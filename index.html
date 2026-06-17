@@ -9,10 +9,19 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', sans-serif; background: #f0f2f5; color: #333; font-size: 14px; min-height: 100vh; }
-  .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f2b5e 0%, #1a4a8a 40%, #1e6fb3 100%); position: relative; overflow: hidden; }
+  
+  /* 登录页样式 */
+  .login-page {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f2b5e 0%, #1a4a8a 40%, #1e6fb3 100%);
+    position: relative; overflow: hidden;
+  }
   .login-page::before { content:''; position:absolute; width:500px; height:500px; background:rgba(255,255,255,0.04); border-radius:50%; top:-150px; left:-150px; }
   .login-page::after { content:''; position:absolute; width:400px; height:400px; background:rgba(255,255,255,0.03); border-radius:50%; bottom:-120px; right:-120px; }
-  .login-box { background: #fff; border-radius: 16px; padding: 44px 40px; width: 440px; max-width: 92vw; box-shadow: 0 16px 50px rgba(0,0,0,0.2); position: relative; z-index: 1; }
+  .login-box {
+    background: #fff; border-radius: 16px; padding: 44px 40px; width: 440px; max-width: 92vw;
+    box-shadow: 0 16px 50px rgba(0,0,0,0.2); position: relative; z-index: 1;
+  }
   .login-logo { text-align: center; margin-bottom: 6px; }
   .login-logo .icon { font-size: 52px; }
   .login-logo h2 { font-size: 22px; color: #0f2b5e; margin: 8px 0 4px; }
@@ -20,9 +29,16 @@
   .login-form { margin-top: 28px; }
   .login-form .form-group { margin-bottom: 18px; }
   .login-form label { display: block; font-weight: 500; color: #555; margin-bottom: 6px; font-size: 13px; }
-  .login-form input, .login-form select { width: 100%; padding: 10px 14px; border: 1px solid #d9d9d9; border-radius: 8px; font-size: 14px; font-family: inherit; transition: border-color 0.2s; }
+  .login-form input, .login-form select {
+    width: 100%; padding: 10px 14px; border: 1px solid #d9d9d9; border-radius: 8px;
+    font-size: 14px; font-family: inherit; transition: border-color 0.2s;
+  }
   .login-form input:focus, .login-form select:focus { border-color: #1a4a8a; outline: none; box-shadow: 0 0 0 2px rgba(26,74,138,0.12); }
-  .login-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #0f2b5e, #1a4a8a); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; font-family: inherit; }
+  .login-btn {
+    width: 100%; padding: 12px; background: linear-gradient(135deg, #0f2b5e, #1a4a8a);
+    color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s; font-family: inherit;
+  }
   .login-btn:hover { opacity: 0.9; }
   .login-error { color: #ff4d4f; font-size: 13px; text-align: center; margin-top: 12px; min-height: 20px; }
   .login-footer { text-align: center; margin-top: 24px; font-size: 11px; color: #bbb; }
@@ -30,318 +46,234 @@
   .login-links a { color: #1a4a8a; cursor: pointer; text-decoration: none; }
   .login-links a:hover { text-decoration: underline; }
 
-  /* 主应用样式 */
+  /* 主界面样式 */
   .app-container { display: none; min-height: 100vh; }
-  .app-header { background: linear-gradient(135deg, #0f2b5e 0%, #1a4a8a 100%); color: #fff; padding: 0 32px; height: 64px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-  .app-header .brand { display: flex; align-items: center; gap: 12px; }
-  .app-header .brand .logo-icon { font-size: 28px; }
-  .app-header .brand .brand-text h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
-  .app-header .brand .brand-text p { font-size: 10px; opacity: 0.7; margin-top: 1px; }
-  .app-header .user-bar { display: flex; align-items: center; gap: 14px; font-size: 13px; }
-  .app-header .user-bar .avatar { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 16px; }
-  .app-header .user-bar .user-info { text-align: right; }
-  .app-header .user-bar .user-info .uname { font-weight: 600; }
-  .app-header .user-bar .user-info .urole { font-size: 11px; opacity: 0.6; }
-  .app-header .user-bar button { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: inherit; transition: background 0.2s; }
-  .app-header .user-bar button:hover { background: rgba(255,255,255,0.22); }
+  .app-header {
+    background: linear-gradient(135deg, #0f2b5e 0%, #1a4a8a 100%);
+    color: #fff; padding: 0 32px; height: 64px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
   .main-body { display: flex; min-height: calc(100vh - 64px); }
-  .sidebar { width: 240px; background: #fff; border-right: 1px solid #e8e8e8; padding: 16px 0; flex-shrink: 0; overflow-y: auto; }
-  .sidebar .nav-group { margin-bottom: 8px; }
-  .sidebar .nav-group-title { padding: 6px 20px; font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-  .sidebar .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer; color: #555; font-size: 13.5px; font-weight: 500; transition: all 0.2s; border-left: 3px solid transparent; background: none; border-top: none; border-right: none; border-bottom: none; width: 100%; text-align: left; font-family: inherit; }
-  .sidebar .nav-item .nav-icon { font-size: 18px; width: 24px; text-align: center; }
-  .sidebar .nav-item:hover { background: #f6f9ff; color: #1a4a8a; }
-  .sidebar .nav-item.active { background: #eef3ff; color: #1a4a8a; border-left-color: #1a4a8a; font-weight: 600; }
+  .sidebar {
+    width: 240px; background: #fff; border-right: 1px solid #e8e8e8; padding: 16px 0;
+    flex-shrink: 0; overflow-y: auto;
+  }
   .content-area { flex: 1; padding: 24px; overflow-y: auto; }
   .page-section { display: none; animation: fadeIn 0.2s ease; }
   .page-section.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .panel { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); margin-bottom: 20px; }
-  .panel h3 { font-size: 16px; color: #0f2b5e; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .panel h3 .sub { font-size: 12px; color: #999; font-weight: 400; }
+  .panel h3 { font-size: 16px; color: #0f2b5e; margin-bottom: 16px; }
   .controls { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-  .controls label { font-weight: 500; color: #555; white-space: nowrap; font-size: 13px; }
-  .controls select, .controls input, .controls button { padding: 7px 14px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; }
-  .controls select, .controls input { background: #fff; }
-  .controls button { background: #1a4a8a; color: #fff; border: none; cursor: pointer; transition: background 0.2s; font-weight: 500; }
-  .controls button:hover { background: #0f2b5e; }
-  .btn-green { background: #52c41a !important; } .btn-green:hover { background: #389e0d !important; }
-  .btn-red { background: #ff4d4f !important; } .btn-red:hover { background: #cf1322 !important; }
-  .btn-orange { background: #fa8c16 !important; } .btn-orange:hover { background: #d46b08 !important; }
-  .btn-gray { background: #f5f5f5 !important; color: #666 !important; } .btn-gray:hover { background: #e8e8e8 !important; }
-  .btn-teal { background: #13c2c2 !important; } .btn-teal:hover { background: #08979c !important; }
-  .btn-purple { background: #722ed1 !important; } .btn-purple:hover { background: #531dab !important; }
-  .btn-gold { background: #d48806 !important; } .btn-gold:hover { background: #b37f00 !important; }
-  .btn-old { background: #7cb305 !important; } .btn-old:hover { background: #5b8c00 !important; }
+  .controls button { padding: 7px 14px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; background: #1a4a8a; color: #fff; border: none; cursor: pointer; }
+  .btn-green { background: #52c41a !important; } .btn-red { background: #ff4d4f !important; }
+  
+  /* 表格样式 */
   .table-wrapper { background: #fff; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); overflow: hidden; }
-  .table-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-  .table-header h3 { font-size: 15px; color: #0f2b5e; }
   table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  thead th { background: #fafbfc; padding: 11px 8px; text-align: center; font-weight: 600; color: #555; border-bottom: 1px solid #e8e8e8; font-size: 12px; }
+  thead th { background: #fafbfc; padding: 11px 8px; text-align: center; font-weight: 600; color: #555; border-bottom: 1px solid #e8e8e8; }
   tbody td { padding: 10px 6px; text-align: center; border-bottom: 1px solid #f5f5f5; }
-  tbody tr:hover { background: #f6f9ff; } tbody tr { cursor: pointer; }
-  .total-row td { background: #f0f5ff; font-weight: 700; color: #0f2b5e; font-size: 13px; }
-  .actions button { padding: 3px 10px; font-size: 11.5px; border: none; border-radius: 4px; cursor: pointer; margin: 0 1px; font-family: inherit; }
-  .actions .edit-btn { background: #e6f7ff; color: #1a4a8a; } .actions .del-btn { background: #fff1f0; color: #ff4d4f; }
-  .actions .view-btn { background: #f6ffed; color: #52c41a; }
-  .status-badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
-  .st-0 { background: #e6f7ff; color: #1a4a8a; } .st-1 { background: #fff7e6; color: #d46b08; }
-  .st-2 { background: #f6ffed; color: #389e0d; } .st-3 { background: #f9e6ff; color: #722ed1; }
-  .st-4 { background: #e6fffb; color: #08979c; } .st-5 { background: #fff1e6; color: #fa8c16; }
-  .st-6 { background: #f6ffed; color: #52c41a; } .st-7 { background: #f0f5ff; color: #0f2b5e; }
-  .st-active { background: #e6f7ff; color: #1a4a8a; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(26,74,138,0.25); } 50% { box-shadow: 0 0 0 6px rgba(26,74,138,0); } }
-  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 1000; justify-content: center; align-items: center; }
-  .modal-overlay.active { display: flex; }
-  .modal { background: #fff; border-radius: 14px; padding: 28px; width: 600px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
-  .modal h3 { margin-bottom: 20px; color: #0f2b5e; font-size: 18px; }
-  .form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-  .form-group { margin-bottom: 12px; flex: 1; min-width: 180px; }
-  .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; font-size: 12.5px; }
-  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13.5px; font-family: inherit; }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1a4a8a; outline: none; }
-  .form-group textarea { resize: vertical; min-height: 60px; }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-  .modal-actions button { padding: 8px 22px; border-radius: 6px; font-size: 14px; cursor: pointer; font-family: inherit; border: none; font-weight: 500; }
-  .modal-actions .btn-cancel { background: #f5f5f5; color: #666; } .modal-actions .btn-cancel:hover { background: #e8e8e8; }
-  .modal-actions .btn-submit { background: #1a4a8a; color: #fff; } .modal-actions .btn-submit:hover { background: #0f2b5e; }
-  .timeline { position: relative; padding-left: 28px; margin-top: 12px; }
-  .timeline::before { content:''; position:absolute; left:10px; top:0; bottom:0; width:2px; background:#e8e8e8; }
-  .timeline-item { position: relative; margin-bottom: 16px; }
-  .timeline-item::before { content:''; position:absolute; left:-22px; top:3px; width:12px; height:12px; border-radius:50%; border:2px solid #d9d9d9; background:#fff; z-index:1; }
-  .timeline-item.done::before { background: #52c41a; border-color: #52c41a; }
-  .timeline-item.active::before { background: #1a4a8a; border-color: #1a4a8a; animation: pulse 1.5s infinite; }
-  .timeline-item .tl-title { font-weight: 600; font-size: 13px; color: #333; }
-  .timeline-item .tl-time { font-size: 12px; color: #999; margin-top: 2px; }
-  .timeline-item .tl-detail { font-size: 12px; color: #666; margin-top: 2px; }
   .empty-state { text-align: center; padding: 48px 20px; color: #bbb; }
-  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
-  .toast { position: fixed; top: 20px; right: 20px; padding: 12px 24px; border-radius: 8px; color: #fff; font-size: 14px; z-index: 2000; display: none; animation: slideIn 0.3s ease; }
+  
+  /* Toast提示 */
+  .toast { position: fixed; top: 20px; right: 20px; padding: 12px 24px; border-radius: 8px; color: #fff; font-size: 14px; z-index: 2000; display: none; }
   .toast.show { display: block; } .toast.success { background: #52c41a; } .toast.error { background: #ff4d4f; }
-  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  .footer-note { text-align: center; padding: 20px; color: #bbb; font-size: 12px; }
-  .dashboard-welcome { background: linear-gradient(135deg, #0f2b5e, #1a4a8a); color: #fff; border-radius: 12px; padding: 28px; margin-bottom: 24px; }
-  .dashboard-welcome h2 { font-size: 22px; margin-bottom: 6px; } .dashboard-welcome p { font-size: 13px; opacity: 0.8; }
-  .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .dashboard-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); border-left: 4px solid #1a4a8a; }
-  .dashboard-card h4 { font-size: 14px; color: #333; margin-bottom: 8px; } .dashboard-card p { font-size: 12px; color: #888; line-height: 1.8; }
-  .dashboard-card .big-num { font-size: 32px; font-weight: 700; color: #1a4a8a; }
-  .detail-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
-  .detail-header h3 { font-size: 18px; color: #0f2b5e; }
-  .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 16px; }
-  .detail-item { background: #fafafa; padding: 10px 14px; border-radius: 8px; }
-  .detail-item .di-label { font-size: 11px; color: #999; margin-bottom: 4px; } .detail-item .di-value { font-size: 14px; font-weight: 600; color: #333; }
-  .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-  .filter-bar select, .filter-bar input { padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; }
-  .config-row { display: flex; gap: 16px; align-items: center; flex-wrap: write; }
-  .config-row label { font-weight: 500; color: #555; white-space: nowrap; font-size: 13px; }
-  .config-row input { width: 120px; padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; font-family: inherit; }
-  .role-badge { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-  .role-badge.admin { background: #fff7e6; color: #d46b08; } .role-badge.user { background: #e6f7ff; color: #1a4a8a; }
-  .user-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border: 1px solid #f0f0f0; border-radius: 8px; margin-bottom: 8px; background: #fafafa; }
-  .user-list-item .u-info { text-align: left; } .user-list-item .u-name { font-weight: 600; color: #333; } .user-list-item .u-role { font-size: 12px; color: #999; }
-  .user-list-item .u-actions { display: flex; gap: 6px; } .user-list-item .u-actions button { padding: 3px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-family: inherit; }
-  .order-no { font-family: 'Courier New', monospace; font-weight: 700; color: #0f2b5e; font-size: 12px; }
-  .progress-bar-wrap { width: 100%; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; margin-bottom: 2px; }
-  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #1a4a8a, #52c41a); border-radius: 4px; transition: width 0.3s; }
-  .sub-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 1px solid #e8e8e8; }
-  .sub-tabs button { padding: 10px 20px; cursor: pointer; font-weight: 500; color: #888; border: none; border-bottom: 2px solid transparent; background: none; font-size: 13.5px; font-family: inherit; transition: all 0.2s; }
-  .sub-tabs button.active { color: #1a4a8a; border-bottom-color: #1a4a8a; } .sub-tabs button:hover { color: #1a4a8a; }
-  .section-title { font-size: 15px; color: #0f2b5e; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-  .tag { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; background: #f0f0f0; color: #666; }
-  .tag-blue { background: #e6f7ff; color: #1a4a8a; } .tag-green { background: #f6ffed; color: #52c41a; } .tag-orange { background: #fff7e6; color: #d46b08; }
-  .tag-purple { background: #f9e6ff; color: #722ed1; } .tag-teal { background: #e6fffb; color: #08979c; } .tag-red { background: #fff1f0; color: #ff4d4f; }
-  .tag-gold { background: #fff7e6; color: #d48806; }
-  .expense-row td { color: #ff4d4f; }
-  .income-row td { color: #52c41a; }
-  .finance-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
-  .finance-card { background: #fff; border-radius: 10px; padding: 16px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-top: 3px solid #1a4a8a; }
-  .finance-card .flabel { font-size: 11px; color: #999; margin-bottom: 6px; }
-  .finance-card .fvalue { font-size: 22px; font-weight: 700; }
-  .finance-card .fvalue.positive { color: #52c41a; }
-  .finance-card .fvalue.negative { color: #ff4d4f; }
-  .finance-card .fvalue.neutral { color: #0f2b5e; }
-  .finance-card .fsub { font-size: 11px; color: #bbb; margin-top: 4px; }
-  .expense-cat { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-  .ecat-rent { background: #fff1f0; color: #ff4d4f; }
-  .ecat-salary { background: #fff7e6; color: #d48806; }
-  .ecat-utility { background: #e6f7ff; color: #1a4a8a; }
-  .ecat-travel { background: #f6ffed; color: #52c41a; }
-  .ecat-marketing { background: #f9e6ff; color: #722ed1; }
-  .ecat-office { background: #e6fffb; color: #08979c; }
-  .ecat-other { background: #f0f0f0; color: #666; }
-  .tag-teal { background: #e6fffb; color: #13c2c2; }
-  .tag-purple { background: #f9e6ff; color: #722ed1; }
-  .tag-gold { background: #fff7e6; color: #d48806; }
 </style>
+</head>
 
-<!-- ==================== JavaScript 核心逻辑（终于加上了！）==================== -->
+<body>
+
+<!-- ==================== 登录页面 ==================== -->
+<div class="login-page" id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icon">🏛️</div>
+      <h2>MNA 业务管理平台</h2>
+      湄公产业资本联盟 Mekong Nexus Association连接产业 · 资本 · 政府 · 国际资源
+    </div>
+    <div class="login-form">
+      <div class="form-group"><label>👤 用户名</label><input type="text" id="loginUser" placeholder="请输入用户名" autocomplete="username" autofocus></div>
+      <div class="form-group"><label>🔑 密码</label><input type="password" id="loginPass" placeholder="请输入密码" autocomplete="current-password"></div>
+      <button class="login-btn" onclick="doLogin()">登 录</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+    <div class="login-links">
+      <a onclick="showResetPassword()">忘记密码？</a>
+    </div>
+    <div class="login-footer">© 2025 MNA · 仅授权用户可访问 · 数据加密存储</div>
+  </div>
+</div>
+
+<!-- ==================== 主应用 ==================== -->
+<div class="app-container" id="appContainer">
+  <div class="app-header">
+    <div class="brand">
+      <div class="logo-icon">🏛️</div>
+      <div class="brand-text">
+        <h1>MNA 湄公产业资本联盟</h1>
+        Mekong Nexus Association · 业务管理平台
+      </div>
+    </div>
+    <div class="user-bar">
+      <div class="avatar">👤</div>
+      <div class="user-info">
+        <div class="uname" id="currentUserName"></div>
+        <div class="urole" id="currentUserRole"></div>
+      </div>
+      <button onclick="doLogout()">退出登录</button>
+    </div>
+  </div>
+
+  <div class="main-body">
+    <div class="sidebar">
+      <div class="nav-group">
+        <div class="nav-group-title">📊 概览</div>
+        <button class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+          <span class="nav-icon">🏠</span> 仪表盘
+        </button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title">🚢 业务板块</div>
+        <button class="nav-item" data-page="logistics" onclick="switchPage('logistics')">
+          <span class="nav-icon">🚢</span> 物流订单跟踪
+        </button>
+        <button class="nav-item" data-page="overseas" onclick="switchPage('overseas')">
+          <span class="nav-icon">🏗️</span> 出海落地服务
+        </button>
+        <button class="nav-item" data-page="investment" onclick="switchPage('investment')">
+          <span class="nav-icon">💰</span> 投融资对接
+        </button>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <!-- 仪表盘 -->
+      <div class="page-section active" id="pageDashboard">
+        <div class="panel">
+          <h3>📌 业务概览</h3>
+          <div class="summary-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div class="card" style="background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); text-align: center; border-top: 3px solid #1a4a8a;">
+              <div class="label" style="font-size: 12px; color: #888; margin-bottom: 8px;">🚢 物流订单</div>
+              <div class="value" style="font-size: 28px; font-weight: 700; color: #0f2b5e;">12</div>
+            </div>
+            <div class="card" style="background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); text-align: center; border-top: 3px solid #d48806;">
+              <div class="label" style="font-size: 12px; color: #888; margin-bottom: 8px;">👥 会员数</div>
+              <div class="value" style="font-size: 28px; font-weight: 700; color: #d48806;">58</div>
+            </div>
+          </div>
+          <p style="color: #666; line-height: 1.8;">
+            欢迎使用 MNA 业务管理平台。目前系统运行正常，您可以开始管理您的业务数据。
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== JavaScript 逻辑 ==================== -->
 <script>
-  // ==========================================
-  // 1. 配置区域 (在这里填你的 Supabase 密钥)
-  // ==========================================
-  const CONFIG = {
-    // 🔴 警告：这是公开的测试数据，任何人都能看到。
-    // 在实际项目中，密码应该加密传输，或者使用后端验证。
-    ADMIN_USER: 'admin@mna.com',
-    ADMIN_PASS: 'admin123',
-    
-    // 🟢 如果你想连接真实的数据库，把下面这两行填好
-    // SUPABASE_URL: 'https://你的项目ID.supabase.co',
-    // SUPABASE_KEY: '你的Publishable Key'
-  };
+  // 简单的用户数据（模拟数据库）
+  const users = [
+    { username: 'admin@mna.com', password: 'admin123', name: '系统管理员', role: 'admin' },
+    { username: 'user@mna.com', password: 'user123', name: '普通用户', role: 'user' }
+  ];
 
-  // ==========================================
-  // 2. 全局变量
-  // ==========================================
-  let currentUser = null;
-
-  // ==========================================
-  // 3. 页面加载时执行
-  // ==========================================
-  document.addEventListener('DOMContentLoaded', () => {
-    // 检查本地存储，看看有没有已经登录的用户
-    const savedUser = localStorage.getItem('mna_current_user');
-    if (savedUser) {
-      currentUser = JSON.parse(savedUser);
-      showApp();
-    } else {
-      showLogin();
-    }
-    
-    // 设置今天的日期
-    const today = new Date();
-    document.getElementById('todayDate').textContent = today.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-  });
-
-  // ==========================================
-  // 4. 登录/登出功能
-  // ==========================================
+  // 登录功能
   function doLogin() {
-    const user = document.getElementById('loginUser').value.trim();
-    const pass = document.getElementById('loginPass').value.trim();
+    const userInput = document.getElementById('loginUser').value.trim();
+    const passInput = document.getElementById('loginPass').value.trim();
     const errorDiv = document.getElementById('loginError');
-
-    // 简单验证
-    if (!user || !pass) {
-      errorDiv.textContent = '请输入用户名和密码';
+    
+    errorDiv.innerText = '';
+    
+    if (!userInput || !passInput) {
+      errorDiv.innerText = '❌ 用户名和密码不能为空';
       return;
     }
-
-    // 🔐 模拟登录验证 (这里暂时不用 Supabase，保证你能进去)
-    // 实际项目中，这里应该调用 Supabase 的 auth.signInWithPassword
-    if (user === CONFIG.ADMIN_USER && pass === CONFIG.ADMIN_PASS) {
+    
+    // 模拟验证（直接对比明文）
+    const foundUser = users.find(u => u.username === userInput && u.password === passInput);
+    
+    if (foundUser) {
       // 登录成功
-      currentUser = { email: user, role: 'admin' };
-      localStorage.setItem('mna_current_user', JSON.stringify(currentUser));
-      showApp();
-      showToast('登录成功！欢迎回来', 'success');
+      showToast('登录成功！正在进入系统...', 'success');
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'flex';
+      
+      // 显示用户信息
+      document.getElementById('currentUserName').innerText = foundUser.name;
+      document.getElementById('currentUserRole').innerText = foundUser.role === 'admin' ? '管理员' : '普通用户';
+      
+      // 记录登录状态
+      localStorage.setItem('isLogin', 'true');
+      localStorage.setItem('currentUser', JSON.stringify(foundUser));
     } else {
-      errorDiv.textContent = '用户名或密码错误，请重试';
+      errorDiv.innerText = '❌ 用户名或密码错误，请重试';
     }
   }
 
+  // 退出登录
   function doLogout() {
-    currentUser = null;
-    localStorage.removeItem('mna_current_user');
-    showLogin();
-    // 清空输入框
+    localStorage.removeItem('isLogin');
+    localStorage.removeItem('currentUser');
+    document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
     document.getElementById('loginUser').value = '';
     document.getElementById('loginPass').value = '';
-    showToast('已安全退出登录', 'success');
+    showToast('已安全退出', 'success');
   }
 
-  // ==========================================
-  // 5. 页面切换功能
-  // ==========================================
-  function showLogin() {
-    document.getElementById('loginPage').style.display = 'flex';
-    document.getElementById('registerPage').style.display = 'none';
-    document.getElementById('resetPage').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'none';
-  }
-
-  function showApp() {
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'flex';
-    
-    // 设置用户信息
-    document.getElementById('currentUserName').textContent = currentUser.email;
-    document.getElementById('currentUserRole').textContent = currentUser.role === 'admin' ? '系统管理员' : '普通用户';
-    
-    // 显示欢迎语
-    document.getElementById('welcomeTitle').textContent = `👋 欢迎回来，${currentUser.email.split('@')[0]}！`;
-    
-    // 默认显示仪表盘
-    switchPage('dashboard');
-    
-    // 加载一些模拟数据 (为了让页面看起来不空)
-    loadMockData();
-  }
-
-  // ==========================================
-  // 6. 菜单切换
-  // ==========================================
-  function switchPage(pageId) {
+  // 切换页面（目前只有仪表盘）
+  function switchPage(pageName) {
     // 隐藏所有页面
     const sections = document.querySelectorAll('.page-section');
-    sections.forEach(sec => sec.classList.remove('active'));
+    sections.forEach(s => s.classList.remove('active'));
     
-    // 显示选中的页面
-    document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
+    // 显示当前页面
+    const target = document.getElementById('page' + pageName.charAt(0).toUpperCase() + pageName.slice(1));
+    if (target) {
+      target.classList.add('active');
+    }
     
-    // 更新菜单激活状态
+    // 更新侧边栏激活状态
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => item.classList.remove('active'));
     event.target.closest('.nav-item').classList.add('active');
   }
 
-  // 子菜单切换
-  function switchSubTab(btn, tabId) {
-    const parent = btn.closest('.sub-tabs');
-    parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    
-    const container = btn.closest('.page-section').querySelector('.content-area');
-    container.querySelectorAll('[id$="List"], [id$="Ledger"]').forEach(el => el.style.display = 'none');
-    document.getElementById(tabId).style.display = 'block';
-  }
-
-  // ==========================================
-  // 7. 模拟数据加载 (防止页面空白)
-  // ==========================================
-  function loadMockData() {
-    // 仪表盘数据
-    document.getElementById('dbLogistics').textContent = '12';
-    document.getElementById('dbMembers').textContent = '58';
-    document.getElementById('dbRevenue').textContent = '$128,560';
-    document.getElementById('dbOverseas').textContent = '5';
-    document.getElementById('dbInvestment').textContent = '8';
-    document.getElementById('dbExpenses').textContent = '$42,300';
-    document.getElementById('dbTax').textContent = '15';
-    document.getElementById('dbTraining').textContent = '3';
-    document.getElementById('dbLegal').textContent = '6';
-    document.getElementById('dbPolicy').textContent = '9';
-  }
-
-  // ==========================================
-  // 8. 辅助功能 (Toast提示)
-  // ==========================================
-  function showToast(msg, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => toast.classList.add('show'), 10);
+  // 显示提示
+  function showToast(msg, type) {
+    let toast = document.querySelector('.toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.className = 'toast';
+      document.body.appendChild(toast);
+    }
+    toast.innerText = msg;
+    toast.className = `toast ${type} show`;
     setTimeout(() => {
       toast.classList.remove('show');
-      setTimeout(() => document.body.removeChild(toast), 300);
     }, 3000);
   }
 
-  // ==========================================
-  // 9. 其他页面功能占位符 (防止报错)
-  // ==========================================
-  function showRegister() { showToast('注册功能开发中...', 'error'); }
+  // 页面加载时检查登录状态
+  window.onload = function() {
+    const isLogin = localStorage.getItem('isLogin');
+    if (isLogin === 'true') {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'flex';
+      const user = JSON.parse(localStorage.getItem('currentUser'));
+      if (user) {
+        document.getElementById('currentUserName').innerText = user.name;
+        document.getElementById('currentUserRole').innerText = user.role === 'admin' ? '管理员' : '普通用户';
+      }
+    }
+  };
+
+  // 辅助功能（占位）
+  function showResetPassword() { alert('请联系管理员重置密码'); }
+</script>
+
+</body>
+</html>
