@@ -5,41 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MNA 业务管理平台</title>
     <style>
-        /* 基础样式 */
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2c5282;
+            --bg: #f7fafc;
+            --card-bg: #ffffff;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #333;
+            padding: 20px;
         }
+
         .login-card {
-            background: white;
+            background: var(--card-bg);
             padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 420px;
             text-align: center;
         }
-        .logo { font-size: 24px; margin-bottom: 10px; color: var(--primary); }
-        h1 { font-size: 22px; margin-bottom: 5px; color: var(--primary); }
-        .subtitle { color: #718096; font-size: 14px; margin-bottom: 30px; }
-        
-        .input-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #4a5568; }
+
+        .logo {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
         input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
+            padding: 12px 12px 12px 40px;
+            border: 1px solid var(--border);
             border-radius: 6px;
-            font-size: 16px;
+            font-size: 14px;
             transition: border-color 0.2s;
         }
-        input:focus { outline: none; border-color: var(--primary); }
-        
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* 修复后的登录按钮样式 */
         .btn-login {
             width: 100%;
             padding: 12px;
@@ -49,170 +103,121 @@
             border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
+            margin-top: 10px;
             transition: background 0.2s;
         }
-        .btn-login:hover { background: var(--primary-light); }
-        
-        .footer-links { margin-top: 20px; font-size: 14px; color: #718096; }
-        .footer-links a { color: var(--primary); text-decoration: none; margin: 0 10px; }
-        .footer-links a:hover { text-decoration: underline; }
-        
-        /* 双语切换 */
-        .lang-switch {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.9);
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            cursor: pointer;
-            border: 1px solid #ccc;
+
+        .btn-login:hover {
+            background: var(--primary-light);
         }
-        
+
+        .footer-links {
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .copyright {
+            margin-top: 30px;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
         /* 错误提示框 */
-        .error-box {
+        .error-msg {
             background: #fed7d7;
             color: #c53030;
-            padding: 15px;
-            border-radius: 6px;
+            padding: 10px;
+            border-radius: 4px;
             margin-bottom: 20px;
             display: none;
-            font-weight: 600;
+            font-size: 14px;
         }
     </style>
-    <script>
-        // 强制设置中文
-        document.documentElement.lang = 'zh-CN';
-        
-        // 1. 初始化默认账号（绝对保证存在）
-        function initUsers() {
-            let users = JSON.parse(localStorage.getItem('mna_users'));
-            if (!users || users.length === 0) {
-                users = [
-                    { username: 'admin', password: 'admin123', role: 'admin', name: '管理员' },
-                    { username: 'demo', password: 'demo123', role: 'user', name: '演示账号' }
-                ];
-                localStorage.setItem('mna_users', JSON.stringify(users));
-            }
-            
-            // 检查是否已登录
-            const loggedUser = localStorage.getItem('mna_currentUser');
-            if (loggedUser) {
-                // 模拟跳转
-                showError("检测到已登录，正在跳转...", false);
-                setTimeout(() => {
-                    alert("模拟进入后台：\n账号：" + JSON.parse(loggedUser).username + "\n角色：" + JSON.parse(loggedUser).role);
-                }, 1500);
-            }
-        }
-        
-        // 2. 登录函数（绝对修复）
-        function doLogin() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const errorBox = document.getElementById('errorBox');
-            
-            // 清空错误
-            errorBox.style.display = 'none';
-            
-            // 非空校验
-            if (!username || !password) {
-                showError('用户名和密码不能为空！');
-                return;
-            }
-            
-            // 获取用户
-            const users = JSON.parse(localStorage.getItem('mna_users')) || [];
-            const user = users.find(u => u.username === username && u.password === password);
-            
-            if (user) {
-                // 保存登录状态
-                localStorage.setItem('mna_currentUser', JSON.stringify(user));
-                showError("✅ 登录成功！正在进入系统...", false);
-                
-                // 模拟跳转
-                setTimeout(() => {
-                    alert("🎉 恭喜！登录逻辑已完全修复。
-你现在已经是管理员了！
-Username: " + user.username + "
-Role: " + user.role);
-                }, 1000);
-            } else {
-                showError('❌ 用户名或密码错误！请确认是否输入了 admin / admin123');
-            }
-        }
-        
-        // 显示错误
-        function showError(msg, isError = true) {
-            const box = document.getElementById('errorBox');
-            box.innerText = msg;
-            box.style.display = 'block';
-            box.style.background = isError ? '#fed7d7' : '#c6f6d5';
-            box.style.color = isError ? '#c53030' : '#276749';
-        }
-        
-        // 3. 页面加载时执行
-        window.onload = function() {
-            initUsers();
-            
-            // 绑定回车键
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') doLogin();
-            });
-            
-            // 强制提醒刷新
-            if (!localStorage.getItem('mna_refreshed')) {
-                console.log("⚠️ 如果页面没反应，请按 Ctrl+F5 强制刷新！");
-                // 模拟提示
-                setTimeout(() => {
-                    if (!localStorage.getItem('mna_currentUser')) {
-                        showError("💡 提示：如果按钮没反应，请按键盘 Ctrl+F5 强制刷新页面！", false);
-                    }
-                }, 500);
-                localStorage.setItem('mna_refreshed', '1');
-            }
-        };
-    </script>
+    <!-- 引入字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- 语言切换 -->
-    <div class="lang-switch" onclick="alert('当前已锁定为中文，如需英文请刷新后点击右上角')">中文</div>
 
     <div class="login-card">
-        <!-- 错误提示区域 -->
-        <div id="errorBox" class="error-box"></div>
-        
-        <!-- Logo -->
-        <div style="font-size: 48px; margin-bottom: 20px;">🏛️</div>
-        
+        <div class="logo">
+            <i class="fas fa-landmark"></i>
+        </div>
         <h1>MNA 业务管理平台</h1>
         <div class="subtitle">湄公产业资本联盟 Mekong Nexus Association</div>
-        <div class="subtitle" style="font-size: 13px; margin-bottom: 30px;">连接产业 · 资本 · 政府 · 国际资源</div>
+        <div class="subtitle">连接产业 · 资本 · 政府 · 国际资源</div>
 
-        <!-- 表单 -->
-        <div class="input-group">
-            <label for="username">👤 用户名</label>
-            <input type="text" id="username" placeholder="请输入用户名" value="admin">
-        </div>
+        <!-- 错误提示区域 -->
+        <div id="errorMsg" class="error-msg"></div>
 
-        <div class="input-group">
-            <label for="password">🔑 密码</label>
-            <input type="password" id="password" placeholder="请输入密码" value="admin123">
-        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> 用户名</label>
+                <div class="input-icon">
+                    <input type="text" id="username" placeholder="请输入用户名" value="admin">
+                </div>
+            </div>
 
-        <button class="btn-login" onclick="doLogin()">登录</button>
+            <div class="form-group">
+                <label for="password"><i class="fas fa-key"></i> 密码</label>
+                <div class="input-icon">
+                    <input type="password" id="password" placeholder="请输入密码" value="admin123">
+                </div>
+            </div>
 
-        <!-- 底部链接 -->
+            <!-- 登录按钮 (这次绝对有了) -->
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> 登录
+            </button>
+        </form>
+
         <div class="footer-links">
-            <a href="#">忘记密码？</a> | 
+            <a href="#">忘记密码？</a>
+            <span>|</span>
             <a href="#">注册新用户</a>
         </div>
 
-        <!-- 版权 -->
-        <div style="margin-top: 30px; font-size: 12px; color: #a0aec0;">
+        <div class="copyright">
             © 2025 MNA · 仅授权用户可访问 · 数据加密存储
         </div>
     </div>
+
+    <script>
+        // 获取元素
+        const form = document.getElementById('loginForm');
+        const errorMsg = document.getElementById('errorMsg');
+        
+        // 修复点：直接用 form.addEventListener 代替 onclick，彻底解决 doLogin is not defined
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // 阻止表单默认提交刷新
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // 简单验证
+            if(username === 'admin' && password === 'admin123') {
+                // 登录成功，跳转到首页（这里先弹个窗模拟）
+                alert('登录成功！正在跳转...');
+                // 实际项目中这里应该是：window.location.href = 'dashboard.html';
+            } else {
+                errorMsg.textContent = '用户名或密码错误！请尝试 admin / admin123';
+                errorMsg.style.display = 'block';
+            }
+        });
+
+        // 可选：如果输入框有内容，隐藏错误提示
+        document.getElementById('username').addEventListener('input', () => {
+            errorMsg.style.display = 'none';
+        });
+        document.getElementById('password').addEventListener('input', () => {
+            errorMsg.style.display = 'none';
+        });
+    </script>
 </body>
 </html>
