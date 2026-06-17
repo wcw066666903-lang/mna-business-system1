@@ -8,7 +8,7 @@
 <!-- ===== Supabase SDK ===== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- ===== ✅ 已为你填好 Supabase 配置 ===== -->
+<!-- ===== ✅ Supabase 配置已填好 ===== -->
 <script>
 const SUPABASE_URL = 'https://dicapkasnfjzbfmfyzib.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_vSH9T39fUA4mfxC2E3QCig_vHObIYCg';
@@ -51,13 +51,14 @@ function initApp(user) {
 }
 </script>
 
-<!-- ===== 样式（精简保留核心）===== -->
+<!-- ===== 样式 ===== -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', sans-serif;
     background: #f0f2f5; color: #333; font-size: 14px;
   }
+
   .login-page {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
     background: linear-gradient(135deg, #0f2b5e, #1a4a8a);
@@ -87,8 +88,10 @@ function initApp(user) {
   }
   .sidebar {
     width: 240px; background: #fff; border-right: 1px solid #e8e8e8;
+    min-height: calc(100vh - 64px);
   }
   .content-area { flex: 1; padding: 24px; overflow-y: auto; }
+
   .page-section { display: none; }
   .page-section.active { display: block; }
 
@@ -98,10 +101,40 @@ function initApp(user) {
     font-size: 13.5px; color: #555;
   }
   button.nav-item:hover { background: #f6f9ff; color: #1a4a8a; }
-  button.nav-item.active { background: #eef3ff; color: #1a4a8a; border-left: 3px solid #1a4a8a; }
+  button.nav-item.active {
+    background: #eef3ff; color: #1a4a8a; border-left: 3px solid #1a4a8a;
+  }
 
-  .panel { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+  .panel {
+    background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
   .panel h3 { font-size: 16px; color: #0f2b5e; margin-bottom: 16px; }
+
+  .dashboard-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-top: 16px;
+  }
+  .card {
+    background: #fff; border-radius: 12px; padding: 20px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    border-top: 3px solid #1a4a8a; text-align: center;
+  }
+  .card .label { font-size: 12px; color: #888; }
+  .card .value { font-size: 28px; font-weight: 700; color: #0f2b5e; margin-top: 8px; }
+
+  button.action-btn {
+    padding: 8px 16px; background: #1a4a8a; color: #fff;
+    border: none; border-radius: 6px; cursor: pointer; font-size: 13px;
+  }
+  button.action-btn:hover { background: #0f2b5e; }
+
+  ul.data-list { list-style: none; padding: 0; }
+  ul.data-list li {
+    padding: 10px 14px; border-bottom: 1px solid #f0f0f0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  ul.data-list li:last-child { border-bottom: none; }
 
   footer { text-align: center; padding: 20px; color: #bbb; font-size: 12px; }
 </style>
@@ -129,31 +162,47 @@ function initApp(user) {
     <div><strong>MNA 湄公产业资本联盟</strong></div>
     <div>
       <span id="currentUserName"></span>
-      <button onclick="doLogout()" style="margin-left:12px;">退出</button>
+      <button onclick="doLogout()" style="margin-left:12px;padding:6px 14px;background:#fff;color:#1a4a8a;border:1px solid #1a4a8a;border-radius:6px;cursor:pointer;">退出</button>
     </div>
   </div>
 
-  <div style="display:flex; min-height:calc(100vh - 64px);">
+  <div style="display:flex;min-height:calc(100vh - 64px);">
     <div class="sidebar">
-      <div style="padding:16px;font-weight:600;color:#0f2b5e;">📦 业务模块</div>
+      <div style="padding:16px;font-weight:600;color:#0f2b5e;border-bottom:1px solid #e8e8e8;">📦 业务模块</div>
 
-      <button class="nav-item active" onclick="switchPage('dashboard')">🏠 仪表盘</button>
-      <button class="nav-item" onclick="switchPage('logistics')">🚢 物流订单</button>
-      <button class="nav-item" onclick="switchPage('tax')">🧾 财税业务</button>
-      <button class="nav-item" onclick="switchPage('investment')">💰 投融资</button>
+      <button class="nav-item active" onclick="switchPage('dashboard', this)">🏠 仪表盘</button>
+      <button class="nav-item" onclick="switchPage('logistics', this)">🚢 物流订单</button>
+      <button class="nav-item" onclick="switchPage('tax', this)">🧾 财税业务</button>
+      <button class="nav-item" onclick="switchPage('investment', this)">💰 投融资</button>
+      <button class="nav-item" onclick="switchPage('training', this)">🎓 职业培训</button>
+      <button class="nav-item" onclick="switchPage('legal', this)">⚖️ 法律合规</button>
+      <button class="nav-item" onclick="switchPage('finance', this)">📊 财务报表</button>
     </div>
 
     <div class="content-area">
 
       <!-- 仪表盘 -->
       <div class="page-section active" id="pageDashboard">
-        <h2>👋 欢迎回来</h2>
-        <p>当前使用 <strong>Supabase 云端数据库</strong>，多设备实时同步 ✅</p>
-        <div class="panel">
-          <h3>📌 系统状态</h3>
-          <p>✅ Supabase 已连接</p>
-          <p>✅ 数据表已就绪</p>
-          <p>✅ 登录认证正常</p>
+        <h2>👋 欢迎回来，<span id="dashUser"></span></h2>
+        <p style="color:#888;margin-top:6px;">当前系统已启用 Supabase 云端数据库，多设备实时同步 ✅</p>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="label">物流订单</div>
+            <div class="value" id="statLogistics">0</div>
+          </div>
+          <div class="card">
+            <div class="label">财税项目</div>
+            <div class="value" id="statTax">0</div>
+          </div>
+          <div class="card">
+            <div class="label">投融资项目</div>
+            <div class="value" id="statInvestment">0</div>
+          </div>
+          <div class="card">
+            <div class="label">培训项目</div>
+            <div class="value" id="statTraining">0</div>
+          </div>
         </div>
       </div>
 
@@ -161,8 +210,8 @@ function initApp(user) {
       <div class="page-section" id="pageLogistics">
         <div class="panel">
           <h3>🚢 物流订单管理</h3>
-          <button onclick="addOrder()">➕ 新建订单</button>
-          <ul id="orderList" style="margin-top:16px;line-height:2;"></ul>
+          <button class="action-btn" onclick="addOrder()">➕ 新建订单</button>
+          <ul class="data-list" id="orderList" style="margin-top:16px;"></ul>
         </div>
       </div>
 
@@ -170,8 +219,8 @@ function initApp(user) {
       <div class="page-section" id="pageTax">
         <div class="panel">
           <h3>🧾 财税业务管理</h3>
-          <button onclick="addTax()">➕ 新增财税项目</button>
-          <ul id="taxList" style="margin-top:16px;line-height:2;"></ul>
+          <button class="action-btn" onclick="addTax()">➕ 新增财税项目</button>
+          <ul class="data-list" id="taxList" style="margin-top:16px;"></ul>
         </div>
       </div>
 
@@ -179,8 +228,47 @@ function initApp(user) {
       <div class="page-section" id="pageInvestment">
         <div class="panel">
           <h3>💰 投融资项目管理</h3>
-          <button onclick="addInvestment()">➕ 新增投融资项目</button>
-          <ul id="investList" style="margin-top:16px;line-height:2;"></ul>
+          <button class="action-btn" onclick="addInvestment()">➕ 新增投融资项目</button>
+          <ul class="data-list" id="investList" style="margin-top:16px;"></ul>
+        </div>
+      </div>
+
+      <!-- 职业培训 -->
+      <div class="page-section" id="pageTraining">
+        <div class="panel">
+          <h3>🎓 职业培训管理</h3>
+          <button class="action-btn" onclick="addTraining()">➕ 新增培训项目</button>
+          <ul class="data-list" id="trainingList" style="margin-top:16px;"></ul>
+        </div>
+      </div>
+
+      <!-- 法律合规 -->
+      <div class="page-section" id="pageLegal">
+        <div class="panel">
+          <h3>⚖️ 法律合规管理</h3>
+          <button class="action-btn" onclick="addLegal()">➕ 新增法律项目</button>
+          <ul class="data-list" id="legalList" style="margin-top:16px;"></ul>
+        </div>
+      </div>
+
+      <!-- 财务报表 -->
+      <div class="page-section" id="pageFinance">
+        <div class="panel">
+          <h3>📊 统一财务报表</h3>
+          <div class="dashboard-grid">
+            <div class="card">
+              <div class="label">财税总额</div>
+              <div class="value" id="finTax">$0</div>
+            </div>
+            <div class="card">
+              <div class="label">投融资总额</div>
+              <div class="value" id="finInvest">$0</div>
+            </div>
+            <div class="card">
+              <div class="label">费用总额</div>
+              <div class="value" id="finExpense">$0</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -188,30 +276,55 @@ function initApp(user) {
   </div>
 
   <footer>
-    当前用户：<span id="footerUser"></span>
+    当前用户：<span id="footerUser"></span> ｜ MNA 湄公产业资本联盟 © 2025
   </footer>
 </div>
 
 <!-- ===== Supabase 业务 CRUD ===== -->
 <script>
 /* ========== 页面切换 ========== */
-function switchPage(pageId) {
+function switchPage(pageId, btn) {
   document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
   document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
 
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  if (pageId === 'dashboard') loadDashboard();
   if (pageId === 'logistics') loadOrders();
   if (pageId === 'tax') loadTax();
   if (pageId === 'investment') loadInvestments();
+  if (pageId === 'training') loadTraining();
+  if (pageId === 'legal') loadLegal();
+  if (pageId === 'finance') loadFinance();
+}
+
+/* ========== 仪表盘 ========== */
+async function loadDashboard() {
+  document.getElementById('dashUser').innerText =
+    document.getElementById('currentUserName').innerText;
+
+  const [lo, ta, inv, tr] = await Promise.all([
+    supabase.from('mna_logistics').select('*', { count: 'exact', head: true }),
+    supabase.from('mna_finance_tax').select('*', { count: 'exact', head: true }),
+    supabase.from('mna_investment').select('*', { count: 'exact', head: true }),
+    supabase.from('mna_training').select('*', { count: 'exact', head: true }),
+  ]);
+  document.getElementById('statLogistics').innerText = lo.count || 0;
+  document.getElementById('statTax').innerText = ta.count || 0;
+  document.getElementById('statInvestment').innerText = inv.count || 0;
+  document.getElementById('statTraining').innerText = tr.count || 0;
 }
 
 /* ========== 物流订单 CRUD ========== */
 async function loadOrders() {
   const { data } = await supabase.from('mna_logistics').select('*').order('created_at', { ascending: false });
   const ul = document.getElementById('orderList');
-  ul.innerHTML = '';
+  ul.innerHTML = data?.length ? '' : '<li style="color:#bbb;text-align:center;">暂无数据</li>';
   data?.forEach(o => {
-    ul.innerHTML += `<li>${o.order_no} — ${o.client_name} — $${o.amount}
-      <button onclick="deleteOrder(${o.id})">删除</button>
+    ul.innerHTML += `<li>
+      <span>${o.order_no} — ${o.client_name} — $${o.amount}</span>
+      <button onclick="deleteOrder(${o.id})" style="color:#ff4d4f;background:none;border:none;cursor:pointer;">删除</button>
     </li>`;
   });
 }
@@ -220,6 +333,7 @@ async function addOrder() {
   await supabase.from('mna_logistics').insert({
     order_no: 'ORD-' + Date.now(),
     client_name: '示例客户',
+    destination: '越南胡志明',
     amount: 180
   });
   loadOrders();
@@ -234,7 +348,7 @@ async function deleteOrder(id) {
 async function loadTax() {
   const { data } = await supabase.from('mna_finance_tax').select('*');
   const ul = document.getElementById('taxList');
-  ul.innerHTML = '';
+  ul.innerHTML = data?.length ? '' : '<li style="color:#bbb;text-align:center;">暂无数据</li>';
   data?.forEach(t => {
     ul.innerHTML += `<li>${t.company_name} — ${t.service_type} — $${t.amount}</li>`;
   });
@@ -253,7 +367,7 @@ async function addTax() {
 async function loadInvestments() {
   const { data } = await supabase.from('mna_investment').select('*');
   const ul = document.getElementById('investList');
-  ul.innerHTML = '';
+  ul.innerHTML = data?.length ? '' : '<li style="color:#bbb;text-align:center;">暂无数据</li>';
   data?.forEach(i => {
     ul.innerHTML += `<li>${i.project_name} — ${i.investor} — $${i.amount}</li>`;
   });
@@ -266,6 +380,56 @@ async function addInvestment() {
     amount: 100000
   });
   loadInvestments();
+}
+
+/* ========== 职业培训 CRUD ========== */
+async function loadTraining() {
+  const { data } = await supabase.from('mna_training').select('*');
+  const ul = document.getElementById('trainingList');
+  ul.innerHTML = data?.length ? '' : '<li style="color:#bbb;text-align:center;">暂无数据</li>';
+  data?.forEach(t => {
+    ul.innerHTML += `<li>${t.course_name} — ${t.trainee_name}</li>`;
+  });
+}
+
+async function addTraining() {
+  await supabase.from('mna_training').insert({
+    course_name: '跨境电商运营',
+    trainee_name: '示例学员'
+  });
+  loadTraining();
+}
+
+/* ========== 法律合规 CRUD ========== */
+async function loadLegal() {
+  const { data } = await supabase.from('mna_legal').select('*');
+  const ul = document.getElementById('legalList');
+  ul.innerHTML = data?.length ? '' : '<li style="color:#bbb;text-align:center;">暂无数据</li>';
+  data?.forEach(l => {
+    ul.innerHTML += `<li>${l.case_name} — ${l.client_name}</li>`;
+  });
+}
+
+async function addLegal() {
+  await supabase.from('mna_legal').insert({
+    case_name: '合同纠纷案',
+    client_name: '示例客户',
+    lawyer: '示例律师'
+  });
+  loadLegal();
+}
+
+/* ========== 财务报表 ========== */
+async function loadFinance() {
+  const [tax, inv, exp] = await Promise.all([
+    supabase.from('mna_finance_tax').select('amount'),
+    supabase.from('mna_investment').select('amount'),
+    supabase.from('mna_expenses').select('amount'),
+  ]);
+  const sum = (arr) => arr?.reduce((s, r) => s + Number(r.amount || 0), 0) || 0;
+  document.getElementById('finTax').innerText = '$' + sum(tax.data);
+  document.getElementById('finInvest').innerText = '$' + sum(inv.data);
+  document.getElementById('finExpense').innerText = '$' + sum(exp.data);
 }
 </script>
 
