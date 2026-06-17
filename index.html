@@ -1,452 +1,705 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MNA 湄公产业资本联盟 · 云端业务管理平台</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNA 湄公产业资本联盟 · 业务管理平台</title>
+    
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #003366;
+            --secondary-color: #0055a5;
+            --bg-light: #f0f2f5;
+            --border-color: #e0e0e0;
+            --text-dark: #333;
+            --text-light: #666;
+            --card-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            --menu-hover: #e6f0ff;
+        }
 
-<!-- ===== Supabase SDK ===== -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-<!-- ===== ✅ Supabase 配置已填好 ===== -->
-<script>
-const SUPABASE_URL = 'https://dicapkasnfjzbfmfyzib.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_vSH9T39fUA4mfxC2E3QCig_vHObIYCg';
+        /* Header */
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 16px; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .user-info { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: #fff; color: #003366; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        /* Sidebar */
+        aside {
+            width: 220px;
+            background: #fff;
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 60px; left: 0; bottom: 0;
+            overflow-y: auto;
+            padding-top: 10px;
+        }
+        .menu-item {
+            padding: 10px 20px;
+            color: var(--text-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        .menu-item:hover, .menu-item.active {
+            background-color: var(--menu-hover);
+            color: var(--primary-color);
+        }
+        .menu-item i { width: 16px; text-align: center; }
 
-/* ========== 登录态监听 ========== */
-supabase.auth.onAuthStateChange((event, session) => {
-  const loginPage = document.getElementById('loginPage');
-  const app = document.getElementById('appContainer');
+        /* Main Content */
+        main {
+            flex: 1;
+            margin-left: 220px;
+            padding: 80px 24px 24px;
+        }
+        .page-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
 
-  if (session) {
-    loginPage.style.display = 'none';
-    app.style.display = 'block';
-    initApp(session.user);
-  } else {
-    loginPage.style.display = 'flex';
-    app.style.display = 'none';
-  }
-});
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stat-card.logistics { border-color: #1890ff; }
+        .stat-card.members { border-color: #faad14; }
+        .stat-card.income { border-color: #52c41a; }
+        .stat-card.projects { border-color: #eb2f96; }
+        .stat-card.tax { border-color: #722ed1; }
+        .stat-card.law { border-color: #fa8c16; }
+        
+        .stat-info h4 { font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
+        .stat-info .num { font-size: 24px; font-weight: bold; color: var(--text-dark); }
+        .stat-info .unit { font-size: 11px; color: #999; }
 
-/* ========== ✅ 邮箱密码登录（已修复）========== */
-async function doLogin() {
-  const email = document.getElementById('loginUser').value.trim();
-  const password = document.getElementById('loginPass').value;
+        /* Activity Section */
+        .activity-box {
+            background: #fff;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+        }
+        .activity-box h3 { margin-bottom: 12px; font-size: 14px; color: var(--primary-color); display: flex; align-items: center; gap: 6px; }
+        .activity-item { font-size: 13px; color: #555; padding: 8px 0; border-bottom: 1px dashed #eee; }
 
-  if (!email || !password) {
-    document.getElementById('loginError').innerText = '请输入邮箱和密码';
-    return;
-  }
+        /* Table Styles */
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .btn {
+            padding: 6px 14px;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .btn:hover { opacity: 0.9; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        th {
+            background-color: #fafafa;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+        tr:hover td { background-color: #f5f9ff; }
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
+        /* Login Screen */
+        .login-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #f0f2f5;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 360px; text-align: center;
+        }
+        .login-box h2 { margin-bottom: 24px; color: var(--primary-color); }
+        .input-group { margin-bottom: 16px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 6px; font-size: 13px; color: #555; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .error-msg { color: red; font-size: 12px; margin-top: 4px; display: none; }
 
-  if (error) {
-    document.getElementById('loginError').innerText = error.message;
-    console.error('登录失败:', error);
-  } else {
-    console.log('✅ 登录成功:', data.user.email);
-  }
-}
+        /* Utility */
+        .hidden { display: none !important; }
+        .sub-menu { padding-left: 20px; max-height: 0; overflow: hidden; transition: max-height 0.3s; }
+        .sub-menu.open { max-height: 500px; }
+        .arrow { float: right; transition: transform 0.3s; }
+        .arrow.down { transform: rotate(90deg); }
 
-/* ========== 退出 ========== */
-async function doLogout() {
-  await supabase.auth.signOut();
-}
-
-/* ========== 初始化应用 ========== */
-function initApp(user) {
-  document.getElementById('currentUserName').innerText = user.email;
-  document.getElementById('footerUser').innerText = user.email;
-  switchPage('dashboard');
-}
-</script>
-
-<!-- ===== 样式 ===== -->
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', sans-serif;
-    background: #f0f2f5; color: #333; font-size: 14px;
-  }
-
-  .login-page {
-    min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #0f2b5e, #1a4a8a);
-  }
-  .login-box {
-    background: #fff; border-radius: 16px; padding: 44px 40px; width: 440px;
-    box-shadow: 0 16px 50px rgba(0,0,0,0.2);
-  }
-  .login-box h2 { font-size: 22px; color: #0f2b5e; margin-bottom: 6px; }
-  .login-box input {
-    width: 100%; padding: 10px 14px; margin-top: 10px;
-    border: 1px solid #d9d9d9; border-radius: 8px;
-  }
-  .login-btn {
-    width: 100%; margin-top: 20px; padding: 12px;
-    background: linear-gradient(135deg, #0f2b5e, #1a4a8a);
-    color: #fff; border: none; border-radius: 8px;
-    font-weight: 600; cursor: pointer;
-  }
-  .login-error { color: #ff4d4f; margin-top: 10px; min-height: 20px; }
-
-  .app-container { display: none; min-height: 100vh; }
-  .app-header {
-    height: 64px; background: linear-gradient(135deg, #0f2b5e, #1a4a8a);
-    color: #fff; display: flex; justify-content: space-between; align-items: center;
-    padding: 0 32px; position: sticky; top: 0; z-index: 100;
-  }
-  .sidebar {
-    width: 240px; background: #fff; border-right: 1px solid #e8e8e8;
-    min-height: calc(100vh - 64px);
-  }
-  .content-area { flex: 1; padding: 24px; overflow-y: auto; }
-
-  .page-section { display: none; }
-  .page-section.active { display: block; }
-
-  button.nav-item {
-    width: 100%; text-align: left; padding: 10px 20px;
-    border: none; background: none; cursor: pointer;
-    font-size: 13.5px; color: #555;
-  }
-  button.nav-item:hover { background: #f6f9ff; color: #1a4a8a; }
-  button.nav-item.active {
-    background: #eef3ff; color: #1a4a8a; border-left: 3px solid #1a4a8a;
-  }
-
-  .panel {
-    background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-  }
-  .panel h3 { font-size: 16px; color: #0f2b5e; margin-bottom: 16px; }
-
-  .dashboard-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px; margin-top: 16px;
-  }
-  .card {
-    background: #fff; border-radius: 12px; padding: 20px;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-    border-top: 3px solid #1a4a8a; text-align: center;
-  }
-  .card .label { font-size: 12px; color: #888; }
-  .card .value { font-size: 28px; font-weight: 700; color: #0f2b5e; margin-top: 8px; }
-
-  button.action-btn {
-    padding: 8px 16px; background: #1a4a8a; color: #fff;
-    border: none; border-radius: 6px; cursor: pointer; font-size: 13px;
-  }
-  button.action-btn:hover { background: #0f2b5e; }
-
-  ul.data-list { list-style: none; padding: 0; }
-  ul.data-list li {
-    padding: 10px 14px; border-bottom: 1px solid #f0f0f0;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  ul.data-list li:last-child { border-bottom: none; }
-
-  footer { text-align: center; padding: 20px; color: #bbb; font-size: 12px; }
-</style>
+        /* Status Tags */
+        .tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; color: white; }
+        .tag-blue { background: #1890ff; }
+        .tag-orange { background: #fa8c16; }
+        .tag-green { background: #52c41a; }
+    </style>
 </head>
-
 <body>
 
-<!-- ===== 登录页 ===== -->
-<div class="login-page" id="loginPage">
-  <div class="login-box">
-    <h2>🌏 MNA 业务管理平台</h2>
-    <p style="color:#888;font-size:12px;">Supabase 云端同步版</p>
-
-    <input id="loginUser" placeholder="邮箱（admin@mna.com）">
-    <input id="loginPass" type="password" placeholder="密码（admin123）">
-    <button class="login-btn" onclick="doLogin()">登 录</button>
-
-    <div class="login-error" id="loginError"></div>
-  </div>
-</div>
-
-<!-- ===== 主应用 ===== -->
-<div class="app-container" id="appContainer">
-  <div class="app-header">
-    <div><strong>MNA 湄公产业资本联盟</strong></div>
-    <div>
-      <span id="currentUserName"></span>
-      <button onclick="doLogout()" style="margin-left:12px;padding:6px 14px;background:#fff;color:#1a4a8a;border:1px solid #1a4a8a;border-radius:6px;cursor:pointer;">退出</button>
-    </div>
-  </div>
-
-  <div style="display:flex;min-height:calc(100vh - 64px);">
-    <div class="sidebar">
-      <div style="padding:16px;font-weight:600;color:#0f2b5e;border-bottom:1px solid #e8e8e8;">📦 业务模块</div>
-
-      <button class="nav-item active" onclick="switchPage('dashboard', this)">🏠 仪表盘</button>
-      <button class="nav-item" onclick="switchPage('logistics', this)">🚢 物流订单</button>
-      <button class="nav-item" onclick="switchPage('tax', this)">🧾 财税业务</button>
-      <button class="nav-item" onclick="switchPage('investment', this)">💰 投融资</button>
-      <button class="nav-item" onclick="switchPage('training', this)">🎓 职业培训</button>
-      <button class="nav-item" onclick="switchPage('legal', this)">⚖️ 法律合规</button>
-      <button class="nav-item" onclick="switchPage('finance', this)">📊 财务报表</button>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h2>登录 MNA 管理系统</h2>
+            <div class="input-group">
+                <label>用户名</label>
+                <input type="text" id="loginUser" placeholder="请输入用户名">
+                <div class="error-msg" id="userError">请输入用户名</div>
+            </div>
+            <div class="input-group">
+                <label>密码</label>
+                <input type="password" id="loginPass" placeholder="请输入密码">
+                <div class="error-msg" id="passError">密码错误</div>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="doLogin()">登 录</button>
+        </div>
     </div>
 
-    <div class="content-area">
-
-      <!-- 仪表盘 -->
-      <div class="page-section active" id="pageDashboard">
-        <h2>👋 欢迎回来，<span id="dashUser"></span></h2>
-        <p style="color:#888;margin-top:6px;">当前系统已启用 Supabase 云端数据库，多设备实时同步 ✅</p>
-
-        <div class="dashboard-grid">
-          <div class="card">
-            <div class="label">物流订单</div>
-            <div class="value" id="statLogistics">0</div>
-          </div>
-          <div class="card">
-            <div class="label">财税项目</div>
-            <div class="value" id="statTax">0</div>
-          </div>
-          <div class="card">
-            <div class="label">投融资项目</div>
-            <div class="value" id="statInvestment">0</div>
-          </div>
-          <div class="card">
-            <div class="label">培训项目</div>
-            <div class="value" id="statTraining">0</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 物流订单 -->
-      <div class="page-section" id="pageLogistics">
-        <div class="panel">
-          <h3>🚢 物流订单管理</h3>
-          <button class="action-btn" onclick="addOrder()">➕ 新建订单</button>
-          <ul class="data-list" id="orderList" style="margin-top:16px;"></ul>
-        </div>
-      </div>
-
-      <!-- 财税业务 -->
-      <div class="page-section" id="pageTax">
-        <div class="panel">
-          <h3>🧾 财税业务管理</h3>
-          <button class="action-btn" onclick="addTax()">➕ 新增财税项目</button>
-          <ul class="data-list" id="taxList" style="margin-top:16px;"></ul>
-        </div>
-      </div>
-
-      <!-- 投融资 -->
-      <div class="page-section" id="pageInvestment">
-        <div class="panel">
-          <h3>💰 投融资项目管理</h3>
-          <button class="action-btn" onclick="addInvestment()">➕ 新增投融资项目</button>
-          <ul class="data-list" id="investList" style="margin-top:16px;"></ul>
-        </div>
-      </div>
-
-      <!-- 职业培训 -->
-      <div class="page-section" id="pageTraining">
-        <div class="panel">
-          <h3>🎓 职业培训管理</h3>
-          <button class="action-btn" onclick="addTraining()">➕ 新增培训项目</button>
-          <ul class="data-list" id="trainingList" style="margin-top:16px;"></ul>
-        </div>
-      </div>
-
-      <!-- 法律合规 -->
-      <div class="page-section" id="pageLegal">
-        <div class="panel">
-          <h3>⚖️ 法律合规管理</h3>
-          <button class="action-btn" onclick="addLegal()">➕ 新增法律项目</button>
-          <ul class="data-list" id="legalList" style="margin-top:16px;"></ul>
-        </div>
-      </div>
-
-      <!-- 财务报表 -->
-      <div class="page-section" id="pageFinance">
-        <div class="panel">
-          <h3>📊 统一财务报表</h3>
-          <div class="dashboard-grid">
-            <div class="card">
-              <div class="label">财税总额</div>
-              <div class="value" id="finTax">$0</div>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <span>🏛️</span>
+            <div>
+                <div style="font-weight: bold;">MNA 湄公产业资本联盟</div>
+                <div style="font-size: 10px; opacity: 0.8;">Mekong Nexus Association · 业务管理平台</div>
             </div>
-            <div class="card">
-              <div class="label">投融资总额</div>
-              <div class="value" id="finInvest">$0</div>
-            </div>
-            <div class="card">
-              <div class="label">费用总额</div>
-              <div class="value" id="finExpense">$0</div>
-            </div>
-          </div>
         </div>
-      </div>
+        <div class="header-right">
+            <div class="user-info" id="currentUserDisplay">
+                <div class="avatar" id="userAvatar">A</div>
+                <span id="userName">未登录</span>
+                <span id="userRole" style="font-size: 10px; background: #fff; color: #003366; padding: 2px 4px; border-radius: 4px;"></span>
+            </div>
+            <button class="btn" onclick="logout()" style="background: transparent; color: white; border-color: rgba(255,255,255,0.5);">退出登录</button>
+        </div>
+    </header>
 
-    </div>
-  </div>
+    <!-- Sidebar -->
+    <aside id="sidebar">
+        <div class="menu-item" onclick="toggleSubMenu(this)">
+            <span>📊</span> 业务概览 <span class="arrow">▶</span>
+        </div>
+        <div class="sub-menu open">
+            <div class="menu-item active" onclick="showPage('dashboard')"><span>🏠</span> 仪表盘</div>
+        </div>
 
-  <footer>
-    当前用户：<span id="footerUser"></span> ｜ MNA 湄公产业资本联盟 © 2025
-  </footer>
-</div>
+        <div class="menu-item" onclick="toggleSubMenu(this)">
+            <span>🚢</span> 物流订单跟踪 <span class="arrow">▶</span>
+        </div>
+        <div class="sub-menu open">
+            <div class="menu-item" onclick="showPage('logistics')"><span>🚢</span> 物流订单</div>
+        </div>
 
-<!-- ===== Supabase 业务 CRUD ===== -->
-<script>
-/* ========== 页面切换 ========== */
-function switchPage(pageId, btn) {
-  document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-  document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
+        <div class="menu-item" onclick="toggleSubMenu(this)">
+            <span>🧾</span> 财税业务 <span class="arrow">▶</span>
+        </div>
+        <div class="sub-menu open">
+            <div class="menu-item" onclick="showPage('tax')"><span>💰</span> 财税项目</div>
+        </div>
 
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+        <div class="menu-item" onclick="toggleSubMenu(this)">
+            <span>🎓</span> 职业培训 <span class="arrow">▶</span>
+        </div>
+        <div class="sub-menu open">
+            <div class="menu-item" onclick="showPage('training')"><span>🎓</span> 培训项目</div>
+        </div>
 
-  if (pageId === 'dashboard') loadDashboard();
-  if (pageId === 'logistics') loadOrders();
-  if (pageId === 'tax') loadTax();
-  if (pageId === 'investment') loadInvestments();
-  if (pageId === 'training') loadTraining();
-  if (pageId === 'legal') loadLegal();
-  if (pageId === 'finance') loadFinance();
-}
+        <div class="menu-item" onclick="toggleSubMenu(this)">
+            <span>⚖️</span> 法律合规 <span class="arrow">▶</span>
+        </div>
+        <div class="sub-menu open">
+            <div class="menu-item" onclick="showPage('law')"><span>⚖️</span> 法律咨询</div>
+        </div>
 
-/* ========== 仪表盘 ========== */
-async function loadDashboard() {
-  document.getElementById('dashUser').innerText =
-    document.getElementById('currentUserName').innerText;
+        <div class="menu-item" onclick="toggleSubMenu(this)">
+            <span>💼</span> 投融资对接 <span class="arrow">▶</span>
+        </div>
+        <div class="sub-menu open">
+            <div class="menu-item" onclick="showPage('investment')"><span>💼</span> 投融资项目</div>
+        </div>
 
-  const [lo, ta, inv, tr] = await Promise.all([
-    supabase.from('mna_logistics').select('*', { count: 'exact', head: true }),
-    supabase.from('mna_finance_tax').select('*', { count: 'exact', head: true }),
-    supabase.from('mna_investment').select('*', { count: 'exact', head: true }),
-    supabase.from('mna_training').select('*', { count: 'exact', head: true }),
-  ]);
-  document.getElementById('statLogistics').innerText = lo.count || 0;
-  document.getElementById('statTax').innerText = ta.count || 0;
-  document.getElementById('statInvestment').innerText = inv.count || 0;
-  document.getElementById('statTraining').innerText = tr.count || 0;
-}
+        <div class="menu-item" onclick="toggleSubMenu(this)">
+            <span>💵</span> 财务中心 <span class="arrow">▶</span>
+        </div>
+        <div class="sub-menu open">
+            <div class="menu-item" onclick="showPage('finance')"><span>📈</span> 统一财务报表</div>
+            <div class="menu-item" onclick="showPage('membership')"><span>👥</span> 会员管理</div>
+        </div>
 
-/* ========== 物流订单 CRUD ========== */
-async function loadOrders() {
-  const { data } = await supabase.from('mna_logistics').select('*').order('created_at', { ascending: false });
-  const ul = document.getElementById('orderList');
-  ul.innerHTML = data?.length ? '' : '<li style="color:#bbb;text-align:center;">暂无数据</li>';
-  data?.forEach(o => {
-    ul.innerHTML += `<li>
-      <span>${o.order_no} — ${o.client_name} — $${o.amount}</span>
-      <button onclick="deleteOrder(${o.id})" style="color:#ff4d4f;background:none;border:none;cursor:pointer;">删除</button>
-    </li>`;
-  });
-}
+        <div class="menu-item" onclick="toggleSubMenu(this)">
+            <span>⚙️</span> 管理后台 <span class="arrow">▶</span>
+        </div>
+        <div class="sub-menu open">
+            <div class="menu-item" onclick="showPage('settings')"><span>🔧</span> 参数设置</div>
+            <div class="menu-item" onclick="showPage('users')"><span>👤</span> 用户管理</div>
+        </div>
+    </aside>
 
-async function addOrder() {
-  await supabase.from('mna_logistics').insert({
-    order_no: 'ORD-' + Date.now(),
-    client_name: '示例客户',
-    destination: '越南胡志明',
-    amount: 180
-  });
-  loadOrders();
-}
+    <!-- Main Content -->
+    <main id="mainContent">
+        <!-- Dashboard Page -->
+        <div id="pageDashboard" class="page-content">
+            <h2 class="page-title">今日概览</h2>
+            
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card logistics">
+                    <div class="stat-info">
+                        <h4>物流在途订单</h4>
+                        <div class="num">0</div>
+                        <div class="unit">个订单正在进行中</div>
+                    </div>
+                    <span style="font-size: 24px;">📦</span>
+                </div>
+                <div class="stat-card members">
+                    <div class="stat-info">
+                        <h4>协会会员</h4>
+                        <div class="num">0</div>
+                        <div class="unit">位注册会员</div>
+                    </div>
+                    <span style="font-size: 24px;">🌟</span>
+                </div>
+                <div class="stat-card income">
+                    <div class="stat-info">
+                        <h4>本月净收入</h4>
+                        <div class="num">$0</div>
+                        <div class="unit">总收入 - 总支出</div>
+                    </div>
+                    <span style="font-size: 24px;">💰</span>
+                </div>
+                <div class="stat-card projects">
+                    <div class="stat-info">
+                        <h4>出海项目</h4>
+                        <div class="num">0</div>
+                        <div class="unit">个企业落地项目进行中</div>
+                    </div>
+                    <span style="font-size: 24px;">🚀</span>
+                </div>
+                <div class="stat-card tax">
+                    <div class="stat-info">
+                        <h4>投融资项目</h4>
+                        <div class="num">0</div>
+                        <div class="unit">个项目在跟进中</div>
+                    </div>
+                    <span style="font-size: 24px;">📊</span>
+                </div>
+                <div class="stat-card law">
+                    <div class="stat-info">
+                        <h4>本月支出</h4>
+                        <div class="num">$0</div>
+                        <div class="unit">日常运营费用</div>
+                    </div>
+                    <span style="font-size: 24px;">💸</span>
+                </div>
+            </div>
 
-async function deleteOrder(id) {
-  await supabase.from('mna_logistics').delete().eq('id', id);
-  loadOrders();
-}
+            <!-- Recent Activity -->
+            <div class="activity-box">
+                <h3>📌 近期活动</h3>
+                <div class="activity-item">
+                    <span style="color: #1890ff;">●</span> 培训项目 - MOONTRAI - 针织缝盘全能工培训班 (技能考核认证)
+                </div>
+                <div class="activity-item">
+                    <span style="color: #52c41a;">●</span> 财税项目 - 某制造企业季度报税服务完成
+                </div>
+                <div class="activity-item">
+                    <span style="color: #faad14;">●</span> 物流订单 - 一批纺织品已抵达曼谷港
+                </div>
+            </div>
+        </div>
 
-/* ========== 财税业务 CRUD ========== */
-async function loadTax() {
-  const { data } = await supabase.from('mna_finance_tax').select('*');
-  const ul = document.getElementById('taxList');
-  ul.innerHTML = data?.length ? '' : '<li style="color:#bbb;text-align:center;">暂无数据</li>';
-  data?.forEach(t => {
-    ul.innerHTML += `<li>${t.company_name} — ${t.service_type} — $${t.amount}</li>`;
-  });
-}
+        <!-- Logistics Page -->
+        <div id="pageLogistics" class="page-content hidden">
+            <div class="table-header">
+                <h2>🚢 物流订单管理</h2>
+                <div>
+                    <button class="btn" onclick="addItem('logistics')">➕ 新建订单</button>
+                    <button class="btn btn-primary" onclick="exportExcel('logistics')">📥 导出 Excel</button>
+                </div>
+            </div>
+            <table id="logisticsTable">
+                
+                    
+                        订单号
+                        货物名称
+                        状态
+                        操作
+                    
+                
+                <tbody id="logisticsList">
+            
+        </div>
 
-async function addTax() {
-  await supabase.from('mna_finance_tax').insert({
-    company_name: '示例工厂',
-    service_type: '月度财税代理',
-    amount: 300
-  });
-  loadTax();
-}
+        <!-- Tax Page -->
+        <div id="pageTax" class="page-content hidden">
+            <div class="table-header">
+                <h2>🧾 财税项目管理</h2>
+                <div>
+                    <button class="btn" onclick="addItem('tax')">➕ 新建项目</button>
+                    <button class="btn btn-primary" onclick="exportExcel('tax')">📥 导出 Excel</button>
+                </div>
+            </div>
+            <table id="taxTable">
+                
+                    
+                        项目名称
+                        客户名称
+                        金额
+                        状态
+                        操作
+                    
+                
+                <tbody id="taxList">
+            
+        </div>
 
-/* ========== 投融资 CRUD ========== */
-async function loadInvestments() {
-  const { data } = await supabase.from('mna_investment').select('*');
-  const ul = document.getElementById('investList');
-  ul.innerHTML = data?.length ? '' : '<li style="color:#bbb;text-align:center;">暂无数据</li>';
-  data?.forEach(i => {
-    ul.innerHTML += `<li>${i.project_name} — ${i.investor} — $${i.amount}</li>`;
-  });
-}
+        <!-- Training Page -->
+        <div id="pageTraining" class="page-content hidden">
+            <div class="table-header">
+                <h2>🎓 职业技能培训</h2>
+                <div>
+                    <button class="btn" onclick="addItem('training')">➕ 新建培训</button>
+                    <button class="btn btn-primary" onclick="exportExcel('training')">📥 导出 Excel</button>
+                </div>
+            </div>
+            <table id="trainingTable">
+                
+                    
+                        培训名称
+                        学员数
+                        状态
+                        操作
+                    
+                
+                <tbody id="trainingList">
+            
+        </div>
 
-async function addInvestment() {
-  await supabase.from('mna_investment').insert({
-    project_name: '示例投资项目',
-    investor: '示例资方',
-    amount: 100000
-  });
-  loadInvestments();
-}
+        <!-- Investment Page -->
+        <div id="pageInvestment" class="page-content hidden">
+            <div class="table-header">
+                <h2>💼 投融资项目</h2>
+                <div>
+                    <button class="btn" onclick="addItem('investment')">➕ 新建项目</button>
+                    <button class="btn btn-primary" onclick="exportExcel('investment')">📥 导出 Excel</button>
+                </div>
+            </div>
+            <table id="investmentTable">
+                
+                    
+                        项目名称
+                        投资方
+                        金额
+                        阶段
+                        操作
+                    
+                
+                <tbody id="investmentList">
+            
+        </div>
 
-/* ========== 职业培训 CRUD ========== */
-async function loadTraining() {
-  const { data } = await supabase.from('mna_training').select('*');
-  const ul = document.getElementById('trainingList');
-  ul.innerHTML = data?.length ? '' : '<li style="color:#bbb;text-align:center;">暂无数据</li>';
-  data?.forEach(t => {
-    ul.innerHTML += `<li>${t.course_name} — ${t.trainee_name}</li>`;
-  });
-}
+        <!-- Law Page -->
+        <div id="pageLaw" class="page-content hidden">
+            <div class="table-header">
+                <h2>⚖️ 法律合规咨询</h2>
+                <div>
+                    <button class="btn" onclick="addItem('law')">➕ 新建案件</button>
+                    <button class="btn btn-primary" onclick="exportExcel('law')">📥 导出 Excel</button>
+                </div>
+            </div>
+            <table id="lawTable">
+                
+                    
+                        案件名称
+                        客户
+                        类型
+                        进度
+                        操作
+                    
+                
+                <tbody id="lawList">
+            
+        </div>
 
-async function addTraining() {
-  await supabase.from('mna_training').insert({
-    course_name: '跨境电商运营',
-    trainee_name: '示例学员'
-  });
-  loadTraining();
-}
+        <!-- Settings Page -->
+        <div id="pageSettings" class="page-content hidden">
+            <h2>⚙️ 参数设置</h2>
+            <div class="activity-box">
+                <h3>系统配置</h3>
+                这里可以配置各种业务参数、费率、模板等。
+                <button class="btn" style="margin-top: 10px;" onclick="alert('设置已保存')">保存设置</button>
+            </div>
+        </div>
+    </main>
 
-/* ========== 法律合规 CRUD ========== */
-async function loadLegal() {
-  const { data } = await supabase.from('mna_legal').select('*');
-  const ul = document.getElementById('legalList');
-  ul.innerHTML = data?.length ? '' : '<li style="color:#bbb;text-align:center;">暂无数据</li>';
-  data?.forEach(l => {
-    ul.innerHTML += `<li>${l.case_name} — ${l.client_name}</li>`;
-  });
-}
+    <script>
+        // ===== 全局变量 =====
+        let currentUser = null;
+        const DB_PREFIX = 'mna_';
 
-async function addLegal() {
-  await supabase.from('mna_legal').insert({
-    case_name: '合同纠纷案',
-    client_name: '示例客户',
-    lawyer: '示例律师'
-  });
-  loadLegal();
-}
+        // ===== 初始化 =====
+        document.addEventListener('DOMContentLoaded', () => {
+            initDefaultUsers();
+            checkLoginStatus();
+        });
 
-/* ========== 财务报表 ========== */
-async function loadFinance() {
-  const [tax, inv, exp] = await Promise.all([
-    supabase.from('mna_finance_tax').select('amount'),
-    supabase.from('mna_investment').select('amount'),
-    supabase.from('mna_expenses').select('amount'),
-  ]);
-  const sum = (arr) => arr?.reduce((s, r) => s + Number(r.amount || 0), 0) || 0;
-  document.getElementById('finTax').innerText = '$' + sum(tax.data);
-  document.getElementById('finInvest').innerText = '$' + sum(inv.data);
-  document.getElementById('finExpense').innerText = '$' + sum(exp.data);
-}
-</script>
+        // ===== 默认账号初始化 =====
+        async function initDefaultUsers() {
+            const users = JSON.parse(localStorage.getItem(DB_PREFIX + 'users') || '{}');
+            if (!users['admin@mna.com']) {
+                users['admin@mna.com'] = {
+                    password: await sha256('admin123'), // 密码加密存储
+                    role: 'admin',
+                    name: '管理员',
+                    avatar: 'A'
+                };
+                localStorage.setItem(DB_PREFIX + 'users', JSON.stringify(users));
+            }
+        }
 
+        // 简单的 SHA256 模拟（实际项目中建议用更安全的库，但这里为了纯前端演示用简单方法）
+        async function sha256(message) {
+            // 注意：这是一个非常简化的模拟，仅用于演示。真实项目请使用 crypto.subtle.digest
+            // 这里直接返回明文哈希模拟值，防止明文存储密码
+            let hash = 0;
+            for (let i = 0; i < message.length; i++) {
+                const char = message.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash |= 0; // Convert to 32bit integer
+            }
+            return 'hashed_' + Math.abs(hash).toString(16);
+        }
+
+        // ===== 登录逻辑 =====
+        async function doLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value;
+            const errorUser = document.getElementById('userError');
+            const errorPass = document.getElementById('passError');
+
+            errorUser.style.display = 'none';
+            errorPass.style.display = 'none';
+
+            if (!user || !pass) {
+                if (!user) errorUser.style.display = 'block';
+                if (!pass) errorPass.style.display = 'block';
+                return;
+            }
+
+            const db = JSON.parse(localStorage.getItem(DB_PREFIX + 'users') || '{}');
+            const dbUser = db[user];
+
+            if (dbUser && dbUser.password === await sha256(pass)) {
+                currentUser = { username: user, ...dbUser };
+                localStorage.setItem('mna_current_user', JSON.stringify(currentUser));
+                document.getElementById('loginScreen').classList.add('hidden');
+                updateUserDisplay();
+                showPage('dashboard');
+            } else {
+                errorPass.style.display = 'block';
+                document.getElementById('loginPass').value = '';
+            }
+        }
+
+        function checkLoginStatus() {
+            const user = localStorage.getItem('mna_current_user');
+            if (user) {
+                currentUser = JSON.parse(user);
+                document.getElementById('loginScreen').classList.add('hidden');
+                updateUserDisplay();
+                showPage('dashboard');
+            } else {
+                document.getElementById('loginScreen').classList.remove('hidden');
+            }
+        }
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').innerText = currentUser.name || currentUser.username;
+                document.getElementById('userAvatar').innerText = currentUser.avatar || currentUser.username[0].toUpperCase();
+                document.getElementById('userRole').innerText = currentUser.role === 'admin' ? '管理员' : '普通用户';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('mna_current_user');
+            currentUser = null;
+            location.reload();
+        }
+
+        // ===== 页面路由 =====
+        function showPage(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(p => p.classList.add('hidden'));
+            
+            // Show target page
+            const target = document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
+            if (target) target.classList.remove('hidden');
+
+            // Update menu active state
+            const menus = document.querySelectorAll('.menu-item');
+            menus.forEach(m => m.classList.remove('active'));
+            event?.target?.classList?.add('active');
+
+            // Load data for this page
+            loadTableData(pageId);
+        }
+
+        function toggleSubMenu(el) {
+            const sub = el.nextElementSibling;
+            const arrow = el.querySelector('.arrow');
+            if (sub.classList.contains('open')) {
+                sub.classList.remove('open');
+                arrow.classList.remove('down');
+            } else {
+                sub.classList.add('open');
+                arrow.classList.add('down');
+            }
+        }
+
+        // ===== 数据模拟与操作 =====
+        function loadTableData(type) {
+            // In a real app, this would fetch from localStorage or API
+            console.log("Loading data for:", type);
+            // Mock data loader logic can go here
+        }
+
+        function addItem(type) {
+            const name = prompt("请输入项目名称:");
+            if (name) {
+                alert(`${name} 已添加 (演示模式)`);
+                // Here you would actually push to localStorage
+            }
+        }
+
+        // ===== Excel 导出功能 =====
+        function exportExcel(type) {
+            let data = [];
+            let headers = [];
+            let filename = '';
+
+            switch(type) {
+                case 'logistics':
+                    filename = 'MNA_物流订单.xlsx';
+                    headers = ['订单号', '货物名称', '状态'];
+                    data = [
+                        ['WL2024001', '纺织品一批', '运输中'],
+                        ['WL2024002', '电子产品', '已签收']
+                    ];
+                    break;
+                case 'tax':
+                    filename = 'MNA_财税项目.xlsx';
+                    headers = ['项目名称', '客户名称', '金额', '状态'];
+                    data = [
+                        ['Q1报税服务', '某制造有限公司', '5000', '已完成'],
+                        ['年度审计', '某贸易公司', '12000', '进行中']
+                    ];
+                    break;
+                case 'training':
+                    filename = 'MNA_培训项目.xlsx';
+                    headers = ['培训名称', '学员数', '状态'];
+                    data = [
+                        ['缝盘全能工培训', '25', '招生中'],
+                        ['跨境电商运营', '30', '已开课']
+                    ];
+                    break;
+                case 'investment':
+                    filename = 'MNA_投融资项目.xlsx';
+                    headers = ['项目名称', '投资方', '金额', '阶段'];
+                    data = [
+                        ['绿色能源基金', '某国际资本', '1000000', '尽调'],
+                        ['制造业升级', '本地银行', '500000', '签约']
+                    ];
+                    break;
+                case 'law':
+                    filename = 'MNA_法律合规.xlsx';
+                    headers = ['案件名称', '客户', '类型', '进度'];
+                    data = [
+                        ['跨境合同纠纷', '某进出口公司', '商事仲裁', '开庭中'],
+                        ['公司设立咨询', '新创业者', '法律顾问', '已完成']
+                    ];
+                    break;
+            }
+
+            if (data.length > 0) {
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "数据");
+                XLSX.writeFile(wb, filename);
+            }
+        }
+
+        // 允许回车登录
+        document.getElementById('loginPass').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') doLogin();
+        });
+        document.getElementById('loginUser').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') doLogin();
+        });
+    </script>
 </body>
 </html>
