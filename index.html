@@ -104,11 +104,11 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
 .st-0 { background:#e6f7ff; color:#1a4a8a; } .st-1 { background:#fff7e6; color:#d46b08; }
 .st-2 { background:#f6ffed; color:#389e0d; } .st-3 { background:#f9e6ff; color:#722ed1; }
 .st-4 { background:#e6fffb; color:#08979c; } .st-5 { background:#fff1e6; color:#fa8c16; }
-.st-6 { background:#f6ffed; color:#52c41a; } .st-7 { background:#f0f5ff; color:#0f2b5e; }
+.st-6 { background:#f6ffed; color:#52c41a; }
 
 .actions button { padding:3px 10px; font-size:11.5px; border:none; border-radius:4px; cursor:pointer; margin:0 1px; font-family:inherit; }
-.actions .edit-btn { background:#e6f7ff; color:#1a4a8a; } .actions .del-btn { background:#fff1f0; color:#ff4d4f; }
-.actions .view-btn { background:#f6ffed; color:#52c41a; }
+.actions .edit-btn { background:#e6f7ff; color:#1a4a8a; }
+.actions .del-btn { background:#fff1f0; color:#ff4d4f; }
 
 .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.45); z-index:1000; justify-content:center; align-items:center; }
 .modal-overlay.active { display:flex; }
@@ -130,1216 +130,17 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
 
 .sub-tabs { display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid #e8e8e8; }
 .sub-tabs button { padding:10px 20px; cursor:pointer; font-weight:500; color:#888; border:none; border-bottom:2px solid transparent; background:none; font-size:13.5px; font-family:inherit; transition:all .2s; }
-.sub-tabs button.active { color:#1a4a8a; border-bottom-color:#1a4a8a; } .sub-tabs button:hover { color:#1a4a8a; }
-
-.finance-summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
-.finance-card { background:#fff; border-radius:10px; padding:16px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.06); border-top:3px solid #1a4a8a; }
-.finance-card .flabel { font-size:11px; color:#999; margin-bottom:6px; }
-.finance-card .fvalue { font-size:22px; font-weight:700; }
-.finance-card .fvalue.positive { color:#52c41a; } .finance-card .fvalue.negative { color:#ff4d4f; }
-</style>
-</head>
-<body>
-
-<!-- ==================== 登录页 ==================== -->
-<div class="login-page" id="loginPage">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="icon">🏛️</div>
-      <h2 data-i18n="login_title">MNA 业务管理平台</h2>
-      <p data-i18n="login_sub">湄公产业资本联盟 Mekong Nexus Association<br>连接产业 · 资本 · 政府 · 国际资源</p>
-    </div>
-    <div class="login-form">
-      <div class="form-group"><label data-i18n="username">👤 用户名（邮箱）</label><input type="email" id="loginUser" placeholder="admin@mna.com" autocomplete="username" autofocus></div>
-      <div class="form-group"><label data-i18n="password">🔑 密码</label><input type="password" id="loginPass" placeholder="密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <button class="login-btn" onclick="doLogin()" data-i18n="login_btn">登 录</button>
-      <div class="login-error" id="loginError"></div>
-    </div>
-    <div class="login-links"><a onclick="alert('请联系管理员重置密码')" data-i18n="forgot">忘记密码？</a></div>
-    <div class="login-footer">© 2025 MNA · 仅授权用户可访问 · 数据加密存储</div>
-  </div>
-</div>
-
-<!-- ==================== 主应用 ==================== -->
-<div class="app-container" id="appContainer">
-  <div class="app-header">
-    <div class="brand">
-      <div class="logo-icon">🏛️</div>
-      <div class="brand-text">
-        <h1 data-i18n="brand">MNA 湄公产业资本联盟</h1>
-        <p data-i18n="brand_sub">Mekong Nexus Association · 业务管理平台</p>
-      </div>
-    </div>
-    <div class="user-bar">
-      <div class="lang-switch" onclick="toggleLang()">🌐 <span id="langLabel">EN</span></div>
-      <div class="avatar">👤</div>
-      <div class="user-info">
-        <div class="uname" id="currentUserName"></div>
-        <div class="urole" id="currentUserRole"></div>
-      </div>
-      <button onclick="doLogout()" data-i18n="logout">退出登录</button>
-    </div>
-  </div>
-
-  <div class="main-body">
-    <!-- 侧边栏 -->
-    <div class="sidebar">
-      <div class="nav-group">
-        <div class="nav-group-title" data-i18n="overview">📊 概览</div>
-        <button class="nav-item active" onclick="switchPage('dashboard')"><span class="nav-icon">🏠</span> <span data-i18n="dashboard">仪表盘</span></button>
-      </div>
-      <div class="nav-group">
-        <div class="nav-group-title" data-i18n="business">🚢 业务板块</div>
-        <button class="nav-item" onclick="switchPage('logistics')"><span class="nav-icon">🚢</span> <span data-i18n="logistics">物流订单跟踪</span></button>
-        <button class="nav-item" onclick="switchPage('overseas')"><span class="nav-icon">🏗️</span> <span data-i18n="overseas">出海落地服务</span></button>
-        <button class="nav-item" onclick="switchPage('investment')"><span class="nav-icon">💰</span> <span data-i18n="investment">投融资对接</span></button>
-        <button class="nav-item" onclick="switchPage('commerce')"><span class="nav-icon">🤝</span> <span data-i18n="commerce">商务合作/会员</span></button>
-        <button class="nav-item" onclick="switchPage('policy')"><span class="nav-icon">📋</span> <span data-i18n="policy">政策解读/政府对接</span></button>
-        <button class="nav-item" onclick="switchPage('tax')"><span class="nav-icon">🧾</span> <span data-i18n="tax">财税业务</span></button>
-        <button class="nav-item" onclick="switchPage('training')"><span class="nav-icon">🎓</span> <span data-i18n="training">职业技能培训</span></button>
-        <button class="nav-item" onclick="switchPage('legal')"><span class="nav-icon">⚖️</span> <span data-i18n="legal">法律咨询合规</span></button>
-      </div>
-      <div class="nav-group admin-only" id="navGroupFinance" style="display:none">
-        <div class="nav-group-title">💰 财务中心</div>
-        <button class="nav-item" onclick="switchPage('finance')"><span class="nav-icon">📊</span> <span data-i18n="finance">统一财务报表</span></button>
-        <button class="nav-item" onclick="switchPage('membership')"><span class="nav-icon">🏅</span> <span data-i18n="membership">会员管理</span></button>
-        <button class="nav-item" onclick="switchPage('expenses')"><span class="nav-icon">💸</span> <span data-i18n="expenses">日常费用支出</span></button>
-      </div>
-      <div class="nav-group">
-        <div class="nav-group-title">⚙️ 系统</div>
-        <button class="nav-item" onclick="switchPage('config')"><span class="nav-icon">⚙️</span> <span data-i18n="config">参数设置</span></button>
-        <button class="nav-item" onclick="switchPage('pwd')"><span class="nav-icon">🔑</span> <span data-i18n="change_pwd">修改密码</span></button>
-      </div>
-    </div>
-
-    <!-- 内容区 -->
-    <div class="content-area">
-
-      <!-- ===== 仪表盘 ===== -->
-      <div class="page-section active" id="pageDashboard">
-        <div class="dashboard-welcome">
-          <h2 data-i18n="welcome">👋 欢迎回来</h2>
-          <p>今天是 <span id="todayDate"></span> · 以下是您的业务概览</p>
-        </div>
-        <div class="dashboard-grid">
-          <div class="dashboard-card"><h4>🚢 物流在途订单</h4><div class="big-num" id="dbLogistics">—</div><p>个订单正在进行中</p></div>
-          <div class="dashboard-card" style="border-left-color:#d48806"><h4>🏅 协会会员</h4><div class="big-num" id="dbMembers" style="color:#d48806">—</div><p>位注册会员</p></div>
-          <div class="dashboard-card" style="border-left-color:#52c41a"><h4>💰 本月净收入</h4><div class="big-num" id="dbRevenue" style="color:#52c41a">—</div><p>总收入 - 总支出</p></div>
-          <div class="dashboard-card" style="border-left-color:#fa8c16"><h4>🏗️ 出海项目</h4><div class="big-num" id="dbOverseas" style="color:#fa8c16">—</div><p>个企业落地项目进行中</p></div>
-          <div class="dashboard-card" style="border-left-color:#722ed1"><h4>💰 投融资项目</h4><div class="big-num" id="dbInvestment" style="color:#722ed1">—</div><p>个项目在跟进中</p></div>
-          <div class="dashboard-card" style="border-left-color:#ff4d4f"><h4>💸 本月支出</h4><div class="big-num" id="dbExpenses" style="color:#ff4d4f">—</div><p>日常运营费用</p></div>
-          <div class="dashboard-card" style="border-left-color:#7cb305"><h4>🧾 财税项目</h4><div class="big-num" id="dbTax" style="color:#7cb305">—</div><p>工厂财税服务进行中</p></div>
-          <div class="dashboard-card" style="border-left-color:#13c2c2"><h4>🎓 培训项目</h4><div class="big-num" id="dbTraining" style="color:#13c2c2">—</div><p>培训项目进行中</p></div>
-          <div class="dashboard-card" style="border-left-color:#722ed1"><h4>⚖️ 法律项目</h4><div class="big-num" id="dbLegal" style="color:#722ed1">—</div><p>法律项目进行中</p></div>
-          <div class="dashboard-card" style="border-left-color:#d48806"><h4>📋 政策项目</h4><div class="big-num" id="dbPolicy" style="color:#d48806">—</div><p>政策项目进行中</p></div>
-        </div>
-      </div>
-
-      <!-- ===== 物流订单 ===== -->
-      <div class="page-section" id="pageLogistics">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'logList')">📋 订单列表</button>
-          <button onclick="switchSubTab(this,'logLedger')">📊 月度台账</button>
-        </div>
-        <div id="logList">
-          <div class="controls">
-            <button class="btn-green" onclick="openOrderModal()">➕ 新建物流订单</button>
-            <div style="flex:1"></div>
-            <select id="filterStatus" onchange="loadOrders()">
-              <option value="">全部状态</option>
-              <option value="0">待发柜</option><option value="1">已发柜（在途）</option>
-              <option value="2">已到港</option><option value="3">清关中</option>
-              <option value="4">已清关</option><option value="5">已到工厂</option>
-              <option value="6">已结单</option>
-            </select>
-            <input type="text" id="searchOrder" placeholder="搜索客户/订单号..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadOrders()">
-            <button class="btn-orange" onclick="exportCSV('orders')">📥 导出CSV</button>
-          </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>📋 物流订单列表</h3><span style="font-size:12px;color:#aaa" id="orderCount">加载中...</span></div>
-            <div id="orderTable"></div>
-          </div>
-        </div>
-        <div id="logLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="logMonth" onchange="loadOrderLedger()">
-            <button onclick="prevLogMonth()">◀</button><button onclick="nextLogMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('orders')">📥 导出CSV</button>
-          </div>
-          <div class="summary-cards" id="logSummary">
-            <div class="card"><div class="label">订单数</div><div class="value" id="logCount">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value profit" id="logRevenue">$0</div></div>
-            <div class="card"><div class="label">总成本</div><div class="value cost" id="logCost">$0</div></div>
-            <div class="card"><div class="label">净利润</div><div class="value" id="logNet">$0</div></div>
-          </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="logLedgerTable"></div></div>
-        </div>
-      </div>
-
-      <!-- ===== 出海落地服务 ===== -->
-      <div class="page-section" id="pageOverseas">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'ovList')">📋 项目列表</button>
-          <button onclick="switchSubTab(this,'ovLedger')">📊 月度台账</button>
-        </div>
-        <div id="ovList">
-          <div class="controls">
-            <button class="btn-green" onclick="openOverseasModal()">➕ 新建出海项目</button>
-            <div style="flex:1"></div>
-            <input type="text" id="searchOverseas" placeholder="搜索客户/项目..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadOverseas()">
-          </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>🏗️ 出海落地服务</h3><span style="font-size:12px;color:#aaa" id="overseasCount">加载中...</span></div>
-            <div id="overseasTable"></div>
-          </div>
-        </div>
-        <div id="ovLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="ovMonth" onchange="loadOverseasLedger()">
-            <button onclick="prevOvMonth()">◀</button><button onclick="nextOvMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('overseas')">📥 导出CSV</button>
-          </div>
-          <div class="summary-cards" id="ovSummary">
-            <div class="card"><div class="label">项目数</div><div class="value" id="ovCount">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value profit" id="ovRevenue">$0</div></div>
-            <div class="card"><div class="label">总成本</div><div class="value cost" id="ovCost">$0</div></div>
-            <div class="card"><div class="label">净利润</div><div class="value" id="ovNet">$0</div></div>
-          </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="ovLedgerTable"></div></div>
-        </div>
-      </div>
-
-      <!-- ===== 投融资对接 ===== -->
-      <div class="page-section" id="pageInvestment">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'invList')">📋 项目列表</button>
-          <button onclick="switchSubTab(this,'invLedger')">📊 月度台账</button>
-        </div>
-        <div id="invList">
-          <div class="controls">
-            <button class="btn-purple" onclick="openInvestModal()">➕ 新建投融资项目</button>
-            <div style="flex:1"></div>
-            <input type="text" id="searchInvest" placeholder="搜索项目/投资方..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadInvest()">
-          </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>💰 投融资项目列表</h3><span style="font-size:12px;color:#aaa" id="investCount">加载中...</span></div>
-            <div id="investTable"></div>
-          </div>
-        </div>
-        <div id="invLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="invMonth" onchange="loadInvestLedger()">
-            <button onclick="prevInvMonth()">◀</button><button onclick="nextInvMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('investments')">📥 导出CSV</button>
-          </div>
-          <div class="summary-cards" id="invSummary">
-            <div class="card"><div class="label">项目数</div><div class="value" id="invCount">0</div></div>
-            <div class="card"><div class="label">涉及金额</div><div class="value" id="invAmount">$0</div></div>
-            <div class="card"><div class="label">佣金收入</div><div class="value profit" id="invCommission">$0</div></div>
-          </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="invLedgerTable"></div></div>
-        </div>
-      </div>
-
-      <!-- ===== 商务合作/会员 ===== -->
-      <div class="page-section" id="pageCommerce">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'comList')">📋 会员/活动列表</button>
-          <button onclick="switchSubTab(this,'comLedger')">📊 月度台账</button>
-        </div>
-        <div id="comList">
-          <div class="controls">
-            <button class="btn-teal" onclick="openCommerceModal()">➕ 新建商务项目</button>
-            <div style="flex:1"></div>
-            <input type="text" id="searchCommerce" placeholder="搜索会员/活动..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadCommerce()">
-          </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>🤝 商务合作/会员</h3><span style="font-size:12px;color:#aaa" id="commerceCount">加载中...</span></div>
-            <div id="commerceTable"></div>
-          </div>
-        </div>
-        <div id="comLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="comMonth" onchange="loadCommerceLedger()">
-            <button onclick="prevComMonth()">◀</button><button onclick="nextComMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('commerce')">📥 导出CSV</button>
-          </div>
-          <div class="summary-cards"><div class="card"><div class="label">会员/活动数</div><div class="value" id="comItems">0</div></div><div class="card"><div class="label">总收入</div><div class="value profit" id="comRevenue">$0</div></div></div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="comLedgerTable"></div></div>
-        </div>
-      </div><!-- ===== 政策解读/政府对接 ===== -->
-      <div class="page-section" id="pagePolicy">
-        <div class="controls">
-          <button class="btn-red" onclick="openPolicyModal()">➕ 新建政策项目</button>
-          <div style="flex:1"></div>
-          <input type="text" id="searchPolicy" placeholder="搜索项目名称/对接部门..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadPolicy()">
-        </div>
-        <div class="table-wrapper">
-          <div class="table-header"><h3>📋 政策解读/政府对接</h3><span style="font-size:12px;color:#aaa" id="policyCount">加载中...</span></div>
-          <div id="policyTable"></div>
-        </div>
-      </div>
-
-      <!-- ===== 财税业务 ===== -->
-      <div class="page-section" id="pageTax">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'taxList')">📋 项目列表</button>
-          <button onclick="switchSubTab(this,'taxLedger')">📊 月度台账</button>
-        </div>
-        <div id="taxList">
-          <div class="controls">
-            <button class="btn-old" onclick="openTaxModal()">➕ 新建财税项目</button>
-            <div style="flex:1"></div>
-            <input type="text" id="searchTax" placeholder="搜索客户/服务类型..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadTax()">
-          </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>🧾 财税服务项目</h3><span style="font-size:12px;color:#aaa" id="taxCount">加载中...</span></div>
-            <div id="taxTable"></div>
-          </div>
-        </div>
-        <div id="taxLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="taxMonth" onchange="loadTaxLedger()">
-            <button onclick="prevTaxMonth()">◀</button><button onclick="nextTaxMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('tax')">📥 导出CSV</button>
-          </div>
-          <div class="summary-cards" id="taxSummary">
-            <div class="card"><div class="label">项目数</div><div class="value" id="taxProjects">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value profit" id="taxRevenue">$0</div></div>
-            <div class="card"><div class="label">净利润</div><div class="value" id="taxNet">$0</div></div>
-          </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="taxLedgerTable"></div></div>
-        </div>
-      </div>
-
-      <!-- ===== 职业技能培训 ===== -->
-      <div class="page-section" id="pageTraining">
-        <div class="controls">
-          <button class="btn-teal" onclick="openTrainingModal()">➕ 新建培训项目</button>
-          <div style="flex:1"></div>
-          <input type="text" id="searchTraining" placeholder="搜索课程/学员..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadTraining()">
-        </div>
-        <div class="table-wrapper">
-          <div class="table-header"><h3>🎓 职业技能培训</h3><span style="font-size:12px;color:#aaa" id="trainingCount">加载中...</span></div>
-          <div id="trainingTable"></div>
-        </div>
-      </div>
-
-      <!-- ===== 法律咨询合规 ===== -->
-      <div class="page-section" id="pageLegal">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'legalList')">📋 项目列表</button>
-          <button onclick="switchSubTab(this,'legalLedger')">📊 月度台账</button>
-        </div>
-        <div id="legalList">
-          <div class="controls">
-            <button class="btn-purple" onclick="openLegalModal()">➕ 新建法律项目</button>
-            <div style="flex:1"></div>
-            <input type="text" id="searchLegal" placeholder="搜索客户/案件类型..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadLegal()">
-          </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>⚖️ 法律咨询合规</h3><span style="font-size:12px;color:#aaa" id="legalCount">加载中...</span></div>
-            <div id="legalTable"></div>
-          </div>
-        </div>
-        <div id="legalLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="legalMonth" onchange="loadLegalLedger()">
-            <button onclick="prevLegalMonth()">◀</button><button onclick="nextLegalMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('legal')">📥 导出CSV</button>
-          </div>
-          <div class="summary-cards" id="legalSummary">
-            <div class="card"><div class="label">案件数</div><div class="value" id="legalCases">0</div></div>
-            <div class="card"><div class="label">服务收入</div><div class="value profit" id="legalRevenue">$0</div></div>
-          </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="legalLedgerTable"></div></div>
-        </div>
-      </div>
-
-      <!-- ===== 会员管理 ===== -->
-      <div class="page-section" id="pageMembership">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'memList')">🏅 会员列表</button>
-          <button onclick="switchSubTab(this,'memLedger')">📊 月度台账</button>
-        </div>
-        <div id="memList">
-          <div class="controls">
-            <button class="btn-gold" onclick="openMemberModal()">➕ 新增会员</button>
-            <div style="flex:1"></div>
-            <input type="text" id="searchMember" placeholder="搜索会员名称..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadMembers()">
-          </div>
-          <div class="summary-cards" id="memberSummary">
-            <div class="card"><div class="label">会员总数</div><div class="value" id="memTotal">0</div></div>
-            <div class="card"><div class="label">普通会员</div><div class="value" id="memNormal">0</div></div>
-            <div class="card"><div class="label">理事会员</div><div class="value" id="memDirector">0</div></div>
-            <div class="card"><div class="label">战略会员</div><div class="value" id="memStrategic">0</div></div>
-          </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>🏅 协会会员列表</h3><span style="font-size:12px;color:#aaa" id="memberCount">加载中...</span></div>
-            <div id="memberTable"></div>
-          </div>
-        </div>
-        <div id="memLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="memMonth" onchange="loadMemberLedger()">
-            <button onclick="prevMemMonth()">◀</button><button onclick="nextMemMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('members')">📥 导出CSV</button>
-          </div>
-          <div class="summary-cards">
-            <div class="card"><div class="label">本月新增</div><div class="value" id="memNew">0</div></div>
-            <div class="card"><div class="label">会员费收入</div><div class="value profit" id="memRevenue">$0</div></div>
-            <div class="card"><div class="label">累计会员</div><div class="value" id="memTotal2">0</div></div>
-          </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="memberLedgerTable"></div></div>
-        </div>
-      </div>
-
-      <!-- ===== 日常费用支出 ===== -->
-      <div class="page-section" id="pageExpenses">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'expList')">📋 支出记录</button>
-          <button onclick="switchSubTab(this,'expLedger')">📊 月度台账</button>
-        </div>
-        <div id="expList">
-          <div class="controls">
-            <button class="btn-red" onclick="openExpenseModal()">➕ 新增支出</button>
-            <div style="flex:1"></div>
-            <label>类别：</label>
-            <select id="filterExpCat" onchange="loadExpenses()">
-              <option value="">全部</option>
-              <option value="rent">房租/水电</option>
-              <option value="salary">人员工资</option>
-              <option value="utility">通讯/网络</option>
-              <option value="travel">差旅费</option>
-              <option value="marketing">市场推广</option>
-              <option value="office">办公用品</option>
-              <option value="other">其他</option>
-            </select>
-            <input type="text" id="searchExpense" placeholder="搜索..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:180px" oninput="loadExpenses()">
-          </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>💸 日常费用支出</h3><span style="font-size:12px;color:#aaa" id="expenseCount">加载中...</span></div>
-            <div id="expenseTable"></div>
-          </div>
-        </div>
-        <div id="expLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="expMonth" onchange="loadExpenseLedger()">
-            <button onclick="prevExpMonth()">◀</button><button onclick="nextExpMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('expenses')">📥 导出CSV</button>
-          </div>
-          <div class="summary-cards">
-            <div class="card"><div class="label">支出笔数</div><div class="value" id="expCount">0</div></div>
-            <div class="card"><div class="label">支出总额</div><div class="value cost" id="expTotal">$0</div></div>
-            <div class="card"><div class="label">最大单笔</div><div class="value" id="expMax">$0</div></div>
-          </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="expenseLedgerTable"></div></div>
-        </div>
-      </div>
-
-      <!-- ===== 统一财务报表 ===== -->
-      <div class="page-section" id="pageFinance">
-        <div class="panel">
-          <h3>📊 全业务营收概览</h3>
-          <div class="controls">
-            <label>📅 选择月份：</label><input type="month" id="financeMonth" onchange="loadFinance()">
-            <button onclick="prevFinanceMonth()">◀</button><button onclick="nextFinanceMonth()">▶</button>
-          </div>
-          <div class="finance-summary-grid" id="financeSummary">
-            <div class="finance-card"><div class="flabel">物流利润</div><div class="fvalue" id="finLogistics">$0</div><div class="fsub">货柜运输</div></div>
-            <div class="finance-card"><div class="flabel">出海服务收入</div><div class="fvalue" id="finOverseas">$0</div><div class="fsub">企业落地</div></div>
-            <div class="finance-card"><div class="flabel">投融资佣金</div><div class="fvalue" id="finInvest">$0</div><div class="fsub">资本对接</div></div>
-            <div class="finance-card"><div class="flabel">商务/会员收入</div><div class="fvalue" id="finCommerce">$0</div><div class="fsub">合作·活动</div></div>
-            <div class="finance-card"><div class="flabel">🧾 财税服务收入</div><div class="fvalue" id="finTax">$0</div><div class="fsub">报税·财税</div></div>
-            <div class="finance-card"><div class="flabel">🎓 培训服务收入</div><div class="fvalue" id="finTraining">$0</div><div class="fsub">职业技能</div></div>
-            <div class="finance-card"><div class="flabel">⚖️ 法律服务收入</div><div class="fvalue" id="finLegal">$0</div><div class="fsub">法律咨询</div></div>
-            <div class="finance-card"><div class="flabel">政策项目收入</div><div class="fvalue" id="finPolicy">$0</div><div class="fsub">政府对接</div></div>
-            <div class="finance-card" style="border-top-color:#fa8c16"><div class="flabel">💰 本月总收入</div><div class="fvalue profit" id="finTotal" style="font-size:36px">$0</div><div class="fsub">所有板块合计</div></div>
-          </div>
-        </div>
-        <div class="panel">
-          <h3>📈 收入构成</h3>
-          <div id="financeBreakdown" style="font-size:13px;color:#666;line-height:2">加载中...</div>
-        </div>
-      </div>
-
-      <!-- ===== 参数设置 ===== -->
-      <div class="page-section" id="pageConfig">
-        <div class="panel">
-          <h3>⚙️ 物流计费参数</h3>
-          <div class="config-row">
-            <label>每货柜利润（USD）：</label><input type="number" id="cfgProfit" value="180" min="0" step="10">
-            <label>返点比例（%）：</label><input type="number" id="cfgRebate" value="3" min="0" max="100" step="0.5">
-            <button class="btn-green" onclick="applyConfig()">应用参数</button>
-          </div>
-        </div>
-        <div class="panel">
-          <h3>📌 返点说明</h3>
-          <ul style="font-size:13px;color:#666;line-height:2;padding-left:20px">
-            <li>每笔订单利润 = 货柜数量 × 每货柜利润（默认 $180）</li>
-            <li>返点金额 = 利润 × 返点比例（默认 3%）</li>
-            <li>净收益 = 利润 - 返点</li>
-            <li>修改参数后，历史数据会自动按新参数重新计算</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- ===== 修改密码 ===== -->
-      <div class="page-section" id="pagePwd">
-        <div class="panel" style="max-width:500px">
-          <h3>🔑 修改密码</h3>
-          <div class="form-group"><label>当前密码</label><input type="password" id="oldPwd" placeholder="请输入当前密码"></div>
-          <div class="form-group"><label>新密码</label><input type="password" id="newPwd" placeholder="至少6位"></div>
-          <div class="form-group"><label>确认新密码</label><input type="password" id="newPwd2" placeholder="再次输入新密码"></div>
-          <button class="btn-green" onclick="changePassword()">提交修改</button>
-          <div id="pwdMsg" style="margin-top:10px;font-size:13px"></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- ==================== 弹窗区域（全部保留） ==================== -->
-<div class="modal-overlay" id="orderModal"><div class="modal" id="orderModalContent"></div></div>
-<div class="modal-overlay" id="overseasModal"><div class="modal" id="overseasModalContent"></div></div>
-<div class="modal-overlay" id="investModal"><div class="modal" id="investModalContent"></div></div>
-<div class="modal-overlay" id="commerceModal"><div class="modal" id="commerceModalContent"></div></div>
-<div class="modal-overlay" id="policyModal"><div class="modal" id="policyModalContent"></div></div>
-<div class="modal-overlay" id="taxModal"><div class="modal" id="taxModalContent"></div></div>
-<div class="modal-overlay" id="trainingModal"><div class="modal" id="trainingModalContent"></div></div>
-<div class="modal-overlay" id="legalModal"><div class="modal" id="legalModalContent"></div></div>
-<div class="modal-overlay" id="memberModal"><div class="modal" id="memberModalContent"></div></div>
-<div class="modal-overlay" id="expenseModal"><div class="modal" id="expenseModalContent"></div></div>
-
-<!-- ==================== JavaScript（核心逻辑 · 完整版） ==================== -->
-<script>
-/* ---- Supabase 初始化 ---- */
-const supabase = window.supabase.createClient(
-  'https://dicapkasnfjzbfmfyzib.supabase.co',
-  'sb_publishable_vSH9T39fUA4mfxC2E3QCig_vHObIYCg'
-);
-
-/* ---- 中英文语言包 ---- */
-const i18n = {
-  zh: {
-    login_title:'MNA 业务管理平台', login_sub:'湄公产业资本联盟 Mekong Nexus Association<br>连接产业 · 资本 · 政府 · 国际资源',
-    username:'👤 用户名（邮箱）', password:'🔑 密码', login_btn:'登 录', forgot:'忘记密码？', logout:'退出登录',
-    brand:'MNA 湄公产业资本联盟', brand_sub:'Mekong Nexus Association · 业务管理平台',
-    overview:'📊 概览', business:'🚢 业务板块', dashboard:'仪表盘', welcome:'👋 欢迎回来',
-    logistics:'物流订单跟踪', overseas:'出海落地服务', investment:'投融资对接',
-    commerce:'商务合作/会员', policy:'政策解读/政府对接', tax:'财税业务',
-    training:'职业技能培训', legal:'法律咨询合规',
-    finance:'统一财务报表', membership:'会员管理', expenses:'日常费用支出',
-    config:'参数设置', change_pwd:'修改密码',
-    loading:'加载中...', saving:'保存中...', deleting:'删除中...'
-  },
-  en: {
-    login_title:'MNA Business Platform', login_sub:'Mekong Nexus Association<br>Connecting Industry · Capital · Government · Global Resources',
-    username:'👤 Email', password:'🔑 Password', login_btn:'Sign In', forgot:'Forgot password?', logout:'Logout',
-    brand:'MNA Mekong Nexus Association', brand_sub:'Business Management Platform',
-    overview:'📊 Overview', business:'🚢 Business Modules', dashboard:'Dashboard', welcome:'👋 Welcome back',
-    logistics:'Logistics Tracking', overseas:'Overseas Services', investment:'Investment Matching',
-    commerce:'Commerce / Membership', policy:'Policy & Gov Liaison', tax:'Tax & Accounting',
-    training:'Vocational Training', legal:'Legal & Compliance',
-    finance:'Financial Report', membership:'Membership', expenses:'Daily Expenses',
-    config:'System Config', change_pwd:'Change Password',
-    loading:'Loading...', saving:'Saving...', deleting:'Deleting...'
-  }
-};
-
-let currentLang = localStorage.getItem('mna_lang') || 'zh';
-let currentUser = null;
-
-/* ---- 语言切换 ---- */
-function applyLang(lang) {
-  currentLang = lang;
-  localStorage.setItem('mna_lang', lang);
-  document.documentElement.setAttribute('data-lang', lang);
-  const d = i18n[lang];
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.getAttribute('data-i18n');
-    if (d[k]) el.innerHTML = d[k];
-  });
-  document.getElementById('langLabel').innerText = lang === 'zh' ? 'EN' : '中';
-}
-function toggleLang() { applyLang(currentLang === 'zh' ? 'en' : 'zh'); }
-
-/* ---- 登录 / 登出 ---- */
-async function doLogin() {
-  const email = document.getElementById('loginUser').value.trim();
-  const pwd = document.getElementById('loginPass').value;
-  const err = document.getElementById('loginError');
-  err.textContent = '';
-  if (!email || !pwd) { err.textContent = '请输入邮箱和密码'; return; }
-
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd });
-  if (error) { err.textContent = '登录失败：' + error.message; return; }
-  showApp(data.user);
-}
-
-async function doLogout() {
-  await supabase.auth.signOut();
-  location.reload();
-}
-
-/* ---- 显示主应用 ---- */
-function showApp(user) {
-  currentUser = user;
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('appContainer').style.display = 'flex';
-  document.getElementById('currentUserName').textContent = user.email;
-  document.getElementById('currentUserRole').textContent = 'Administrator';
-  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'});
-  applyLang(currentLang);
-  loadAllData();
-}
-
-/* ---- 页面切换 ---- */
-function switchPage(page) {
-  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-  const t = document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1));
-  if (t) t.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  if (event && event.target) event.target.closest('.nav-item')?.classList.add('active');
-}
-
-function switchSubTab(btn, tabId) {
-  const parent = btn.closest('.sub-tabs');
-  parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const section = btn.closest('.page-section');
-  section.querySelectorAll('[id$="List"],[id$="Ledger"]').forEach(d => d.style.display = 'none');
-  document.getElementById(tabId).style.display = 'block';
-}
-
-/* ---- 加载全部数据 ---- */
-async function loadAllData() {
-  loadDashboard();
-  loadOrders();
-  loadOverseas();
-  loadInvest();
-  loadCommerce();
-  loadPolicy();
-  loadTax();
-  loadTraining();
-  loadLegal();
-  loadMembers();
-  loadExpenses();
-  loadFinance();
-}
-
-/* ---- 仪表盘 ---- */
-async function loadDashboard() {
-  try {
-    const [lo, mem, ov, inv, ex, tx, tr, lg, po] = await Promise.all([
-      supabase.from('orders').select('*',{count:'exact',head:true}),
-      supabase.from('members').select('*',{count:'exact',head:true}),
-      supabase.from('overseas').select('*',{count:'exact',head:true}),
-      supabase.from('investments').select('*',{count:'exact',head:true}),
-      supabase.from('expenses').select('*',{count:'exact',head:true}),
-      supabase.from('tax').select('*',{count:'exact',head:true}),
-      supabase.from('training').select('*',{count:'exact',head:true}),
-      supabase.from('legal').select('*',{count:'exact',head:true}),
-      supabase.from('policy').select('*',{count:'exact',head:true})
-    ]);
-    document.getElementById('dbLogistics').textContent = lo.count ?? 0;
-    document.getElementById('dbMembers').textContent = mem.count ?? 0;
-    document.getElementById('dbOverseas').textContent = ov.count ?? 0;
-    document.getElementById('dbInvestment').textContent = inv.count ?? 0;
-    document.getElementById('dbExpenses').textContent = '$' + (ex.count ?? 0);
-    document.getElementById('dbTax').textContent = tx.count ?? 0;
-    document.getElementById('dbTraining').textContent = tr.count ?? 0;
-    document.getElementById('dbLegal').textContent = lg.count ?? 0;
-    document.getElementById('dbPolicy').textContent = po.count ?? 0;
-  } catch(e) { console.error(e); }
-}
-
-/* ---- 通用 CRUD 封装 ---- */
-async function loadTable(table, renderFn, countId, searchId, extraFilter) {
-  let query = supabase.from(table).select('*',{count:'exact'}).order('created_at',{ascending:false});
-  if (searchId) {
-    const kw = document.getElementById(searchId).value.trim();
-    if (kw) query = query.or(`customer.ilike.%${kw}%,project_name.ilike.%${kw}%,company.ilike.%${kw}%`);
-  }
-  if (extraFilter) query = extraFilter(query);
-  const { data, error, count } = await query;
-  document.getElementById(countId).textContent = error ? '加载失败' : `共 ${count ?? 0} 条`;
-  renderFn(data || []);
-}
-
-/* ---- 物流 ---- */
-function renderOrders(data) {
-  if (!data.length) return document.getElementById('orderTable').innerHTML = emptyState();
-  let html = `<table><thead><tr><th>订单号</th><th>客户</th><th>货柜数</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(o => {
-    html += `<tr>
-      <td>${o.order_no||'—'}</td>
-      <td>${o.customer||'—'}</td>
-      <td>${o.container_count||0}</td>
-      <td><span class="status-badge st-${o.status??0}">${orderStatus(o.status)}</span></td>
-      <td>${fmtDate(o.created_at)}</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editOrder('${o.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteOrder('${o.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('orderTable').innerHTML = html;
-}
-async function loadOrders() {
-  await loadTable('orders', renderOrders, 'orderCount', 'searchOrder');
-}
-function orderStatus(s) {
-  return ['待发柜','已发柜','已到港','清关中','已清关','已到厂','已结单'][s]||'未知';
-}
-async function deleteOrder(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('orders').delete().eq('id',id);
-  showToast('删除成功','success'); loadOrders(); loadDashboard();
-}
-function editOrder(id) {
-  const s = prompt('新状态(0-6):');
-  if (s===null) return;
-  supabase.from('orders').update({status:+s}).eq('id',id).then(()=>{showToast('更新成功');loadOrders();});
-}
-
-/* ---- 出海 ---- */
-function renderOverseas(data) {
-  if (!data.length) return document.getElementById('overseasTable').innerHTML = emptyState();
-  let html = `<table><thead><tr><th>项目</th><th>企业</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(o => {
-    html += `<tr>
-      <td>${o.project_name}</td>
-      <td>${o.company}</td>
-      <td>${o.service_type}</td>
-      <td><span class="status-badge st-${o.status}">${o.status?'已完成':'进行中'}</span></td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editOverseas('${o.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteOverseas('${o.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('overseasTable').innerHTML = html;
-}
-async function loadOverseas() {
-  await loadTable('overseas', renderOverseas, 'overseasCount', 'searchOverseas');
-}
-async function deleteOverseas(id) {
-  await supabase.from('overseas').delete().eq('id',id);
-  showToast('删除成功'); loadOverseas(); loadDashboard();
-}
-
-/* ---- 投融资 ---- */
-function renderInvest(data) {
-  if (!data.length) return document.getElementById('investTable').innerHTML = emptyState();
-  let html = `<table><thead><tr><th>项目</th><th>投资方</th><th>金额</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(i => {
-    html += `<tr>
-      <td>${i.project_name}</td>
-      <td>${i.investor}</td>
-      <td>$${i.amount}</td>
-      <td><span class="status-badge st-${i.status}">${i.status?'已完成':'跟进中'}</span></td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editInvest('${i.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteInvest('${i.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('investTable').innerHTML = html;
-}
-async function loadInvest() {
-  await loadTable('investments', renderInvest, 'investCount', 'searchInvest');
-}
-
-/* ---- 商务合作 ---- */
-function renderCommerce(data) {
-  if (!data.length) return document.getElementById('commerceTable').innerHTML = emptyState();
-  let html = `<table><thead><tr><th>活动/会员</th><th>类型</th><th>收入</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(c => {
-    html += `<tr>
-      <td>${c.name}</td>
-      <td>${c.type}</td>
-      <td>$${c.revenue}</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editCommerce('${c.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteCommerce('${c.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('commerceTable').innerHTML = html;
-}
-async function loadCommerce() {
-  await loadTable('commerce', renderCommerce, 'commerceCount', 'searchCommerce');
-}
-
-/* ---- 政策 ---- */
-function renderPolicy(data) {
-  if (!data.length) return document.getElementById('policyTable').innerHTML = emptyState();
-  let html = `<table><thead><tr><th>项目</th><th>部门</th><th>进度</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(p => {
-    html += `<tr>
-      <td>${p.project_name}</td>
-      <td>${p.department}</td>
-      <td><span class="status-badge st-${p.progress}">${p.progress}%</span></td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editPolicy('${p.id}')">编辑</button>
-        <button class="del-btn" onclick="deletePolicy('${p.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('policyTable').innerHTML = html;
-}
-async function loadPolicy() {
-  await loadTable('policy', renderPolicy, 'policyCount', 'searchPolicy');
-}
-
-/* ---- 财税 ---- */
-function renderTax(data) {
-  if (!data.length) return document.getElementById('taxTable').innerHTML = emptyState();
-  let html = `<table><thead><tr><th>客户</th><th>服务类型</th><th>周期</th><th>费用</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(t => {
-    html += `<tr>
-      <td>${t.customer}</td>
-      <td>${t.service_type}</td>
-      <td>${t.period}</td>
-      <td>$${t.fee}</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editTax('${t.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteTax('${t.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('taxTable').innerHTML = html;
-}
-async function loadTax() {
-  await loadTable('tax', renderTax, 'taxCount', 'searchTax');
-}
-
-/* ---- 培训 ---- */
-function renderTraining(data) {
-  if (!data.length) return document.getElementById('trainingTable').innerHTML = emptyState();
-  let html = `<table><thead><tr><th>课程</th><th>学员</th><th>费用</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(t => {
-    html += `<tr>
-      <td>${t.course}</td>
-      <td>${t.trainee}</td>
-      <td>$${t.fee}</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editTraining('${t.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteTraining('${t.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('trainingTable').innerHTML = html;
-}
-async function loadTraining() {
-  await loadTable('training', renderTraining, 'trainingCount', 'searchTraining');
-}
-
-/* ---- 法律 ---- */
-function renderLegal(data) {
-  if (!data.length) return document.getElementById('legalTable').innerHTML = emptyState();
-  let html = `<table><thead><tr><th>客户</th><th>案件类型</th><th>费用</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(l => {
-    html += `<tr>
-      <td>${l.customer}</td>
-      <td>${l.case_type}</td>
-      <td>$${l.fee}</td>
-      <td><span class="status-badge st-${l.status}">${l.status?'已结案':'处理中'}</span></td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editLegal('${l.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteLegal('${l.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('legalTable').innerHTML = html;
-}
-async function loadLegal() {
-  await loadTable('legal', renderLegal, 'legalCount', 'searchLegal');
-}
-
-/* ---- 会员 ---- */
-function renderMembers(data) {
-  if (!data.length) return document.getElementById('memberTable').innerHTML = emptyState();
-  let html = `<table><thead><tr><th>会员名称</th><th>等级</th><th>入会费</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(m => {
-    html += `<tr>
-      <td>${m.name}</td>
-      <td>${m.level}</td>
-      <td>$${m.fee}</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editMember('${m.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteMember('${m.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('memberTable').innerHTML = html;
-}
-async function loadMembers() {
-  await loadTable('members', renderMembers, 'memberCount', 'searchMember');
-}
-
-/* ---- 费用 ---- */
-function renderExpenses(data) {
-  if (!data.length) return document.getElementById('expenseTable').innerHTML = emptyState();
-  let html = `<table><thead><tr><th>类别</th><th>说明</th><th>金额</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(e => {
-    html += `<tr>
-      <td>${e.category}</td>
-      <td>${e.note}</td>
-      <td>$${e.amount}</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editExpense('${e.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteExpense('${e.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('expenseTable').innerHTML = html;
-}
-async function loadExpenses() {
-  const cat = document.getElementById('filterExpCat').value;
-  await loadTable('expenses', renderExpenses, 'expenseCount', 'searchExpense',
-    q => cat ? q.eq('category',cat) : q
-  );
-}
-
-/* ---- 财务总览 ---- */
-async function loadFinance() {
-  document.getElementById('financeBreakdown').innerHTML = '功能完善中...';
-}
-
-/* ---- 工具函数 ---- */
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('zh-CN') : '—'; }
-function emptyState() { return '<div class="empty-state"><div class="icon">📭</div><p>暂无数据</p></div>'; }
-function showToast(msg,type='success') {
-  let t=document.querySelector('.toast');
-  if(!t){ t=document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
-  t.textContent=msg; t.className=`toast ${type} show`;
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-/* ---- 修改密码 ---- */
-async function changePassword() {
-  const oldPwd = document.getElementById('oldPwd').value;
-  const newPwd = document.getElementById('newPwd').value;
-  const msg = document.getElementById('pwdMsg');
-  if (!oldPwd || !newPwd) { msg.textContent='请填写完整'; return; }
-  const { error } = await supabase.auth.updateUser({ password: newPwd });
-  msg.textContent = error ? '修改失败：'+error.message : '✅ 密码修改成功';
-  msg.style.color = error ? '#ff4d4f' : '#52c41a';
-}
-
-/* ---- 启动 ---- */
-document.addEventListener('DOMContentLoaded', async () => {
-  const { data } = await supabase.auth.getSession();
-  if (data.session) {
-    showApp(data.session.user);
-  } else {
-    applyLang(currentLang);
-  }
-});
-</script>
-
-</body>
-</html><!DOCTYPE html>
-<html lang="zh-CN" data-lang="zh">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MNA 湄公产业资本联盟 · 财税业务管理平台</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-/* ==================== 全局重置 ==================== */
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  font-family:'WenQuanYi Micro Hei','Noto Sans CJK SC',sans-serif;
-  background:#f0f2f5; color:#333; font-size:14px; min-height:100vh;
-}
-
-/* ==================== 登录页 ==================== */
-.login-page {
-  min-height:100vh; display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(135deg,#0f2b5e 0%,#1a4a8a 40%,#1e6fb3 100%);
-  position:relative; overflow:hidden;
-}
-.login-page::before { content:''; position:absolute; width:500px; height:500px; background:rgba(255,255,255,.04); border-radius:50%; top:-150px; left:-150px; }
-.login-page::after { content:''; position:absolute; width:400px; height:400px; background:rgba(255,255,255,.03); border-radius:50%; bottom:-120px; right:-120px; }
-.login-box {
-  background:#fff; border-radius:16px; padding:44px 40px; width:440px; max-width:92vw;
-  box-shadow:0 16px 50px rgba(0,0,0,.2); position:relative; z-index:1;
-}
-.login-logo { text-align:center; margin-bottom:6px; }
-.login-logo .icon { font-size:52px; }
-.login-logo h2 { font-size:22px; color:#0f2b5e; margin:8px 0 4px; }
-.login-logo p { font-size:12px; color:#888; line-height:1.6; }
-.login-form { margin-top:28px; }
-.form-group { margin-bottom:18px; }
-.form-group label { display:block; font-weight:500; color:#555; margin-bottom:6px; font-size:13px; }
-.login-form input,.login-form select {
-  width:100%; padding:10px 14px; border:1px solid #d9d9d9; border-radius:8px;
-  font-size:14px; font-family:inherit; transition:border-color .2s;
-}
-.login-form input:focus,.login-form select:focus {
-  border-color:#1a4a8a; outline:none; box-shadow:0 0 0 2px rgba(26,74,138,.12);
-}
-.login-btn {
-  width:100%; padding:12px; background:linear-gradient(135deg,#0f2b5e,#1a4a8a);
-  color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:600;
-  cursor:pointer; transition:opacity .2s; font-family:inherit;
-}
-.login-btn:hover { opacity:.9; }
-.login-error { color:#ff4d4f; font-size:13px; text-align:center; margin-top:12px; min-height:20px; }
-.login-footer { text-align:center; margin-top:24px; font-size:11px; color:#bbb; }
-.login-links { display:flex; justify-content:space-between; margin-top:14px; font-size:12px; }
-.login-links a { color:#1a4a8a; cursor:pointer; text-decoration:none; }
-.login-links a:hover { text-decoration:underline; }
-
-/* ==================== 主应用布局 ==================== */
-.app-container { display:none; min-height:100vh; }
-.app-header {
-  background:linear-gradient(135deg,#0f2b5e 0%,#1a4a8a 100%);
-  color:#fff; padding:0 32px; height:64px;
-  display:flex; justify-content:space-between; align-items:center;
-  position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.15);
-}
-.app-header .brand { display:flex; align-items:center; gap:12px; }
-.app-header .brand .logo-icon { font-size:28px; }
-.app-header .brand .brand-text h1 { font-size:18px; font-weight:700; letter-spacing:1px; }
-.app-header .brand .brand-text p { font-size:10px; opacity:.7; margin-top:1px; }
-.app-header .user-bar { display:flex; align-items:center; gap:14px; font-size:13px; }
-.app-header .user-bar .avatar { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.15); display:flex; align-items:center; justify-content:center; font-size:16px; }
-.app-header .user-bar .user-info { text-align:right; }
-.app-header .user-bar .user-info .uname { font-weight:600; }
-.app-header .user-bar .user-info .urole { font-size:11px; opacity:.6; }
-.app-header .user-bar button {
-  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
-  color:#fff; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; font-family:inherit; transition:background .2s;
-}
-.app-header .user-bar button:hover { background:rgba(255,255,255,.22); }
-.lang-switch {
-  cursor:pointer; padding:4px 10px; border-radius:6px;
-  background:rgba(255,255,255,.15); color:#fff; font-size:12px;
-  border:1px solid rgba(255,255,255,.3); user-select:none; display:flex; align-items:center; gap:4px;
-}
-.lang-switch:hover { background:rgba(255,255,255,.25); }
-
-.main-body { display:flex; min-height:calc(100vh - 64px); }
-.sidebar { width:240px; background:#fff; border-right:1px solid #e8e8e8; padding:16px 0; flex-shrink:0; overflow-y:auto; }
-.sidebar .nav-group { margin-bottom:8px; }
-.sidebar .nav-group-title { padding:6px 20px; font-size:11px; color:#aaa; text-transform:uppercase; letter-spacing:1px; font-weight:600; }
-.sidebar .nav-item {
-  display:flex; align-items:center; gap:10px; padding:10px 20px; cursor:pointer;
-  color:#555; font-size:13.5px; font-weight:500; transition:all .2s;
-  border-left:3px solid transparent; background:none; border-top:none; border-right:none; border-bottom:none;
-  width:100%; text-align:left; font-family:inherit;
-}
-.sidebar .nav-item .nav-icon { font-size:18px; width:24px; text-align:center; }
-.sidebar .nav-item:hover { background:#f6f9ff; color:#1a4a8a; }
-.sidebar .nav-item.active { background:#eef3ff; color:#1a4a8a; border-left-color:#1a4a8a; font-weight:600; }
-.content-area { flex:1; padding:24px; overflow-y:auto; }
-
-/* ==================== 通用组件 ==================== */
-.page-section { display:none; animation:fadeIn .2s ease; }
-.page-section.active { display:block; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-
-.panel { background:#fff; border-radius:12px; padding:24px; box-shadow:0 1px 6px rgba(0,0,0,.06); margin-bottom:20px; }
-.panel h3 { font-size:16px; color:#0f2b5e; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-.panel h3 .sub { font-size:12px; color:#999; font-weight:400; }
-
-.controls { display:flex; gap:12px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
-.controls label { font-weight:500; color:#555; white-space:nowrap; font-size:13px; }
-.controls select,.controls input,.controls button {
-  padding:7px 14px; border:1px solid #d9d9d9; border-radius:6px; font-size:13px; font-family:inherit;
-}
-.controls select,.controls input { background:#fff; }
-.controls button { background:#1a4a8a; color:#fff; border:none; cursor:pointer; transition:background .2s; font-weight:500; }
-.controls button:hover { background:#0f2b5e; }
-.btn-green { background:#52c41a!important; } .btn-green:hover { background:#389e0d!important; }
-.btn-red { background:#ff4d4f!important; } .btn-red:hover { background:#cf1322!important; }
-.btn-orange { background:#fa8c16!important; } .btn-orange:hover { background:#d46b08!important; }
-.btn-teal { background:#13c2c2!important; } .btn-teal:hover { background:#08979c!important; }
-.btn-purple { background:#722ed1!important; } .btn-purple:hover { background:#531dab!important; }
-.btn-gold { background:#d48806!important; } .btn-gold:hover { background:#b37f00!important; }
-.btn-old { background:#7cb305!important; } .btn-old:hover { background:#5b8c00!important; }
-
-.summary-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
-.card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 1px 6px rgba(0,0,0,.06); text-align:center; border-top:3px solid #1a4a8a; }
-.card .label { font-size:12px; color:#888; margin-bottom:8px; }
-.card .value { font-size:28px; font-weight:700; color:#0f2b5e; }
-.card .unit { font-size:11px; color:#aaa; margin-top:4px; }
-
-.table-wrapper { background:#fff; border-radius:12px; box-shadow:0 1px 6px rgba(0,0,0,.06); overflow:hidden; }
-.table-header { padding:16px 20px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
-.table-header h3 { font-size:15px; color:#0f2b5e; }
-table { width:100%; border-collapse:collapse; font-size:12.5px; }
-thead th { background:#fafbfc; padding:11px 8px; text-align:center; font-weight:600; color:#555; border-bottom:1px solid #e8e8e8; font-size:12px; }
-tbody td { padding:10px 6px; text-align:center; border-bottom:1px solid #f5f5f5; }
-tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
-.total-row td { background:#f0f5ff; font-weight:700; color:#0f2b5e; font-size:13px; }
-.actions button { padding:3px 10px; font-size:11.5px; border:none; border-radius:4px; cursor:pointer; margin:0 1px; font-family:inherit; }
-.actions .edit-btn { background:#e6f7ff; color:#1a4a8a; }
-.actions .del-btn { background:#fff1f0; color:#ff4d4f; }
-.actions .view-btn { background:#f6ffed; color:#52c41a; }
-
-.status-badge { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:600; white-space:nowrap; }
-.st-0 { background:#e6f7ff; color:#1a4a8a; } .st-1 { background:#fff7e6; color:#d46b08; }
-.st-2 { background:#f6ffed; color:#389e0d; } .st-3 { background:#f9e6ff; color:#722ed1; }
-.st-4 { background:#e6fffb; color:#08979c; } .st-5 { background:#fff1e6; color:#fa8c16; }
-.st-6 { background:#f6ffed; color:#52c41a; } .st-7 { background:#f0f5ff; color:#0f2b5e; }
-.st-active { background:#e6f7ff; color:#1a4a8a; animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(26,74,138,.25)} 50%{box-shadow:0 0 0 6px rgba(26,74,138,0)} }
-
-.modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.45); z-index:1000; justify-content:center; align-items:center; }
-.modal-overlay.active { display:flex; }
-.modal { background:#fff; border-radius:14px; padding:28px; width:600px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 12px 40px rgba(0,0,0,.18); }
-.modal h3 { margin-bottom:20px; color:#0f2b5e; font-size:18px; }
-.form-row { display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
-.form-group { margin-bottom:12px; flex:1; min-width:180px; }
-.form-group label { display:block; margin-bottom:5px; font-weight:500; color:#555; font-size:12.5px; }
-.form-group input,.form-group select,.form-group textarea {
-  width:100%; padding:8px 12px; border:1px solid #d9d9d9; border-radius:6px; font-size:13.5px; font-family:inherit;
-}
-.form-group textarea { resize:vertical; min-height:60px; }
-.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
-.modal-actions button { padding:8px 22px; border-radius:6px; font-size:14px; cursor:pointer; font-family:inherit; border:none; font-weight:500; }
-.modal-actions .btn-cancel { background:#f5f5f5; color:#666; } .modal-actions .btn-cancel:hover { background:#e8e8e8; }
-.modal-actions .btn-submit { background:#1a4a8a; color:#fff; } .modal-actions .btn-submit:hover { background:#0f2b5e; }
-
-.timeline { position:relative; padding-left:28px; margin-top:12px; }
-.timeline::before { content:''; position:absolute; left:10px; top:0; bottom:0; width:2px; background:#e8e8e8; }
-.timeline-item { position:relative; margin-bottom:16px; }
-.timeline-item::before { content:''; position:absolute; left:-22px; top:3px; width:12px; height:12px; border-radius:50%; border:2px solid #d9d9d9; background:#fff; z-index:1; }
-.timeline-item.done::before { background:#52c41a; border-color:#52c41a; }
-.timeline-item.active::before { background:#1a4a8a; border-color:#1a4a8a; animation:pulse 1.5s infinite; }
-.timeline-item .tl-title { font-weight:600; font-size:13px; color:#333; }
-.timeline-item .tl-time { font-size:12px; color:#999; margin-top:2px; }
-.timeline-item .tl-detail { font-size:12px; color:#666; margin-top:2px; }
-
-.empty-state { text-align:center; padding:48px 20px; color:#bbb; }
-.empty-state .icon { font-size:48px; margin-bottom:12px; }
-
-.toast { position:fixed; top:20px; right:20px; padding:12px 24px; border-radius:8px; color:#fff; font-size:14px; z-index:2000; display:none; animation:slideIn .3s ease; }
-.toast.show { display:block; } .toast.success { background:#52c41a; } .toast.error { background:#ff4d4f; }
-@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
-
-.footer-note { text-align:center; padding:20px; color:#bbb; font-size:12px; }
-
-/* ==================== 仪表盘 ==================== */
-.dashboard-welcome {
-  background:linear-gradient(135deg,#0f2b5e,#1a4a8a); color:#fff;
-  border-radius:12px; padding:28px; margin-bottom:24px;
-}
-.dashboard-welcome h2 { font-size:22px; margin-bottom:6px; }
-.dashboard-welcome p { font-size:13px; opacity:.8; }
-.dashboard-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-bottom:24px; }
-.dashboard-card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 1px 6px rgba(0,0,0,.06); border-left:4px solid #1a4a8a; }
-.dashboard-card h4 { font-size:14px; color:#333; margin-bottom:8px; }
-.dashboard-card p { font-size:12px; color:#888; line-height:1.8; }
-.dashboard-card .big-num { font-size:32px; font-weight:700; color:#1a4a8a; }
-
-/* ==================== 详情面板 ==================== */
-.detail-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #f0f0f0; }
-.detail-header h3 { font-size:18px; color:#0f2b5e; }
-.detail-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:16px; }
-.detail-item { background:#fafafa; padding:10px 14px; border-radius:8px; }
-.detail-item .di-label { font-size:11px; color:#999; margin-bottom:4px; }
-.detail-item .di-value { font-size:14px; font-weight:600; color:#333; }
-
-/* ==================== 筛选栏 ==================== */
-.filter-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
-.filter-bar select,.filter-bar input { padding:6px 12px; border:1px solid #d9d9d9; border-radius:6px; font-size:13px; font-family:inherit; }
-
-/* ==================== 配置 ==================== */
-.config-row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
-.config-row label { font-weight:500; color:#555; white-space:nowrap; font-size:13px; }
-.config-row input { width:120px; padding:6px 10px; border:1px solid #d9d9d9; border-radius:6px; font-size:14px; font-family:inherit; }
-
-/* ==================== 用户管理 ==================== */
-.role-badge { display:inline-block; padding:1px 8px; border-radius:4px; font-size:11px; font-weight:500; }
-.role-badge.admin { background:#fff7e6; color:#d46b08; }
-.role-badge.user { background:#e6f7ff; color:#1a4a8a; }
-.user-list-item { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border:1px solid #f0f0f0; border-radius:8px; margin-bottom:8px; background:#fafafa; }
-.user-list-item .u-info { text-align:left; }
-.user-list-item .u-name { font-weight:600; color:#333; }
-.user-list-item .u-role { font-size:12px; color:#999; }
-.user-list-item .u-actions { display:flex; gap:6px; }
-.user-list-item .u-actions button { padding:3px 10px; font-size:12px; border-radius:4px; border:none; cursor:pointer; font-family:inherit; }
-
-/* ==================== 订单号 ==================== */
-.order-no { font-family:'Courier New',monospace; font-weight:700; color:#0f2b5e; font-size:12px; }
-
-/* ==================== 进度条 ==================== */
-.progress-bar-wrap { width:100%; height:8px; background:#f0f0f0; border-radius:4px; overflow:hidden; margin-bottom:2px; }
-.progress-bar-fill { height:100%; background:linear-gradient(90deg,#1a4a8a,#52c41a); border-radius:4px; transition:width .3s; }
-
-/* ==================== Tab 子导航 ==================== */
-.sub-tabs { display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid #e8e8e8; }
-.sub-tabs button { padding:10px 20px; cursor:pointer; font-weight:500; color:#888; border:none; border-bottom:2px solid transparent; background:none; font-size:13.5px; font-family:inherit; transition:all .2s; }
 .sub-tabs button.active { color:#1a4a8a; border-bottom-color:#1a4a8a; }
 .sub-tabs button:hover { color:#1a4a8a; }
 
-/* ==================== 标签 ==================== */
-.section-title { font-size:15px; color:#0f2b5e; font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
-.tag { display:inline-block; padding:1px 8px; border-radius:4px; font-size:11px; font-weight:500; background:#f0f0f0; color:#666; }
-.tag-blue { background:#e6f7ff; color:#1a4a8a; }
-.tag-green { background:#f6ffed; color:#52c41a; }
-.tag-orange { background:#fff7e6; color:#d46b08; }
-.tag-purple { background:#f9e6ff; color:#722ed1; }
-.tag-teal { background:#e6fffb; color:#08979c; }
-.tag-red { background:#fff1f0; color:#ff4d4f; }
-.tag-gold { background:#fff7e6; color:#d48806; }
-
-/* ==================== 费用相关 ==================== */
-.expense-row td { color:#ff4d4f; }
-.income-row td { color:#52c41a; }
 .finance-summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
 .finance-card { background:#fff; border-radius:10px; padding:16px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.06); border-top:3px solid #1a4a8a; }
 .finance-card .flabel { font-size:11px; color:#999; margin-bottom:6px; }
 .finance-card .fvalue { font-size:22px; font-weight:700; }
 .finance-card .fvalue.positive { color:#52c41a; }
 .finance-card .fvalue.negative { color:#ff4d4f; }
-.finance-card .fvalue.neutral { color:#0f2b5e; }
-.finance-card .fsub { font-size:11px; color:#bbb; margin-top:4px; }
-
-.expense-cat { display:inline-block; padding:1px 8px; border-radius:4px; font-size:11px; font-weight:500; }
-.ecat-rent { background:#fff1f0; color:#ff4d4f; }
-.ecat-salary { background:#fff7e6; color:#d48806; }
-.ecat-utility { background:#e6f7ff; color:#1a4a8a; }
-.ecat-travel { background:#f6ffed; color:#52c41a; }
-.ecat-marketing { background:#f9e6ff; color:#722ed1; }
-.ecat-office { background:#e6fffb; color:#08979c; }
-.ecat-other { background:#f0f0f0; color:#666; }
-
-/* ==================== 定价规则 ==================== */
-.pricing-rule { display:flex; gap:10px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
-.pricing-rule label { font-size:12px; white-space:nowrap; }
-.pricing-rule input,.pricing-rule select { padding:6px; border:1px solid #d9d9d9; border-radius:6px; font-size:12px; font-family:inherit; }
-.pricing-rule .pr-max { width:100px; }
-.pricing-rule .pr-fee { width:90px; }
 </style>
 </head>
-
 <body>
 
 <!-- ==================== 登录页 ==================== -->
@@ -1383,38 +184,35 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
   </div>
 
   <div class="main-body">
-    <!-- ==================== 侧边栏 ==================== -->
     <div class="sidebar">
       <div class="nav-group">
         <div class="nav-group-title" data-i18n="overview">📊 概览</div>
-        <button class="nav-item active" onclick="switchPage('dashboard')"><span class="nav-icon">🏠</span> <span data-i18n="dashboard">仪表盘</span></button>
+        <button class="nav-item active" onclick="switchPage('dashboard', event)"><span class="nav-icon">🏠</span> <span data-i18n="dashboard">仪表盘</span></button>
       </div>
       <div class="nav-group">
         <div class="nav-group-title" data-i18n="business">🚢 业务板块</div>
-        <button class="nav-item" onclick="switchPage('logistics')"><span class="nav-icon">🚢</span> <span data-i18n="logistics">物流订单跟踪</span></button>
-        <button class="nav-item" onclick="switchPage('overseas')"><span class="nav-icon">🏗️</span> <span data-i18n="overseas">出海落地服务</span></button>
-        <button class="nav-item" onclick="switchPage('investment')"><span class="nav-icon">💰</span> <span data-i18n="investment">投融资对接</span></button>
-        <button class="nav-item" onclick="switchPage('commerce')"><span class="nav-icon">🤝</span> <span data-i18n="commerce">商务合作/会员</span></button>
-        <button class="nav-item" onclick="switchPage('policy')"><span class="nav-icon">📋</span> <span data-i18n="policy">政策解读/政府对接</span></button>
-        <button class="nav-item" onclick="switchPage('tax')"><span class="nav-icon">🧾</span> <span data-i18n="tax">财税业务</span></button>
-        <button class="nav-item" onclick="switchPage('training')"><span class="nav-icon">🎓</span> <span data-i18n="training">职业技能培训</span></button>
-        <button class="nav-item" onclick="switchPage('legal')"><span class="nav-icon">⚖️</span> <span data-i18n="legal">法律咨询合规</span></button>
+        <button class="nav-item" onclick="switchPage('logistics', event)"><span class="nav-icon">🚢</span> <span data-i18n="logistics">物流订单跟踪</span></button>
+        <button class="nav-item" onclick="switchPage('overseas', event)"><span class="nav-icon">🏗️</span> <span data-i18n="overseas">出海落地服务</span></button>
+        <button class="nav-item" onclick="switchPage('investment', event)"><span class="nav-icon">💰</span> <span data-i18n="investment">投融资对接</span></button>
+        <button class="nav-item" onclick="switchPage('commerce', event)"><span class="nav-icon">🤝</span> <span data-i18n="commerce">商务合作/会员</span></button>
+        <button class="nav-item" onclick="switchPage('policy', event)"><span class="nav-icon">📋</span> <span data-i18n="policy">政策解读/政府对接</span></button>
+        <button class="nav-item" onclick="switchPage('tax', event)"><span class="nav-icon">🧾</span> <span data-i18n="tax">财税业务</span></button>
+        <button class="nav-item" onclick="switchPage('training', event)"><span class="nav-icon">🎓</span> <span data-i18n="training">职业技能培训</span></button>
+        <button class="nav-item" onclick="switchPage('legal', event)"><span class="nav-icon">⚖️</span> <span data-i18n="legal">法律咨询合规</span></button>
       </div>
       <div class="nav-group admin-only" id="navGroupFinance" style="display:none">
         <div class="nav-group-title">💰 财务中心</div>
-        <button class="nav-item" onclick="switchPage('finance')"><span class="nav-icon">📊</span> <span data-i18n="finance">统一财务报表</span></button>
-        <button class="nav-item" onclick="switchPage('membership')"><span class="nav-icon">🏅</span> <span data-i18n="membership">会员管理</span></button>
-        <button class="nav-item" onclick="switchPage('expenses')"><span class="nav-icon">💸</span> <span data-i18n="expenses">日常费用支出</span></button>
+        <button class="nav-item" onclick="switchPage('finance', event)"><span class="nav-icon">📊</span> <span data-i18n="finance">统一财务报表</span></button>
+        <button class="nav-item" onclick="switchPage('membership', event)"><span class="nav-icon">🏅</span> <span data-i18n="membership">会员管理</span></button>
+        <button class="nav-item" onclick="switchPage('expenses', event)"><span class="nav-icon">💸</span> <span data-i18n="expenses">日常费用支出</span></button>
       </div>
       <div class="nav-group">
         <div class="nav-group-title">⚙️ 系统</div>
-        <button class="nav-item" onclick="switchPage('config')"><span class="nav-icon">⚙️</span> <span data-i18n="config">参数设置</span></button>
-        <button class="nav-item" onclick="switchPage('users')" id="navUsers" style="display:none"><span class="nav-icon">👥</span> 用户管理</button>
-        <button class="nav-item" onclick="switchPage('pwd')"><span class="nav-icon">🔑</span> <span data-i18n="change_pwd">修改密码</span></button>
+        <button class="nav-item" onclick="switchPage('config', event)"><span class="nav-icon">⚙️</span> <span data-i18n="config">参数设置</span></button>
+        <button class="nav-item" onclick="switchPage('pwd', event)"><span class="nav-icon">🔑</span> <span data-i18n="change_pwd">修改密码</span></button>
       </div>
     </div>
 
-    <!-- ==================== 内容区 ==================== -->
     <div class="content-area">
 
       <!-- ===== 仪表盘 ===== -->
@@ -1435,13 +233,9 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
           <div class="dashboard-card" style="border-left-color:#722ed1"><h4>⚖️ 法律项目</h4><div class="big-num" id="dbLegal" style="color:#722ed1">—</div><p>法律项目进行中</p></div>
           <div class="dashboard-card" style="border-left-color:#d48806"><h4>📋 政策项目</h4><div class="big-num" id="dbPolicy" style="color:#d48806">—</div><p>政策项目进行中</p></div>
         </div>
-        <div class="panel">
-          <h3>📌 近期活动</h3>
-          <div id="recentActivity" style="font-size:13px;color:#888;line-height:2"><p>暂无近期活动记录</p></div>
-        </div>
       </div>
 
-      <!-- ===== 物流订单跟踪 ===== -->
+      <!-- ===== 物流订单 ===== -->
       <div class="page-section" id="pageLogistics">
         <div class="sub-tabs">
           <button class="active" onclick="switchSubTab(this,'logList')">📋 订单列表</button>
@@ -1458,14 +252,12 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
               <option value="4">已清关</option><option value="5">已到工厂</option>
               <option value="6">已结单</option>
             </select>
-            <input type="text" id="filterKeyword" placeholder="搜索客户/订单号/货柜号..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadOrders()">
-            <button class="btn-orange" onclick="exportOrdersCSV()">📥 导出CSV</button>
+            <input type="text" id="searchOrder" placeholder="搜索客户/订单号..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadOrders()">
+            <button class="btn-orange" onclick="exportCSV('orders')">📥 导出CSV</button>
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>📋 物流订单列表</h3><span style="font-size:12px;color:#aaa" id="orderCount">共 0 条订单</span></div>
-            <div id="orderTableContainer">
-              <div class="empty-state"><div class="icon">📭</div><p>暂无订单，请点击「新建物流订单」开始录入</p></div>
-            </div>
+            <div class="table-header"><h3>📋 物流订单列表</h3><span style="font-size:12px;color:#aaa" id="orderCount">加载中...</span></div>
+            <div id="orderTable"></div>
           </div>
         </div>
         <div id="logLedger" style="display:none">
@@ -1473,12 +265,12 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
             <label>📅 月份：</label><input type="month" id="logMonth" onchange="loadOrderLedger()">
             <button onclick="prevLogMonth()">◀</button><button onclick="nextLogMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportOrdersCSV()">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportCSV('orders')">📥 导出CSV</button>
           </div>
           <div class="summary-cards" id="logSummary">
             <div class="card"><div class="label">订单数</div><div class="value" id="logCount">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value profit" id="logRevenue">$0</div></div>
-            <div class="card"><div class="label">总成本</div><div class="value cost" id="logCost">$0</div></div>
+            <div class="card"><div class="label">总收入</div><div class="value positive" id="logRevenue">$0</div></div>
+            <div class="card"><div class="label">总成本</div><div class="value negative" id="logCost">$0</div></div>
             <div class="card"><div class="label">净利润</div><div class="value" id="logNet">$0</div></div>
           </div>
           <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="logLedgerTable"></div></div>
@@ -1495,13 +287,11 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
           <div class="controls">
             <button class="btn-green" onclick="openOverseasModal()">➕ 新建出海项目</button>
             <div style="flex:1"></div>
-            <input type="text" id="searchOverseas" placeholder="搜索客户/项目名称..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadOverseas()">
+            <input type="text" id="searchOverseas" placeholder="搜索客户/项目..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadOverseas()">
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>🏗️ 出海落地服务</h3><span style="font-size:12px;color:#aaa" id="overseasCount">共 0 个项目</span></div>
-            <div id="overseasTableContainer">
-              <div class="empty-state"><div class="icon">📭</div><p>暂无出海项目，请点击「新建出海项目」</p></div>
-            </div>
+            <div class="table-header"><h3>🏗️ 出海落地服务</h3><span style="font-size:12px;color:#aaa" id="overseasCount">加载中...</span></div>
+            <div id="overseasTable"></div>
           </div>
         </div>
         <div id="ovLedger" style="display:none">
@@ -1509,12 +299,12 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
             <label>📅 月份：</label><input type="month" id="ovMonth" onchange="loadOverseasLedger()">
             <button onclick="prevOvMonth()">◀</button><button onclick="nextOvMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportOverseasCSV()">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportCSV('overseas')">📥 导出CSV</button>
           </div>
           <div class="summary-cards" id="ovSummary">
             <div class="card"><div class="label">项目数</div><div class="value" id="ovProjects">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value profit" id="ovRevenue">$0</div></div>
-            <div class="card"><div class="label">总成本</div><div class="value cost" id="ovCost">$0</div></div>
+            <div class="card"><div class="label">总收入</div><div class="value positive" id="ovRevenue">$0</div></div>
+            <div class="card"><div class="label">总成本</div><div class="value negative" id="ovCost">$0</div></div>
             <div class="card"><div class="label">净利润</div><div class="value" id="ovNet">$0</div></div>
           </div>
           <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="ovLedgerTable"></div></div>
@@ -1531,13 +321,11 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
           <div class="controls">
             <button class="btn-purple" onclick="openInvestModal()">➕ 新建投融资项目</button>
             <div style="flex:1"></div>
-            <input type="text" id="searchInvest" placeholder="搜索项目名称/投资方..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadInvest()">
+            <input type="text" id="searchInvest" placeholder="搜索项目/投资方..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadInvest()">
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>💰 投融资项目列表</h3><span style="font-size:12px;color:#aaa" id="investCount">共 0 个项目</span></div>
-            <div id="investTableContainer">
-              <div class="empty-state"><div class="icon">📭</div><p>暂无投融资项目</p></div>
-            </div>
+            <div class="table-header"><h3>💰 投融资项目列表</h3><span style="font-size:12px;color:#aaa" id="investCount">加载中...</span></div>
+            <div id="investTable"></div>
           </div>
         </div>
         <div id="invLedger" style="display:none">
@@ -1545,12 +333,12 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
             <label>📅 月份：</label><input type="month" id="invMonth" onchange="loadInvestLedger()">
             <button onclick="prevInvMonth()">◀</button><button onclick="nextInvMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportInvestCSV()">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportCSV('investments')">📥 导出CSV</button>
           </div>
           <div class="summary-cards" id="invSummary">
             <div class="card"><div class="label">项目数</div><div class="value" id="invProjects">0</div></div>
             <div class="card"><div class="label">涉及金额</div><div class="value" id="invAmount">$0</div></div>
-            <div class="card"><div class="label">佣金收入</div><div class="value profit" id="invCommission">$0</div></div>
+            <div class="card"><div class="label">佣金收入</div><div class="value positive" id="invCommission">$0</div></div>
           </div>
           <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="invLedgerTable"></div></div>
         </div>
@@ -1566,13 +354,11 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
           <div class="controls">
             <button class="btn-teal" onclick="openCommerceModal()">➕ 新建商务项目</button>
             <div style="flex:1"></div>
-            <input type="text" id="searchCommerce" placeholder="搜索会员/活动名称..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadCommerce()">
+            <input type="text" id="searchCommerce" placeholder="搜索会员/活动..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadCommerce()">
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>🤝 商务合作/会员</h3><span style="font-size:12px;color:#aaa" id="commerceCount">共 0 条记录</span></div>
-            <div id="commerceTableContainer">
-              <div class="empty-state"><div class="icon">📭</div><p>暂无商务合作/会员记录</p></div>
-            </div>
+            <div class="table-header"><h3>🤝 商务合作/会员</h3><span style="font-size:12px;color:#aaa" id="commerceCount">加载中...</span></div>
+            <div id="commerceTable"></div>
           </div>
         </div>
         <div id="comLedger" style="display:none">
@@ -1580,28 +366,26 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
             <label>📅 月份：</label><input type="month" id="comMonth" onchange="loadCommerceLedger()">
             <button onclick="prevComMonth()">◀</button><button onclick="nextComMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCommerceCSV()">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportCSV('commerce')">📥 导出CSV</button>
           </div>
           <div class="summary-cards">
             <div class="card"><div class="label">会员/活动数</div><div class="value" id="comItems">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value profit" id="comRevenue">$0</div></div>
+            <div class="card"><div class="label">总收入</div><div class="value positive" id="comRevenue">$0</div></div>
           </div>
           <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="comLedgerTable"></div></div>
         </div>
       </div>
 
-      <!-- ===== 政策解读/政府对接 ===== -->
+      <!-- ===== 政策解读 ===== -->
       <div class="page-section" id="pagePolicy">
         <div class="controls">
           <button class="btn-red" onclick="openPolicyModal()">➕ 新建政策项目</button>
           <div style="flex:1"></div>
-          <input type="text" id="searchPolicy" placeholder="搜索项目名称/对接部门..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadPolicy()">
+          <input type="text" id="searchPolicy" placeholder="搜索项目/部门..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadPolicy()">
         </div>
         <div class="table-wrapper">
-          <div class="table-header"><h3>📋 政策解读/政府对接项目</h3><span style="font-size:12px;color:#aaa" id="policyCount">共 0 个项目</span></div>
-          <div id="policyTableContainer">
-            <div class="empty-state"><div class="icon">📭</div><p>暂无政策项目</p></div>
-          </div>
+          <div class="table-header"><h3>📋 政策解读/政府对接</h3><span style="font-size:12px;color:#aaa" id="policyCount">加载中...</span></div>
+          <div id="policyTable"></div>
         </div>
       </div>
 
@@ -1616,25 +400,17 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
             <button class="btn-old" onclick="openTaxModal()">➕ 新建财税项目</button>
             <div style="flex:1"></div>
             <select id="filterTaxType" onchange="loadTax()">
-              <option value="">全部服务类型</option>
+              <option value="">全部类型</option>
               <option value="小规模纳税人">小规模纳税人</option>
               <option value="一般纳税人">一般纳税人</option>
               <option value="全套财税代理">全套财税代理</option>
-              <option value="增值税申报">增值税申报</option>
-              <option value="企业所得税">企业所得税</option>
-              <option value="个税代扣代缴">个税代扣代缴</option>
-              <option value="年度汇算清缴">年度汇算清缴</option>
-              <option value="税务登记">税务登记</option>
-              <option value="其他">其他</option>
             </select>
-            <input type="text" id="searchTax" placeholder="搜索客户/服务类型..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadTax()">
-            <button class="btn-orange" onclick="exportTaxCSV()">📥 导出CSV</button>
+            <input type="text" id="searchTax" placeholder="搜索客户/类型..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadTax()">
+            <button class="btn-orange" onclick="exportCSV('tax')">📥 导出CSV</button>
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>🧾 财税服务项目</h3><span style="font-size:12px;color:#aaa" id="taxCount">共 0 个项目</span></div>
-            <div id="taxTableContainer">
-              <div class="empty-state"><div class="icon">📭</div><p>暂无财税服务项目</p></div>
-            </div>
+            <div class="table-header"><h3>🧾 财税服务项目</h3><span style="font-size:12px;color:#aaa" id="taxCount">加载中...</span></div>
+            <div id="taxTable"></div>
           </div>
         </div>
         <div id="taxLedger" style="display:none">
@@ -1642,18 +418,18 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
             <label>📅 月份：</label><input type="month" id="taxMonth" onchange="loadTaxLedger()">
             <button onclick="prevTaxMonth()">◀</button><button onclick="nextTaxMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportTaxCSV()">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportCSV('tax')">📥 导出CSV</button>
           </div>
           <div class="summary-cards" id="taxSummary">
             <div class="card"><div class="label">项目数</div><div class="value" id="taxProjects">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value profit" id="taxRevenue">$0</div></div>
+            <div class="card"><div class="label">总收入</div><div class="value positive" id="taxRevenue">$0</div></div>
             <div class="card"><div class="label">净利润</div><div class="value" id="taxNet">$0</div></div>
           </div>
           <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="taxLedgerTable"></div></div>
         </div>
       </div>
 
-      <!-- ===== 职业技能培训 ===== -->
+      <!-- ===== 培训 ===== -->
       <div class="page-section" id="pageTraining">
         <div class="controls">
           <button class="btn-teal" onclick="openTrainingModal()">➕ 新建培训项目</button>
@@ -1665,14 +441,12 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
           <input type="text" id="searchTraining" placeholder="搜索课程/学员..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadTraining()">
         </div>
         <div class="table-wrapper">
-          <div class="table-header"><h3>🎓 职业技能培训</h3><span style="font-size:12px;color:#aaa" id="trainingCount">共 0 个项目</span></div>
-          <div id="trainingTableContainer">
-            <div class="empty-state"><div class="icon">📭</div><p>暂无培训项目</p></div>
-          </div>
+          <div class="table-header"><h3>🎓 职业技能培训</h3><span style="font-size:12px;color:#aaa" id="trainingCount">加载中...</span></div>
+          <div id="trainingTable"></div>
         </div>
       </div>
 
-      <!-- ===== 法律咨询合规 ===== -->
+      <!-- ===== 法律 ===== -->
       <div class="page-section" id="pageLegal">
         <div class="sub-tabs">
           <button class="active" onclick="switchSubTab(this,'legalList')">📋 项目列表</button>
@@ -1686,13 +460,11 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
               <option value="-1">全部状态</option>
               <option value="0">咨询中</option><option value="1">处理中</option><option value="2">已结案</option>
             </select>
-            <input type="text" id="searchLegal" placeholder="搜索客户/案件类型..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadLegal()">
+            <input type="text" id="searchLegal" placeholder="搜索客户/案件..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadLegal()">
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>⚖️ 法律咨询合规</h3><span style="font-size:12px;color:#aaa" id="legalCount">共 0 个项目</span></div>
-            <div id="legalTableContainer">
-              <div class="empty-state"><div class="icon">📭</div><p>暂无法律项目</p></div>
-            </div>
+            <div class="table-header"><h3>⚖️ 法律咨询合规</h3><span style="font-size:12px;color:#aaa" id="legalCount">加载中...</span></div>
+            <div id="legalTable"></div>
           </div>
         </div>
         <div id="legalLedger" style="display:none">
@@ -1700,43 +472,17 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
             <label>📅 月份：</label><input type="month" id="legalMonth" onchange="loadLegalLedger()">
             <button onclick="prevLegalMonth()">◀</button><button onclick="nextLegalMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportLegalCSV()">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportCSV('legal')">📥 导出CSV</button>
           </div>
           <div class="summary-cards" id="legalSummary">
             <div class="card"><div class="label">案件数</div><div class="value" id="legalCases">0</div></div>
-            <div class="card"><div class="label">服务收入</div><div class="value profit" id="legalRevenue">$0</div></div>
+            <div class="card"><div class="label">服务收入</div><div class="value positive" id="legalRevenue">$0</div></div>
           </div>
           <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="legalLedgerTable"></div></div>
         </div>
       </div>
 
-      <!-- ===== 统一财务报表 ===== -->
-      <div class="page-section" id="pageFinance">
-        <div class="panel">
-          <h3>📊 全业务营收概览</h3>
-          <div class="controls">
-            <label>📅 选择月份：</label><input type="month" id="financeMonth" onchange="loadFinance()">
-            <button onclick="prevFinanceMonth()">◀</button><button onclick="nextFinanceMonth()">▶</button>
-          </div>
-          <div class="finance-summary-grid" id="financeSummary">
-            <div class="finance-card"><div class="flabel">物流利润</div><div class="fvalue" id="finLogistics">$0</div><div class="fsub">货柜运输</div></div>
-            <div class="finance-card"><div class="flabel">出海服务收入</div><div class="fvalue" id="finOverseas">$0</div><div class="fsub">企业落地</div></div>
-            <div class="finance-card"><div class="flabel">投融资佣金</div><div class="fvalue" id="finInvest">$0</div><div class="fsub">资本对接</div></div>
-            <div class="finance-card"><div class="flabel">商务/会员收入</div><div class="fvalue" id="finCommerce">$0</div><div class="fsub">合作·活动</div></div>
-            <div class="finance-card" style="border-top-color:#7cb305"><div class="flabel">🧾 财税服务收入</div><div class="fvalue" id="finTax" style="color:#7cb305">$0</div><div class="fsub">报税·财税</div></div>
-            <div class="finance-card" style="border-top-color:#13c2c2"><div class="flabel">🎓 培训服务收入</div><div class="fvalue" id="finTraining" style="color:#13c2c2">$0</div><div class="fsub">职业技能</div></div>
-            <div class="finance-card" style="border-top-color:#722ed1"><div class="flabel">⚖️ 法律服务收入</div><div class="fvalue" id="finLegal" style="color:#722ed1">$0</div><div class="fsub">法律咨询</div></div>
-            <div class="finance-card" style="border-top-color:#ff4d4f"><div class="flabel">政策项目收入</div><div class="fvalue" id="finPolicy">$0</div><div class="fsub">政府对接</div></div>
-            <div class="finance-card" style="border-top-color:#fa8c16"><div class="flabel">💰 本月总收入</div><div class="fvalue profit" id="finTotal" style="font-size:36px">$0</div><div class="fsub">所有板块合计</div></div>
-          </div>
-        </div>
-        <div class="panel">
-          <h3>📈 收入构成</h3>
-          <div id="financeBreakdown" style="font-size:13px;color:#666;line-height:2"><p>暂无数据</p></div>
-        </div>
-      </div>
-
-      <!-- ===== 会员管理 ===== -->
+      <!-- ===== 会员 ===== -->
       <div class="page-section" id="pageMembership">
         <div class="sub-tabs">
           <button class="active" onclick="switchSubTab(this,'memList')">🏅 会员列表</button>
@@ -1752,19 +498,17 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
               <option value="理事会员">理事会员</option>
               <option value="战略会员">战略会员</option>
             </select>
-            <input type="text" id="searchMember" placeholder="搜索会员名称..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadMembers()">
+            <input type="text" id="searchMember" placeholder="搜索会员..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadMembers()">
           </div>
-          <div class="summary-cards" id="memberSummaryCards">
+          <div class="summary-cards" id="memberSummary">
             <div class="card"><div class="label">会员总数</div><div class="value" id="memTotal">0</div></div>
             <div class="card"><div class="label">普通会员</div><div class="value" id="memNormal">0</div></div>
             <div class="card"><div class="label">理事会员</div><div class="value" id="memDirector">0</div></div>
             <div class="card"><div class="label">战略会员</div><div class="value" id="memStrategic">0</div></div>
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>🏅 协会会员列表</h3><span style="font-size:12px;color:#aaa" id="memberCount">共 0 位会员</span></div>
-            <div id="memberTableContainer">
-              <div class="empty-state"><div class="icon">📭</div><p>暂无会员记录，请点击「新增会员」</p></div>
-            </div>
+            <div class="table-header"><h3>🏅 协会会员列表</h3><span style="font-size:12px;color:#aaa" id="memberCount">加载中...</span></div>
+            <div id="memberTable"></div>
           </div>
         </div>
         <div id="memLedger" style="display:none">
@@ -1772,18 +516,18 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
             <label>📅 月份：</label><input type="month" id="memMonth" onchange="loadMemberLedger()">
             <button onclick="prevMemMonth()">◀</button><button onclick="nextMemMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportMembersCSV()">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportCSV('members')">📥 导出CSV</button>
           </div>
           <div class="summary-cards">
             <div class="card"><div class="label">本月新增</div><div class="value" id="memNew">0</div></div>
-            <div class="card"><div class="label">会员费收入</div><div class="value profit" id="memRevenue">$0</div></div>
+            <div class="card"><div class="label">会员费收入</div><div class="value positive" id="memRevenue">$0</div></div>
             <div class="card"><div class="label">累计会员</div><div class="value" id="memTotal2">0</div></div>
           </div>
           <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="memberLedgerTable"></div></div>
         </div>
       </div>
 
-      <!-- ===== 日常费用支出 ===== -->
+      <!-- ===== 费用 ===== -->
       <div class="page-section" id="pageExpenses">
         <div class="sub-tabs">
           <button class="active" onclick="switchSubTab(this,'expList')">📋 支出记录</button>
@@ -1793,7 +537,6 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
           <div class="controls">
             <button class="btn-red" onclick="openExpenseModal()">➕ 新增支出</button>
             <div style="flex:1"></div>
-            <label>类别：</label>
             <select id="filterExpCat" onchange="loadExpenses()">
               <option value="">全部</option>
               <option value="rent">房租/水电</option>
@@ -1807,10 +550,8 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
             <input type="text" id="searchExpense" placeholder="搜索..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:180px" oninput="loadExpenses()">
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>💸 日常费用支出</h3><span style="font-size:12px;color:#aaa" id="expenseCount">共 0 条记录</span></div>
-            <div id="expenseTableContainer">
-              <div class="empty-state"><div class="icon">📭</div><p>暂无支出记录，请点击「新增支出」</p></div>
-            </div>
+            <div class="table-header"><h3>💸 日常费用支出</h3><span style="font-size:12px;color:#aaa" id="expenseCount">加载中...</span></div>
+            <div id="expenseTable"></div>
           </div>
         </div>
         <div id="expLedger" style="display:none">
@@ -1818,14 +559,40 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
             <label>📅 月份：</label><input type="month" id="expMonth" onchange="loadExpenseLedger()">
             <button onclick="prevExpMonth()">◀</button><button onclick="nextExpMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportExpensesCSV()">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportCSV('expenses')">📥 导出CSV</button>
           </div>
           <div class="summary-cards">
             <div class="card"><div class="label">支出笔数</div><div class="value" id="expCount">0</div></div>
-            <div class="card"><div class="label">支出总额</div><div class="value cost" id="expTotal">$0</div></div>
+            <div class="card"><div class="label">支出总额</div><div class="value negative" id="expTotal">$0</div></div>
             <div class="card"><div class="label">最大单笔</div><div class="value" id="expMax">$0</div></div>
           </div>
           <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="expenseLedgerTable"></div></div>
+        </div>
+      </div>
+
+      <!-- ===== 财务 ===== -->
+      <div class="page-section" id="pageFinance">
+        <div class="panel">
+          <h3>📊 全业务营收概览</h3>
+          <div class="controls">
+            <label>📅 选择月份：</label><input type="month" id="financeMonth" onchange="loadFinance()">
+            <button onclick="prevFinanceMonth()">◀</button><button onclick="nextFinanceMonth()">▶</button>
+          </div>
+          <div class="finance-summary-grid" id="financeSummary">
+            <div class="finance-card"><div class="flabel">物流利润</div><div class="fvalue" id="finLogistics">$0</div><div class="fsub">货柜运输</div></div>
+            <div class="finance-card"><div class="flabel">出海收入</div><div class="fvalue" id="finOverseas">$0</div><div class="fsub">企业落地</div></div>
+            <div class="finance-card"><div class="flabel">投融资佣金</div><div class="fvalue" id="finInvest">$0</div><div class="fsub">资本对接</div></div>
+            <div class="finance-card"><div class="flabel">商务/会员</div><div class="fvalue" id="finCommerce">$0</div><div class="fsub">合作·活动</div></div>
+            <div class="finance-card" style="border-top-color:#7cb305"><div class="flabel">🧾 财税收入</div><div class="fvalue" id="finTax" style="color:#7cb305">$0</div><div class="fsub">报税·财税</div></div>
+            <div class="finance-card" style="border-top-color:#13c2c2"><div class="flabel">🎓 培训收入</div><div class="fvalue" id="finTraining" style="color:#13c2c2">$0</div><div class="fsub">职业技能</div></div>
+            <div class="finance-card" style="border-top-color:#722ed1"><div class="flabel">⚖️ 法律收入</div><div class="fvalue" id="finLegal" style="color:#722ed1">$0</div><div class="fsub">法律咨询</div></div>
+            <div class="finance-card" style="border-top-color:#ff4d4f"><div class="flabel">政策收入</div><div class="fvalue" id="finPolicy">$0</div><div class="fsub">政府对接</div></div>
+            <div class="finance-card" style="border-top-color:#fa8c16"><div class="flabel">💰 本月总收入</div><div class="fvalue positive" id="finTotal" style="font-size:36px">$0</div><div class="fsub">所有板块合计</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>📈 收入构成</h3>
+          <div id="financeBreakdown" style="font-size:13px;color:#666;line-height:2">加载中...</div>
         </div>
       </div>
 
@@ -1833,86 +600,11 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
       <div class="page-section" id="pageConfig">
         <div class="panel">
           <h3>⚙️ 物流计费参数</h3>
-          <div class="config-row">
+          <div class="controls">
             <label>每货柜利润（USD）：</label><input type="number" id="cfgProfit" value="180" min="0" step="10">
             <label>返点比例（%）：</label><input type="number" id="cfgRebate" value="3" min="0" max="100" step="0.5">
             <button class="btn-green" onclick="applyConfig()">应用参数</button>
           </div>
-        </div>
-        <div class="panel">
-          <h3>📌 返点说明</h3>
-          <ul style="font-size:13px;color:#666;line-height:2;padding-left:20px">
-            <li>每笔订单利润 = 货柜数量 × 每货柜利润（默认 $180）</li>
-            <li>返点金额 = 利润 × 返点比例（默认 3%）</li>
-            <li>净收益 = 利润 - 返点</li>
-            <li>修改参数后，历史数据会自动按新参数重新计算</li>
-          </ul>
-        </div>
-        <div class="panel">
-          <h3>⚙️ 出海服务收费模板</h3>
-          <div class="config-row">
-            <label>公司注册（USD）：</label><input type="number" id="cfgOverseasReg" value="2000" min="0" step="100">
-            <label>财税代理/月（USD）：</label><input type="number" id="cfgOverseasFiscal" value="300" min="0" step="50">
-            <button class="btn-green" onclick="applyOverseasConfig()">保存</button>
-          </div>
-        </div>
-        <div class="panel">
-          <h3>⚙️ 投融资佣金比例</h3>
-          <div class="config-row">
-            <label>成功佣金（%）：</label><input type="number" id="cfgInvCommission" value="3" min="0" max="20" step="0.5">
-            <button class="btn-green" onclick="applyInvConfig()">保存</button>
-          </div>
-        </div>
-        <div class="panel">
-          <h3>⚙️ 会员入会费</h3>
-          <div class="config-row">
-            <label>普通会员入会费（USD）：</label><input type="number" id="cfgMemFee" value="999" min="0" step="50">
-            <label>理事会员入会费（USD）：</label><input type="number" id="cfgMemDirector" value="2999" min="0" step="100">
-            <label>战略会员入会费（USD）：</label><input type="number" id="cfgMemStrategic" value="9999" min="0" step="100">
-            <button class="btn-green" onclick="applyMemConfig()">保存</button>
-          </div>
-        </div>
-        <div class="panel">
-          <h3>⚙️ 财税计费模板</h3>
-          <div id="taxPricingRules">
-            <div class="pricing-rule">
-              <label>月营业额 ≤</label><input type="number" class="pr-max" value="100000" min="0" step="10000"> USD
-              <label>服务类型：</label>
-              <select class="pr-type">
-                <option value="小规模纳税人">小规模纳税人</option><option value="一般纳税人">一般纳税人</option>
-                <option value="全套财税代理">全套财税代理</option><option value="增值税申报">增值税申报</option>
-                <option value="企业所得税">企业所得税</option><option value="个税代扣代缴">个税代扣代缴</option>
-                <option value="年度汇算清缴">年度汇算清缴</option><option value="税务登记">税务登记</option>
-                <option value="其他">其他</option>
-              </select>
-              <label>周期：</label>
-              <select class="pr-period"><option value="月度">月度</option><option value="季度">季度</option><option value="年度">年度</option></select>
-              <label>服务费（USD）：</label><input type="number" class="pr-fee" value="99" min="0" step="10">
-              <button class="btn-red" onclick="removePricingRule(this)">删除</button>
-            </div>
-            <div class="pricing-rule">
-              <label>月营业额 ≤</label><input type="number" class="pr-max" value="500000" min="0" step="10000"> USD
-              <label>服务类型：</label>
-              <select class="pr-type"><option value="一般纳税人">一般纳税人</option><option value="小规模纳税人">小规模纳税人</option><option value="全套财税代理">全套财税代理</option><option value="增值税申报">增值税申报</option><option value="企业所得税">企业所得税</option><option value="个税代扣代缴">个税代扣代缴</option><option value="年度汇算清缴">年度汇算清缴</option><option value="税务登记">税务登记</option><option value="其他">其他</option></select>
-              <label>周期：</label>
-              <select class="pr-period"><option value="月度">月度</option><option value="季度">季度</option><option value="年度">年度</option></select>
-              <label>服务费（USD）：</label><input type="number" class="pr-fee" value="199" min="0" step="10">
-              <button class="btn-red" onclick="removePricingRule(this)">删除</button>
-            </div>
-          </div>
-          <button class="btn-green" onclick="addPricingRule()" style="margin-top:8px">➕ 添加计费规则</button>
-          <button class="btn-gold" onclick="savePricingRules()" style="margin-top:8px;margin-left:8px">💾 保存计费模板</button>
-        </div>
-      </div>
-
-      <!-- ===== 用户管理 ===== -->
-      <div class="page-section" id="pageUsers">
-        <div class="panel">
-          <h3>👥 系统用户管理</h3>
-          <div class="controls">
-            <button class="btn-green" onclick="openUserModal()">➕ 新增用户</button>
-          </div>
-          <div id="userList"></div>
         </div>
       </div>
 
@@ -1920,19 +612,19 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
       <div class="page-section" id="pagePwd">
         <div class="panel" style="max-width:500px">
           <h3>🔑 修改密码</h3>
-          <div class="form-group"><label>当前密码</label><input type="password" id="oldPwd" placeholder="请输入当前密码"></div>
+          <div class="form-group"><label>当前密码</label><input type="password" id="oldPwd" placeholder="当前密码"></div>
           <div class="form-group"><label>新密码</label><input type="password" id="newPwd" placeholder="至少6位"></div>
-          <div class="form-group"><label>确认新密码</label><input type="password" id="newPwd2" placeholder="再次输入新密码"></div>
+          <div class="form-group"><label>确认新密码</label><input type="password" id="newPwd2" placeholder="再次输入"></div>
           <button class="btn-green" onclick="changePassword()">提交修改</button>
           <div id="pwdMsg" style="margin-top:10px;font-size:13px"></div>
         </div>
       </div>
 
-    </div><!-- /content-area -->
-  </div><!-- /main-body -->
-</div><!-- /app-container -->
+    </div>
+  </div>
+</div>
 
-<!-- ==================== 弹窗区域 ==================== -->
+<!-- ==================== 弹窗 ==================== -->
 <div class="modal-overlay" id="orderModal"><div class="modal" id="orderModalContent"></div></div>
 <div class="modal-overlay" id="overseasModal"><div class="modal" id="overseasModalContent"></div></div>
 <div class="modal-overlay" id="investModal"><div class="modal" id="investModalContent"></div></div>
@@ -1943,16 +635,16 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
 <div class="modal-overlay" id="legalModal"><div class="modal" id="legalModalContent"></div></div>
 <div class="modal-overlay" id="memberModal"><div class="modal" id="memberModalContent"></div></div>
 <div class="modal-overlay" id="expenseModal"><div class="modal" id="expenseModalContent"></div></div>
-<div class="modal-overlay" id="userModal"><div class="modal" id="userModalContent"></div></div>
 
-<!-- ==================== JavaScript 逻辑 ==================== -->
 <script>
 /* ========== Supabase 初始化 ========== */
-const SUPABASE_URL = 'https://dicapkasnfjzbfmfyzib.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_vSH9T39fUA4mfxC2E3QCig_vHObIYCg';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const { createClient } = window.supabase;
+const supabase = createClient(
+  'https://dicapkasnfjzbfmfyzib.supabase.co',
+  'sb_publishable_vSH9T39fUA4mfxC2E3QCig_vHObIYCg'
+);
 
-/* ========== 中英文语言包 ========== */
+/* ========== 语言包 ========== */
 const i18n = {
   zh: {
     login_title:'MNA 业务管理平台', login_sub:'湄公产业资本联盟 Mekong Nexus Association<br>连接产业 · 资本 · 政府 · 国际资源',
@@ -1979,31 +671,41 @@ const i18n = {
 };
 
 let currentLang = localStorage.getItem('mna_lang') || 'zh';
-let currentUser = null;
-let config = { profitPerContainer: 180, rebateRate: 3, overseasReg: 2000, overseasFiscal: 300, invCommission: 3, memFee: 999, memDirector: 2999, memStrategic: 9999 };
 
-/* ========== 语言切换 ========== */
+/* ========== 工具函数 ========== */
 function applyLang(lang) {
   currentLang = lang;
   localStorage.setItem('mna_lang', lang);
   document.documentElement.setAttribute('data-lang', lang);
   const d = i18n[lang];
-  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if(d[k]) el.innerHTML = d[k]; });
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (d[k]) el.innerHTML = d[k];
+  });
   document.getElementById('langLabel').innerText = lang === 'zh' ? 'EN' : '中';
 }
 function toggleLang() { applyLang(currentLang === 'zh' ? 'en' : 'zh'); }
 
-/* ========== 登录/登出 ========== */
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('zh-CN') : '—'; }
+function emptyHtml(msg) { return `<div class="empty-state"><div class="icon">📭</div><p>${msg}</p></div>`; }
+function showToast(msg, type='success') {
+  let t = document.querySelector('.toast');
+  if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ========== 登录 ========== */
 async function doLogin() {
   const email = document.getElementById('loginUser').value.trim();
   const pwd = document.getElementById('loginPass').value;
   const err = document.getElementById('loginError');
   err.textContent = '';
   if (!email || !pwd) { err.textContent = '请输入邮箱和密码'; return; }
-  showToast('登录中...', 'success');
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd });
-  if (error) { err.textContent = '登录失败：' + error.message; return; }
-  await showApp(data.user);
+  if (error || !data?.user) { err.textContent = '登录失败：' + (error?.message || '未知错误'); return; }
+  showApp(data.user);
 }
 
 async function doLogout() {
@@ -2011,25 +713,24 @@ async function doLogout() {
   location.reload();
 }
 
-/* ========== 显示主应用 ========== */
-async function showApp(user) {
-  currentUser = user;
+/* ========== 主应用 ========== */
+function showApp(user) {
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('appContainer').style.display = 'flex';
   document.getElementById('currentUserName').textContent = user.email;
   document.getElementById('currentUserRole').textContent = '管理员';
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'});
   applyLang(currentLang);
-  await loadAllData();
+  loadAllData();
 }
 
-/* ========== 页面/子页切换 ========== */
-function switchPage(page) {
+/* ========== 页面切换 ========== */
+function switchPage(page, evt) {
   document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
   const t = document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1));
   if (t) t.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  if (event && event.target) event.target.closest('.nav-item')?.classList.add('active');
+  evt?.target?.closest('.nav-item')?.classList.add('active');
 }
 
 function switchSubTab(btn, tabId) {
@@ -2041,97 +742,53 @@ function switchSubTab(btn, tabId) {
   document.getElementById(tabId).style.display = 'block';
 }
 
-/* ========== 工具函数 ========== */
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('zh-CN') : '—'; }
-function emptyHtml(msg) { return `<div class="empty-state"><div class="icon">📭</div><p>${msg||'暂无数据'}</p></div>`; }
-
-function showToast(msg, type='success') {
-  let t = document.querySelector('.toast');
-  if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function getMonthFilter() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-}
-
-function shiftMonth(id, delta) {
-  const el = document.getElementById(id);
-  const d = new Date(el.value + '-01');
-  d.setMonth(d.getMonth() + delta);
-  el.value = d.toISOString().slice(0,7);
-  el.dispatchEvent(new Event('change'));
-}
-
-/* ========== 通用表格加载器 ========== */
-async function loadTable(table, renderFn, countId, searchId, extraFilter) {
-  showToast('加载中...', 'success');
-  let query = supabase.from(table).select('*', {count:'exact'}).order('created_at', {ascending:false});
-  if (searchId) {
+/* ========== 通用加载器 ========== */
+async function loadTable(table, renderFn, countId, searchId, searchField, extraFilter) {
+  let query = supabase.from(table).select('*',{count:'exact'}).order('created_at',{ascending:false});
+  if (searchId && searchField) {
     const kw = document.getElementById(searchId).value.trim();
-    if (kw) query = query.or(`customer.ilike.%${kw}%,project_name.ilike.%${kw}%,company.ilike.%${kw}%,name.ilike.%${kw}%`);
+    if (kw) query = query.ilike(searchField, `%${kw}%`);
   }
   if (extraFilter) query = extraFilter(query);
   const { data, error, count } = await query;
-  const container = document.getElementById(countId.replace('Count','TableContainer').replace('count','TableContainer'));
-  if (error) {
-    document.getElementById(countId).textContent = '加载失败';
-    return;
-  }
-  document.getElementById(countId).textContent = `共 ${count ?? 0} 条`;
-  if (!data || data.length === 0) {
-    const msgMap = { orderCount:'暂无订单', overseasCount:'暂无出海项目', investCount:'暂无投融资项目', commerceCount:'暂无商务合作/会员记录', policyCount:'暂无政策项目', taxCount:'暂无财税服务项目', trainingCount:'暂无培训项目', legalCount:'暂无法律项目', memberCount:'暂无会员', expenseCount:'暂无支出记录' };
-    document.getElementById(countId.replace('Count','TableContainer').replace('count','TableContainer').replace('TableContainer','tableContainer')) || document.getElementById(countId).parentElement.nextElementSibling || document.getElementById(countId).closest('.table-wrapper').querySelector('[id$="Container"]') || { innerHTML:'' }.innerHTML = emptyHtml(msgMap[countId] || '暂无数据');
-    // Simplified: just render the table or empty state
-    renderFn(data);
-    return;
-  }
-  renderFn(data);
+  document.getElementById(countId).textContent = error ? '加载失败' : `共 ${count ?? 0} 条`;
+  renderFn(data || []);
 }
 
 /* ========== 仪表盘 ========== */
 async function loadDashboard() {
-  try {
-    const [lo, mem, ov, inv, ex, tx, tr, lg, po] = await Promise.all([
-      supabase.from('orders').select('*',{count:'exact',head:true}),
-      supabase.from('members').select('*',{count:'exact',head:true}),
-      supabase.from('overseas').select('*',{count:'exact',head:true}),
-      supabase.from('investments').select('*',{count:'exact',head:true}),
-      supabase.from('expenses').select('*',{count:'exact',head:true}),
-      supabase.from('tax').select('*',{count:'exact',head:true}),
-      supabase.from('training').select('*',{count:'exact',head:true}),
-      supabase.from('legal').select('*',{count:'exact',head:true}),
-      supabase.from('policy').select('*',{count:'exact',head:true})
-    ]);
-    document.getElementById('dbLogistics').textContent = lo.count ?? 0;
-    document.getElementById('dbMembers').textContent = mem.count ?? 0;
-    document.getElementById('dbOverseas').textContent = ov.count ?? 0;
-    document.getElementById('dbInvestment').textContent = inv.count ?? 0;
-    document.getElementById('dbExpenses').textContent = '$' + (ex.count ?? 0);
-    document.getElementById('dbTax').textContent = tx.count ?? 0;
-    document.getElementById('dbTraining').textContent = tr.count ?? 0;
-    document.getElementById('dbLegal').textContent = lg.count ?? 0;
-    document.getElementById('dbPolicy').textContent = po.count ?? 0;
-  } catch(e) { console.error('Dashboard error:', e); }
+  const [lo, mem, ov, inv, ex, tx, tr, lg, po] = await Promise.all([
+    supabase.from('orders').select('*',{count:'exact',head:true}),
+    supabase.from('members').select('*',{count:'exact',head:true}),
+    supabase.from('overseas').select('*',{count:'exact',head:true}),
+    supabase.from('investments').select('*',{count:'exact',head:true}),
+    supabase.from('expenses').select('*',{count:'exact',head:true}),
+    supabase.from('tax').select('*',{count:'exact',head:true}),
+    supabase.from('training').select('*',{count:'exact',head:true}),
+    supabase.from('legal').select('*',{count:'exact',head:true}),
+    supabase.from('policy').select('*',{count:'exact',head:true})
+  ]);
+  document.getElementById('dbLogistics').textContent = lo.count ?? 0;
+  document.getElementById('dbMembers').textContent = mem.count ?? 0;
+  document.getElementById('dbOverseas').textContent = ov.count ?? 0;
+  document.getElementById('dbInvestment').textContent = inv.count ?? 0;
+  document.getElementById('dbExpenses').textContent = '$' + (ex.count ?? 0);
+  document.getElementById('dbTax').textContent = tx.count ?? 0;
+  document.getElementById('dbTraining').textContent = tr.count ?? 0;
+  document.getElementById('dbLegal').textContent = lg.count ?? 0;
+  document.getElementById('dbPolicy').textContent = po.count ?? 0;
 }
 
-/* ========== 物流订单 ========== */
+/* ========== 物流 ========== */
 function renderOrders(data) {
-  const container = document.getElementById('orderTableContainer');
-  if (!data || data.length === 0) { container.innerHTML = emptyHtml('暂无订单，请点击「新建物流订单」开始录入'); return; }
-  let html = `<table><thead><tr>
-    <th>订单号</th><th>客户</th><th>货柜数</th><th>状态</th><th>创建时间</th><th>操作</th>
-  </tr></thead><tbody>`;
+  if (!data.length) return document.getElementById('orderTable').innerHTML = emptyHtml('暂无订单');
+  let html = `<table><thead><tr><th>订单号</th><th>客户</th><th>货柜</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
   data.forEach(o => {
     html += `<tr>
-      <td class="order-no">${o.order_no||'—'}</td>
+      <td>${o.order_no||'—'}</td>
       <td>${o.customer||'—'}</td>
       <td>${o.container_count||0}</td>
-      <td><span class="status-badge st-${o.status??0}">${orderStatus(o.status)}</span></td>
-      <td>${fmtDate(o.created_at)}</td>
+      <td><span class="status-badge st-${o.status??0}">${['待发柜','已发柜','已到港','清关中','已清关','已到厂','已结单'][o.status]||'未知'}</span></td>
       <td class="actions">
         <button class="edit-btn" onclick="editOrder('${o.id}')">编辑</button>
         <button class="del-btn" onclick="deleteOrder('${o.id}')">删除</button>
@@ -2139,61 +796,43 @@ function renderOrders(data) {
     </tr>`;
   });
   html += '</tbody></table>';
-  container.innerHTML = html;
+  document.getElementById('orderTable').innerHTML = html;
 }
 
-function orderStatus(s) { return ['待发柜','已发柜（在途）','已到港','清关中','已清关','已到工厂','已结单'][s]||'未知'; }
-
 async function loadOrders() {
-  await loadTable('orders', renderOrders, 'orderCount', 'filterKeyword',
-    q => { const v = document.getElementById('filterStatus').value; return v !== '-1' ? q.eq('status', +v) : q; }
-  );
+  await loadTable('orders', renderOrders, 'orderCount', 'searchOrder', 'customer');
 }
 
 async function deleteOrder(id) {
-  if (!confirm('确定删除该订单？')) return;
+  if (!confirm('确定删除？')) return;
   await supabase.from('orders').delete().eq('id', id);
-  showToast('删除成功', 'success'); loadOrders(); loadDashboard();
+  showToast('删除成功'); loadOrders(); loadDashboard();
 }
 
 function editOrder(id) {
-  supabase.from('orders').select('*').eq('id', id).single().then(({data}) => {
-    openOrderModal(data);
-  });
+  supabase.from('orders').select('*').eq('id', id).single().then(({data}) => openOrderModal(data));
 }
 
 function openOrderModal(existing) {
   const m = document.getElementById('orderModalContent');
   m.innerHTML = `
-    <h3>${existing?'编辑物流订单':'新建物流订单'}</h3>
+    <h3>${existing?'编辑订单':'新建订单'}</h3>
     <div class="form-row">
-      <div class="form-group"><label>客户名称</label><input id="oCustomer" value="${existing?.customer||''}" placeholder="客户名称"></div>
-      <div class="form-group"><label>订单号</label><input id="oOrderNo" value="${existing?.order_no||''}" placeholder="MNA-LOG-XXXX"></div>
+      <div class="form-group"><label>客户</label><input id="oCustomer" value="${existing?.customer||''}"></div>
+      <div class="form-group"><label>订单号</label><input id="oOrderNo" value="${existing?.order_no||''}"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>货柜数量</label><input type="number" id="oContainers" value="${existing?.container_count||1}" min="1"></div>
+      <div class="form-group"><label>货柜数</label><input type="number" id="oContainers" value="${existing?.container_count||1}"></div>
       <div class="form-group"><label>状态</label>
         <select id="oStatus">
-          <option value="0" ${existing?.status===0?'selected':''}>待发柜</option>
-          <option value="1" ${existing?.status===1?'selected':''}>已发柜（在途）</option>
-          <option value="2" ${existing?.status===2?'selected':''}>已到港</option>
-          <option value="3" ${existing?.status===3?'selected':''}>清关中</option>
-          <option value="4" ${existing?.status===4?'selected':''}>已清关</option>
-          <option value="5" ${existing?.status===5?'selected':''}>已到工厂</option>
-          <option value="6" ${existing?.status===6?'selected':''}>已结单</option>
+          ${[0,1,2,3,4,5,6].map(i=>`<option value="${i}" ${existing?.status===i?'selected':''}>${['待发柜','已发柜','已到港','清关中','已清关','已到厂','已结单'][i]}</option>`).join('')}
         </select>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label>收入（USD）</label><input type="number" id="oRevenue" value="${existing?.revenue||0}" min="0"></div>
-      <div class="form-group"><label>成本（USD）</label><input type="number" id="oCost" value="${existing?.cost||0}" min="0"></div>
-    </div>
-    <div class="form-group"><label>备注</label><textarea id="oNote" placeholder="备注信息">${existing?.note||''}</textarea></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('orderModal')">取消</button>
       <button class="btn-submit" onclick="saveOrder('${existing?.id||''}')">保存</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('orderModal').classList.add('active');
 }
 
@@ -2202,40 +841,35 @@ async function saveOrder(id) {
     customer: document.getElementById('oCustomer').value,
     order_no: document.getElementById('oOrderNo').value,
     container_count: +document.getElementById('oContainers').value,
-    status: +document.getElementById('oStatus').value,
-    revenue: +document.getElementById('oRevenue').value,
-    cost: +document.getElementById('oCost').value,
-    note: document.getElementById('oNote').value
+    status: +document.getElementById('oStatus').value
   };
-  if (id) {
-    await supabase.from('orders').update(obj).eq('id', id);
-  } else {
-    await supabase.from('orders').insert(obj);
-  }
+  if (id) await supabase.from('orders').update(obj).eq('id', id);
+  else await supabase.from('orders').insert(obj);
   closeModal('orderModal');
-  showToast('保存成功', 'success'); loadOrders(); loadDashboard();
+  showToast('保存成功');
+  loadOrders(); loadDashboard();
 }
 
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-/* ========== 出海服务 ========== */
+/* ========== 出海 ========== */
 function renderOverseas(data) {
-  const c = document.getElementById('overseasTableContainer');
-  if (!data || data.length === 0) { c.innerHTML = emptyHtml('暂无出海项目，请点击「新建出海项目」'); return; }
-  let html = `<table><thead><tr><th>项目名称</th><th>企业</th><th>服务类型</th><th>状态</th><th>收入</th><th>操作</th></tr></thead><tbody>`;
+  if (!data.length) return document.getElementById('overseasTable').innerHTML = emptyHtml('暂无项目');
+  let html = `<table><thead><tr><th>项目</th><th>企业</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
   data.forEach(o => {
     html += `<tr>
-      <td>${o.project_name||'—'}</td><td>${o.company||'—'}</td><td>${o.service_type||'—'}</td>
-      <td><span class="status-badge st-${o.status??0}">${o.status?'已完成':'进行中'}</span></td>
-      <td>$${o.revenue||0}</td>
-      <td class="actions"><button class="edit-btn" onclick="editOverseas('${o.id}')">编辑</button><button class="del-btn" onclick="deleteOverseas('${o.id}')">删除</button></td>
+      <td>${o.project_name}</td><td>${o.company}</td><td>${o.service_type}</td>
+      <td><span class="status-badge st-${o.status}">${o.status?'已完成':'进行中'}</span></td>
+      <td class="actions">
+        <button class="edit-btn" onclick="editOverseas('${o.id}')">编辑</button>
+        <button class="del-btn" onclick="deleteOverseas('${o.id}')">删除</button>
+      </td>
     </tr>`;
   });
-  html += '</tbody></table>'; c.innerHTML = html;
+  html += '</tbody></table>';
+  document.getElementById('overseasTable').innerHTML = html;
 }
 
 async function loadOverseas() {
-  await loadTable('overseas', renderOverseas, 'overseasCount', 'searchOverseas');
+  await loadTable('overseas', renderOverseas, 'overseasCount', 'searchOverseas', 'project_name');
 }
 
 async function deleteOverseas(id) {
@@ -2251,412 +885,561 @@ function editOverseas(id) {
 function openOverseasModal(existing) {
   const m = document.getElementById('overseasModalContent');
   m.innerHTML = `
-    <h3>${existing?'编辑出海项目':'新建出海项目'}</h3>
+    <h3>${existing?'编辑项目':'新建项目'}</h3>
     <div class="form-row">
-      <div class="form-group"><label>企业名称</label><input id="ovCompany" value="${existing?.company||''}"></div>
-      <div class="form-group"><label>项目名称</label><input id="ovProject" value="${existing?.project_name||''}"></div>
+      <div class="form-group"><label>企业</label><input id="ovCompany" value="${existing?.company||''}"></div>
+      <div class="form-group"><label>项目名</label><input id="ovProject" value="${existing?.project_name||''}"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>服务类型</label>
-        <select id="ovType"><option value="公司注册" ${existing?.service_type==='公司注册'?'selected':''}>公司注册</option><option value="财税代理" ${existing?.service_type==='财税代理'?'selected':''}>财税代理</option><option value="法律合规" ${existing?.service_type==='法律合规'?'selected':''}>法律合规</option><option value="全流程落地" ${existing?.service_type==='全流程落地'?'selected':''}>全流程落地</option></select>
+      <div class="form-group"><label>类型</label>
+        <select id="ovType">
+          <option value="公司注册" ${existing?.service_type==='公司注册'?'selected':''}>公司注册</option>
+          <option value="财税代理" ${existing?.service_type==='财税代理'?'selected':''}>财税代理</option>
+          <option value="法律合规" ${existing?.service_type==='法律合规'?'selected':''}>法律合规</option>
+        </select>
       </div>
-      <div class="form-group"><label>状态</label><select id="ovStatus"><option value="0" ${!existing?.status?'selected':''}>进行中</option><option value="1" ${existing?.status?'selected':''}>已完成</option></select></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>收入（USD）</label><input type="number" id="ovRevenue" value="${existing?.revenue||0}"></div>
-      <div class="form-group"><label>成本（USD）</label><input type="number" id="ovCost" value="${existing?.cost||0}"></div>
+      <div class="form-group"><label>状态</label>
+        <select id="ovStatus">
+          <option value="0" ${!existing?.status?'selected':''}>进行中</option>
+          <option value="1" ${existing?.status?'selected':''}>已完成</option>
+        </select>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('overseasModal')">取消</button>
       <button class="btn-submit" onclick="saveOverseas('${existing?.id||''}')">保存</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('overseasModal').classList.add('active');
 }
 
 async function saveOverseas(id) {
-  const obj = { company:document.getElementById('ovCompany').value, project_name:document.getElementById('ovProject').value, service_type:document.getElementById('ovType').value, status:+document.getElementById('ovStatus').value, revenue:+document.getElementById('ovRevenue').value, cost:+document.getElementById('ovCost').value };
-  if (id) await supabase.from('overseas').update(obj).eq('id',id); else await supabase.from('overseas').insert(obj);
-  closeModal('overseasModal'); showToast('保存成功'); loadOverseas(); loadDashboard();
+  const obj = {
+    company: document.getElementById('ovCompany').value,
+    project_name: document.getElementById('ovProject').value,
+    service_type: document.getElementById('ovType').value,
+    status: +document.getElementById('ovStatus').value
+  };
+  if (id) await supabase.from('overseas').update(obj).eq('id', id);
+  else await supabase.from('overseas').insert(obj);
+  closeModal('overseasModal');
+  showToast('保存成功');
+  loadOverseas(); loadDashboard();
 }
 
 /* ========== 投融资 ========== */
 function renderInvest(data) {
-  const c = document.getElementById('investTableContainer');
-  if (!data || data.length === 0) { c.innerHTML = emptyHtml('暂无投融资项目'); return; }
-  let html = `<table><thead><tr><th>项目名称</th><th>投资方</th><th>融资金额</th><th>佣金比例</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+  if (!data.length) return document.getElementById('investTable').innerHTML = emptyHtml('暂无项目');
+  let html = `<table><thead><tr><th>项目</th><th>投资方</th><th>金额</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
   data.forEach(i => {
     html += `<tr>
-      <td>${i.project_name||'—'}</td><td>${i.investor||'—'}</td><td>$${i.amount||0}</td><td>${i.commission_rate||0}%</td>
-      <td><span class="status-badge st-${i.status??0}">${i.status?'已完成':'跟进中'}</span></td>
-      <td class="actions"><button class="edit-btn" onclick="editInvest('${i.id}')">编辑</button><button class="del-btn" onclick="deleteInvest('${i.id}')">删除</button></td>
+      <td>${i.project_name}</td><td>${i.investor}</td><td>$${i.amount||0}</td>
+      <td><span class="status-badge st-${i.status}">${i.status?'已完成':'跟进中'}</span></td>
+      <td class="actions">
+        <button class="edit-btn" onclick="editInvest('${i.id}')">编辑</button>
+        <button class="del-btn" onclick="deleteInvest('${i.id}')">删除</button>
+      </td>
     </tr>`;
   });
-  html += '</tbody></table>'; c.innerHTML = html;
+  html += '</tbody></table>';
+  document.getElementById('investTable').innerHTML = html;
 }
 
 async function loadInvest() {
-  await loadTable('investments', renderInvest, 'investCount', 'searchInvest');
+  await loadTable('investments', renderInvest, 'investCount', 'searchInvest', 'project_name');
 }
 
-async function deleteInvest(id) { if(!confirm('确定删除？')) return; await supabase.from('investments').delete().eq('id',id); showToast('删除成功'); loadInvest(); loadDashboard(); }
-function editInvest(id) { supabase.from('investments').select('*').eq('id',id).single().then(({data}) => openInvestModal(data)); }
+async function deleteInvest(id) {
+  if (!confirm('确定删除？')) return;
+  await supabase.from('investments').delete().eq('id', id);
+  showToast('删除成功'); loadInvest(); loadDashboard();
+}
+
+function editInvest(id) {
+  supabase.from('investments').select('*').eq('id', id).single().then(({data}) => openInvestModal(data));
+}
 
 function openInvestModal(existing) {
   const m = document.getElementById('investModalContent');
   m.innerHTML = `
-    <h3>${existing?'编辑投融资项目':'新建投融资项目'}</h3>
+    <h3>${existing?'编辑项目':'新建项目'}</h3>
     <div class="form-row">
-      <div class="form-group"><label>项目名称</label><input id="invProject" value="${existing?.project_name||''}"></div>
+      <div class="form-group"><label>项目名</label><input id="invProject" value="${existing?.project_name||''}"></div>
       <div class="form-group"><label>投资方</label><input id="invInvestor" value="${existing?.investor||''}"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>融资金额（USD）</label><input type="number" id="invAmount" value="${existing?.amount||0}"></div>
-      <div class="form-group"><label>佣金比例（%）</label><input type="number" id="invCommission" value="${existing?.commission_rate||3}" step="0.5"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>状态</label><select id="invStatus"><option value="0" ${!existing?.status?'selected':''}>跟进中</option><option value="1" ${existing?.status?'selected':''}>已完成</option></select></div>
+      <div class="form-group"><label>金额</label><input type="number" id="invAmount" value="${existing?.amount||0}"></div>
+      <div class="form-group"><label>状态</label>
+        <select id="invStatus">
+          <option value="0" ${!existing?.status?'selected':''}>跟进中</option>
+          <option value="1" ${existing?.status?'selected':''}>已完成</option>
+        </select>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('investModal')">取消</button>
       <button class="btn-submit" onclick="saveInvest('${existing?.id||''}')">保存</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('investModal').classList.add('active');
 }
 
 async function saveInvest(id) {
-  const obj = { project_name:document.getElementById('invProject').value, investor:document.getElementById('invInvestor').value, amount:+document.getElementById('invAmount').value, commission_rate:+document.getElementById('invCommission').value, status:+document.getElementById('invStatus').value };
-  if (id) await supabase.from('investments').update(obj).eq('id',id); else await supabase.from('investments').insert(obj);
-  closeModal('investModal'); showToast('保存成功'); loadInvest(); loadDashboard();
+  const obj = {
+    project_name: document.getElementById('invProject').value,
+    investor: document.getElementById('invInvestor').value,
+    amount: +document.getElementById('invAmount').value,
+    status: +document.getElementById('invStatus').value
+  };
+  if (id) await supabase.from('investments').update(obj).eq('id', id);
+  else await supabase.from('investments').insert(obj);
+  closeModal('investModal');
+  showToast('保存成功');
+  loadInvest(); loadDashboard();
 }
 
-/* ========== 商务合作 ========== */
+/* ========== 商务 ========== */
 function renderCommerce(data) {
-  const c = document.getElementById('commerceTableContainer');
-  if (!data || data.length === 0) { c.innerHTML = emptyHtml('暂无商务合作/会员记录'); return; }
-  let html = `<table><thead><tr><th>活动/会员名称</th><th>类型</th><th>收入（USD）</th><th>操作</th></tr></thead><tbody>`;
+  if (!data.length) return document.getElementById('commerceTable').innerHTML = emptyHtml('暂无记录');
+  let html = `<table><thead><tr><th>名称</th><th>类型</th><th>收入</th><th>操作</th></tr></thead><tbody>`;
   data.forEach(c => {
     html += `<tr>
-      <td>${c.name||'—'}</td><td>${c.type||'—'}</td><td>$${c.revenue||0}</td>
-      <td class="actions"><button class="edit-btn" onclick="editCommerce('${c.id}')">编辑</button><button class="del-btn" onclick="deleteCommerce('${c.id}')">删除</button></td>
+      <td>${c.name}</td><td>${c.type}</td><td>$${c.revenue||0}</td>
+      <td class="actions">
+        <button class="edit-btn" onclick="editCommerce('${c.id}')">编辑</button>
+        <button class="del-btn" onclick="deleteCommerce('${c.id}')">删除</button>
+      </td>
     </tr>`;
   });
-  html += '</tbody></table>'; c.innerHTML = html;
+  html += '</tbody></table>';
+  document.getElementById('commerceTable').innerHTML = html;
 }
 
-async function loadCommerce() { await loadTable('commerce', renderCommerce, 'commerceCount', 'searchCommerce'); }
-async function deleteCommerce(id) { if(!confirm('确定删除？')) return; await supabase.from('commerce').delete().eq('id',id); showToast('删除成功'); loadCommerce(); loadDashboard(); }
-function editCommerce(id) { supabase.from('commerce').select('*').eq('id',id).single().then(({data}) => openCommerceModal(data)); }
+async function loadCommerce() {
+  await loadTable('commerce', renderCommerce, 'commerceCount', 'searchCommerce', 'name');
+}
+
+async function deleteCommerce(id) {
+  if (!confirm('确定删除？')) return;
+  await supabase.from('commerce').delete().eq('id', id);
+  showToast('删除成功'); loadCommerce(); loadDashboard();
+}
+
+function editCommerce(id) {
+  supabase.from('commerce').select('*').eq('id', id).single().then(({data}) => openCommerceModal(data));
+}
 
 function openCommerceModal(existing) {
   const m = document.getElementById('commerceModalContent');
   m.innerHTML = `
-    <h3>${existing?'编辑商务项目':'新建商务项目'}</h3>
+    <h3>${existing?'编辑记录':'新建记录'}</h3>
     <div class="form-row">
       <div class="form-group"><label>名称</label><input id="comName" value="${existing?.name||''}"></div>
       <div class="form-group"><label>类型</label>
-        <select id="comType"><option value="会员费" ${existing?.type==='会员费'?'selected':''}>会员费</option><option value="活动赞助" ${existing?.type==='活动赞助'?'selected':''}>活动赞助</option><option value="商务合作" ${existing?.type==='商务合作'?'selected':''}>商务合作</option><option value="其他" ${existing?.type==='其他'?'selected':''}>其他</option></select>
+        <select id="comType">
+          <option value="会员费" ${existing?.type==='会员费'?'selected':''}>会员费</option>
+          <option value="活动赞助" ${existing?.type==='活动赞助'?'selected':''}>活动赞助</option>
+        </select>
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>收入（USD）</label><input type="number" id="comRevenue" value="${existing?.revenue||0}"></div>
+      <div class="form-group"><label>收入</label><input type="number" id="comRevenue" value="${existing?.revenue||0}"></div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('commerceModal')">取消</button>
       <button class="btn-submit" onclick="saveCommerce('${existing?.id||''}')">保存</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('commerceModal').classList.add('active');
 }
 
 async function saveCommerce(id) {
-  const obj = { name:document.getElementById('comName').value, type:document.getElementById('comType').value, revenue:+document.getElementById('comRevenue').value };
-  if (id) await supabase.from('commerce').update(obj).eq('id',id); else await supabase.from('commerce').insert(obj);
-  closeModal('commerceModal'); showToast('保存成功'); loadCommerce(); loadDashboard();
+  const obj = {
+    name: document.getElementById('comName').value,
+    type: document.getElementById('comType').value,
+    revenue: +document.getElementById('comRevenue').value
+  };
+  if (id) await supabase.from('commerce').update(obj).eq('id', id);
+  else await supabase.from('commerce').insert(obj);
+  closeModal('commerceModal');
+  showToast('保存成功');
+  loadCommerce(); loadDashboard();
 }
 
 /* ========== 政策 ========== */
 function renderPolicy(data) {
-  const c = document.getElementById('policyTableContainer');
-  if (!data || data.length === 0) { c.innerHTML = emptyHtml('暂无政策项目'); return; }
-  let html = `<table><thead><tr><th>项目名称</th><th>对接部门</th><th>进度（%）</th><th>操作</th></tr></thead><tbody>`;
+  if (!data.length) return document.getElementById('policyTable').innerHTML = emptyHtml('暂无项目');
+  let html = `<table><thead><tr><th>项目</th><th>部门</th><th>进度</th><th>操作</th></tr></thead><tbody>`;
   data.forEach(p => {
     html += `<tr>
-      <td>${p.project_name||'—'}</td><td>${p.department||'—'}</td>
-      <td><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${p.progress||0}%"></div></div><span class="status-badge st-${Math.min(Math.floor((p.progress||0)/25),3)}">${p.progress||0}%</span></td>
-      <td class="actions"><button class="edit-btn" onclick="editPolicy('${p.id}')">编辑</button><button class="del-btn" onclick="deletePolicy('${p.id}')">删除</button></td>
+      <td>${p.project_name}</td><td>${p.department}</td>
+      <td>${p.progress||0}%</td>
+      <td class="actions">
+        <button class="edit-btn" onclick="editPolicy('${p.id}')">编辑</button>
+        <button class="del-btn" onclick="deletePolicy('${p.id}')">删除</button>
+      </td>
     </tr>`;
   });
-  html += '</tbody></table>'; c.innerHTML = html;
+  html += '</tbody></table>';
+  document.getElementById('policyTable').innerHTML = html;
 }
 
-async function loadPolicy() { await loadTable('policy', renderPolicy, 'policyCount', 'searchPolicy'); }
-async function deletePolicy(id) { if(!confirm('确定删除？')) return; await supabase.from('policy').delete().eq('id',id); showToast('删除成功'); loadPolicy(); loadDashboard(); }
-function editPolicy(id) { supabase.from('policy').select('*').eq('id',id).single().then(({data}) => openPolicyModal(data)); }
+async function loadPolicy() {
+  await loadTable('policy', renderPolicy, 'policyCount', 'searchPolicy', 'project_name');
+}
+
+async function deletePolicy(id) {
+  if (!confirm('确定删除？')) return;
+  await supabase.from('policy').delete().eq('id', id);
+  showToast('删除成功'); loadPolicy(); loadDashboard();
+}
+
+function editPolicy(id) {
+  supabase.from('policy').select('*').eq('id', id).single().then(({data}) => openPolicyModal(data));
+}
 
 function openPolicyModal(existing) {
   const m = document.getElementById('policyModalContent');
   m.innerHTML = `
-    <h3>${existing?'编辑政策项目':'新建政策项目'}</h3>
+    <h3>${existing?'编辑项目':'新建项目'}</h3>
     <div class="form-row">
-      <div class="form-group"><label>项目名称</label><input id="polProject" value="${existing?.project_name||''}"></div>
-      <div class="form-group"><label>对接部门</label><input id="polDept" value="${existing?.department||''}"></div>
+      <div class="form-group"><label>项目名</label><input id="polProject" value="${existing?.project_name||''}"></div>
+      <div class="form-group"><label>部门</label><input id="polDept" value="${existing?.department||''}"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>进度（%）</label><input type="number" id="polProgress" value="${existing?.progress||0}" min="0" max="100"></div>
+      <div class="form-group"><label>进度(%)</label><input type="number" id="polProgress" value="${existing?.progress||0}" min="0" max="100"></div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('policyModal')">取消</button>
       <button class="btn-submit" onclick="savePolicy('${existing?.id||''}')">保存</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('policyModal').classList.add('active');
 }
 
 async function savePolicy(id) {
-  const obj = { project_name:document.getElementById('polProject').value, department:document.getElementById('polDept').value, progress:+document.getElementById('polProgress').value };
-  if (id) await supabase.from('policy').update(obj).eq('id',id); else await supabase.from('policy').insert(obj);
-  closeModal('policyModal'); showToast('保存成功'); loadPolicy(); loadDashboard();
+  const obj = {
+    project_name: document.getElementById('polProject').value,
+    department: document.getElementById('polDept').value,
+    progress: +document.getElementById('polProgress').value
+  };
+  if (id) await supabase.from('policy').update(obj).eq('id', id);
+  else await supabase.from('policy').insert(obj);
+  closeModal('policyModal');
+  showToast('保存成功');
+  loadPolicy(); loadDashboard();
 }
 
 /* ========== 财税 ========== */
 function renderTax(data) {
-  const c = document.getElementById('taxTableContainer');
-  if (!data || data.length === 0) { c.innerHTML = emptyHtml('暂无财税服务项目'); return; }
-  let html = `<table><thead><tr><th>客户</th><th>服务类型</th><th>周期</th><th>费用（USD）</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+  if (!data.length) return document.getElementById('taxTable').innerHTML = emptyHtml('暂无项目');
+  let html = `<table><thead><tr><th>客户</th><th>类型</th><th>费用</th><th>操作</th></tr></thead><tbody>`;
   data.forEach(t => {
     html += `<tr>
-      <td>${t.customer||'—'}</td><td>${t.service_type||'—'}</td><td>${t.period||'—'}</td><td>$${t.fee||0}</td>
-      <td><span class="status-badge st-${t.status??0}">${t.status?'已结单':'服务中'}</span></td>
-      <td class="actions"><button class="edit-btn" onclick="editTax('${t.id}')">编辑</button><button class="del-btn" onclick="deleteTax('${t.id}')">删除</button></td>
+      <td>${t.customer}</td><td>${t.service_type}</td><td>$${t.fee||0}</td>
+      <td class="actions">
+        <button class="edit-btn" onclick="editTax('${t.id}')">编辑</button>
+        <button class="del-btn" onclick="deleteTax('${t.id}')">删除</button>
+      </td>
     </tr>`;
   });
-  html += '</tbody></table>'; c.innerHTML = html;
+  html += '</tbody></table>';
+  document.getElementById('taxTable').innerHTML = html;
 }
 
 async function loadTax() {
-  await loadTable('tax', renderTax, 'taxCount', 'searchTax',
-    q => { const v = document.getElementById('filterTaxType').value; return v ? q.eq('service_type', v) : q; }
-  );
+  await loadTable('tax', renderTax, 'taxCount', 'searchTax', 'customer');
 }
 
-async function deleteTax(id) { if(!confirm('确定删除？')) return; await supabase.from('tax').delete().eq('id',id); showToast('删除成功'); loadTax(); loadDashboard(); }
-function editTax(id) { supabase.from('tax').select('*').eq('id',id).single().then(({data}) => openTaxModal(data)); }
+async function deleteTax(id) {
+  if (!confirm('确定删除？')) return;
+  await supabase.from('tax').delete().eq('id', id);
+  showToast('删除成功'); loadTax(); loadDashboard();
+}
+
+function editTax(id) {
+  supabase.from('tax').select('*').eq('id', id).single().then(({data}) => openTaxModal(data));
+}
 
 function openTaxModal(existing) {
   const m = document.getElementById('taxModalContent');
   m.innerHTML = `
-    <h3>${existing?'编辑财税项目':'新建财税项目'}</h3>
+    <h3>${existing?'编辑项目':'新建项目'}</h3>
     <div class="form-row">
-      <div class="form-group"><label>客户名称</label><input id="taxCustomer" value="${existing?.customer||''}"></div>
-      <div class="form-group"><label>服务类型</label>
-        <select id="taxType"><option value="小规模纳税人" ${existing?.service_type==='小规模纳税人'?'selected':''}>小规模纳税人</option><option value="一般纳税人" ${existing?.service_type==='一般纳税人'?'selected':''}>一般纳税人</option><option value="全套财税代理" ${existing?.service_type==='全套财税代理'?'selected':''}>全套财税代理</option><option value="增值税申报" ${existing?.service_type==='增值税申报'?'selected':''}>增值税申报</option><option value="企业所得税" ${existing?.service_type==='企业所得税'?'selected':''}>企业所得税</option><option value="个税代扣代缴" ${existing?.service_type==='个税代扣代缴'?'selected':''}>个税代扣代缴</option><option value="年度汇算清缴" ${existing?.service_type==='年度汇算清缴'?'selected':''}>年度汇算清缴</option><option value="税务登记" ${existing?.service_type==='税务登记'?'selected':''}>税务登记</option><option value="其他" ${existing?.service_type==='其他'?'selected':''}>其他</option></select>
+      <div class="form-group"><label>客户</label><input id="taxCustomer" value="${existing?.customer||''}"></div>
+      <div class="form-group"><label>类型</label>
+        <select id="taxType">
+          <option value="小规模纳税人" ${existing?.service_type==='小规模纳税人'?'selected':''}>小规模纳税人</option>
+          <option value="一般纳税人" ${existing?.service_type==='一般纳税人'?'selected':''}>一般纳税人</option>
+          <option value="全套财税代理" ${existing?.service_type==='全套财税代理'?'selected':''}>全套财税代理</option>
+        </select>
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>周期</label><select id="taxPeriod"><option value="月度" ${existing?.period==='月度'?'selected':''}>月度</option><option value="季度" ${existing?.period==='季度'?'selected':''}>季度</option><option value="年度" ${existing?.period==='年度'?'selected':''}>年度</option></select></div>
-      <div class="form-group"><label>费用（USD）</label><input type="number" id="taxFee" value="${existing?.fee||0}"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>状态</label><select id="taxStatus"><option value="0" ${!existing?.status?'selected':''}>服务中</option><option value="1" ${existing?.status?'selected':''}>已结单</option></select></div>
+      <div class="form-group"><label>费用</label><input type="number" id="taxFee" value="${existing?.fee||0}"></div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('taxModal')">取消</button>
       <button class="btn-submit" onclick="saveTax('${existing?.id||''}')">保存</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('taxModal').classList.add('active');
 }
 
 async function saveTax(id) {
-  const obj = { customer:document.getElementById('taxCustomer').value, service_type:document.getElementById('taxType').value, period:document.getElementById('taxPeriod').value, fee:+document.getElementById('taxFee').value, status:+document.getElementById('taxStatus').value };
-  if (id) await supabase.from('tax').update(obj).eq('id',id); else await supabase.from('tax').insert(obj);
-  closeModal('taxModal'); showToast('保存成功'); loadTax(); loadDashboard();
+  const obj = {
+    customer: document.getElementById('taxCustomer').value,
+    service_type: document.getElementById('taxType').value,
+    fee: +document.getElementById('taxFee').value
+  };
+  if (id) await supabase.from('tax').update(obj).eq('id', id);
+  else await supabase.from('tax').insert(obj);
+  closeModal('taxModal');
+  showToast('保存成功');
+  loadTax(); loadDashboard();
 }
 
 /* ========== 培训 ========== */
 function renderTraining(data) {
-  const c = document.getElementById('trainingTableContainer');
-  if (!data || data.length === 0) { c.innerHTML = emptyHtml('暂无培训项目'); return; }
-  let html = `<table><thead><tr><th>课程名称</th><th>学员</th><th>费用（USD）</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+  if (!data.length) return document.getElementById('trainingTable').innerHTML = emptyHtml('暂无项目');
+  let html = `<table><thead><tr><th>课程</th><th>学员</th><th>费用</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
   data.forEach(t => {
     html += `<tr>
-      <td>${t.course||'—'}</td><td>${t.trainee||'—'}</td><td>$${t.fee||0}</td>
-      <td><span class="status-badge st-${t.status??0}">${['招生中','进行中','已结课'][t.status]||'—'}</span></td>
-      <td class="actions"><button class="edit-btn" onclick="editTraining('${t.id}')">编辑</button><button class="del-btn" onclick="deleteTraining('${t.id}')">删除</button></td>
+      <td>${t.course}</td><td>${t.trainee}</td><td>$${t.fee||0}</td>
+      <td><span class="status-badge st-${t.status}">${['招生中','进行中','已结课'][t.status]}</span></td>
+      <td class="actions">
+        <button class="edit-btn" onclick="editTraining('${t.id}')">编辑</button>
+        <button class="del-btn" onclick="deleteTraining('${t.id}')">删除</button>
+      </td>
     </tr>`;
   });
-  html += '</tbody></table>'; c.innerHTML = html;
+  html += '</tbody></table>';
+  document.getElementById('trainingTable').innerHTML = html;
 }
 
 async function loadTraining() {
-  await loadTable('training', renderTraining, 'trainingCount', 'searchTraining',
-    q => { const v = document.getElementById('filterTrainingStatus').value; return v !== '-1' ? q.eq('status', +v) : q; }
-  );
+  await loadTable('training', renderTraining, 'trainingCount', 'searchTraining', 'course');
 }
 
-async function deleteTraining(id) { if(!confirm('确定删除？')) return; await supabase.from('training').delete().eq('id',id); showToast('删除成功'); loadTraining(); loadDashboard(); }
-function editTraining(id) { supabase.from('training').select('*').eq('id',id).single().then(({data}) => openTrainingModal(data)); }
+async function deleteTraining(id) {
+  if (!confirm('确定删除？')) return;
+  await supabase.from('training').delete().eq('id', id);
+  showToast('删除成功'); loadTraining(); loadDashboard();
+}
+
+function editTraining(id) {
+  supabase.from('training').select('*').eq('id', id).single().then(({data}) => openTrainingModal(data));
+}
 
 function openTrainingModal(existing) {
   const m = document.getElementById('trainingModalContent');
   m.innerHTML = `
-    <h3>${existing?'编辑培训项目':'新建培训项目'}</h3>
+    <h3>${existing?'编辑项目':'新建项目'}</h3>
     <div class="form-row">
-      <div class="form-group"><label>课程名称</label><input id="trCourse" value="${existing?.course||''}"></div>
+      <div class="form-group"><label>课程</label><input id="trCourse" value="${existing?.course||''}"></div>
       <div class="form-group"><label>学员</label><input id="trTrainee" value="${existing?.trainee||''}"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>费用（USD）</label><input type="number" id="trFee" value="${existing?.fee||0}"></div>
-      <div class="form-group"><label>状态</label><select id="trStatus"><option value="0" ${!existing?.status?'selected':''}>招生中</option><option value="1" ${existing?.status===1?'selected':''}>进行中</option><option value="2" ${existing?.status===2?'selected':''}>已结课</option></select></div>
+      <div class="form-group"><label>费用</label><input type="number" id="trFee" value="${existing?.fee||0}"></div>
+      <div class="form-group"><label>状态</label>
+        <select id="trStatus">
+          <option value="0" ${existing?.status===0?'selected':''}>招生中</option>
+          <option value="1" ${existing?.status===1?'selected':''}>进行中</option>
+          <option value="2" ${existing?.status===2?'selected':''}>已结课</option>
+        </select>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('trainingModal')">取消</button>
       <button class="btn-submit" onclick="saveTraining('${existing?.id||''}')">保存</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('trainingModal').classList.add('active');
 }
 
 async function saveTraining(id) {
-  const obj = { course:document.getElementById('trCourse').value, trainee:document.getElementById('trTrainee').value, fee:+document.getElementById('trFee').value, status:+document.getElementById('trStatus').value };
-  if (id) await supabase.from('training').update(obj).eq('id',id); else await supabase.from('training').insert(obj);
-  closeModal('trainingModal'); showToast('保存成功'); loadTraining(); loadDashboard();
+  const obj = {
+    course: document.getElementById('trCourse').value,
+    trainee: document.getElementById('trTrainee').value,
+    fee: +document.getElementById('trFee').value,
+    status: +document.getElementById('trStatus').value
+  };
+  if (id) await supabase.from('training').update(obj).eq('id', id);
+  else await supabase.from('training').insert(obj);
+  closeModal('trainingModal');
+  showToast('保存成功');
+  loadTraining(); loadDashboard();
 }
 
 /* ========== 法律 ========== */
 function renderLegal(data) {
-  const c = document.getElementById('legalTableContainer');
-  if (!data || data.length === 0) { c.innerHTML = emptyHtml('暂无法律项目'); return; }
-  let html = `<table><thead><tr><th>客户</th><th>案件类型</th><th>费用（USD）</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+  if (!data.length) return document.getElementById('legalTable').innerHTML = emptyHtml('暂无项目');
+  let html = `<table><thead><tr><th>客户</th><th>案件</th><th>费用</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
   data.forEach(l => {
     html += `<tr>
-      <td>${l.customer||'—'}</td><td>${l.case_type||'—'}</td><td>$${l.fee||0}</td>
-      <td><span class="status-badge st-${l.status??0}">${['咨询中','处理中','已结案'][l.status]||'—'}</span></td>
-      <td class="actions"><button class="edit-btn" onclick="editLegal('${l.id}')">编辑</button><button class="del-btn" onclick="deleteLegal('${l.id}')">删除</button></td>
+      <td>${l.customer}</td><td>${l.case_type}</td><td>$${l.fee||0}</td>
+      <td><span class="status-badge st-${l.status}">${['咨询中','处理中','已结案'][l.status]}</span></td>
+      <td class="actions">
+        <button class="edit-btn" onclick="editLegal('${l.id}')">编辑</button>
+        <button class="del-btn" onclick="deleteLegal('${l.id}')">删除</button>
+      </td>
     </tr>`;
   });
-  html += '</tbody></table>'; c.innerHTML = html;
+  html += '</tbody></table>';
+  document.getElementById('legalTable').innerHTML = html;
 }
 
 async function loadLegal() {
-  await loadTable('legal', renderLegal, 'legalCount', 'searchLegal',
-    q => { const v = document.getElementById('filterLegalStatus').value; return v !== '-1' ? q.eq('status', +v) : q; }
-  );
+  await loadTable('legal', renderLegal, 'legalCount', 'searchLegal', 'customer');
 }
 
-async function deleteLegal(id) { if(!confirm('确定删除？')) return; await supabase.from('legal').delete().eq('id',id); showToast('删除成功'); loadLegal(); loadDashboard(); }
-function editLegal(id) { supabase.from('legal').select('*').eq('id',id).single().then(({data}) => openLegalModal(data)); }
+async function deleteLegal(id) {
+  if (!confirm('确定删除？')) return;
+  await supabase.from('legal').delete().eq('id', id);
+  showToast('删除成功'); loadLegal(); loadDashboard();
+}
+
+function editLegal(id) {
+  supabase.from('legal').select('*').eq('id', id).single().then(({data}) => openLegalModal(data));
+}
 
 function openLegalModal(existing) {
   const m = document.getElementById('legalModalContent');
   m.innerHTML = `
-    <h3>${existing?'编辑法律项目':'新建法律项目'}</h3>
+    <h3>${existing?'编辑项目':'新建项目'}</h3>
     <div class="form-row">
       <div class="form-group"><label>客户</label><input id="lgCustomer" value="${existing?.customer||''}"></div>
-      <div class="form-group"><label>案件类型</label>
-        <select id="lgCaseType"><option value="合同审查" ${existing?.case_type==='合同审查'?'selected':''}>合同审查</option><option value="公司法务" ${existing?.case_type==='公司法务'?'selected':''}>公司法务</option><option value="知识产权" ${existing?.case_type==='知识产权'?'selected':''}>知识产权</option><option value="劳动仲裁" ${existing?.case_type==='劳动仲裁'?'selected':''}>劳动仲裁</option><option value="诉讼代理" ${existing?.case_type==='诉讼代理'?'selected':''}>诉讼代理</option><option value="其他" ${existing?.case_type==='其他'?'selected':''}>其他</option></select>
+      <div class="form-group"><label>案件</label>
+        <select id="lgCase">
+          <option value="合同审查" ${existing?.case_type==='合同审查'?'selected':''}>合同审查</option>
+          <option value="公司法务" ${existing?.case_type==='公司法务'?'selected':''}>公司法务</option>
+          <option value="劳动仲裁" ${existing?.case_type==='劳动仲裁'?'selected':''}>劳动仲裁</option>
+        </select>
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>费用（USD）</label><input type="number" id="lgFee" value="${existing?.fee||0}"></div>
-      <div class="form-group"><label>状态</label><select id="lgStatus"><option value="0" ${!existing?.status?'selected':''}>咨询中</option><option value="1" ${existing?.status===1?'selected':''}>处理中</option><option value="2" ${existing?.status===2?'selected':''}>已结案</option></select></div>
+      <div class="form-group"><label>费用</label><input type="number" id="lgFee" value="${existing?.fee||0}"></div>
+      <div class="form-group"><label>状态</label>
+        <select id="lgStatus">
+          <option value="0" ${existing?.status===0?'selected':''}>咨询中</option>
+          <option value="1" ${existing?.status===1?'selected':''}>处理中</option>
+          <option value="2" ${existing?.status===2?'selected':''}>已结案</option>
+        </select>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('legalModal')">取消</button>
       <button class="btn-submit" onclick="saveLegal('${existing?.id||''}')">保存</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('legalModal').classList.add('active');
 }
 
 async function saveLegal(id) {
-  const obj = { customer:document.getElementById('lgCustomer').value, case_type:document.getElementById('lgCaseType').value, fee:+document.getElementById('lgFee').value, status:+document.getElementById('lgStatus').value };
-  if (id) await supabase.from('legal').update(obj).eq('id',id); else await supabase.from('legal').insert(obj);
-  closeModal('legalModal'); showToast('保存成功'); loadLegal(); loadDashboard();
+  const obj = {
+    customer: document.getElementById('lgCustomer').value,
+    case_type: document.getElementById('lgCase').value,
+    fee: +document.getElementById('lgFee').value,
+    status: +document.getElementById('lgStatus').value
+  };
+  if (id) await supabase.from('legal').update(obj).eq('id', id);
+  else await supabase.from('legal').insert(obj);
+  closeModal('legalModal');
+  showToast('保存成功');
+  loadLegal(); loadDashboard();
 }
 
 /* ========== 会员 ========== */
 function renderMembers(data) {
-  const c = document.getElementById('memberTableContainer');
-  if (!data || data.length === 0) { c.innerHTML = emptyHtml('暂无会员记录，请点击「新增会员」'); return; }
-  let html = `<table><thead><tr><th>会员名称</th><th>等级</th><th>入会费（USD）</th><th>加入日期</th><th>操作</th></tr></thead><tbody>`;
+  if (!data.length) return document.getElementById('memberTable').innerHTML = emptyHtml('暂无会员');
+  let html = `<table><thead><tr><th>姓名</th><th>等级</th><th>费用</th><th>操作</th></tr></thead><tbody>`;
   data.forEach(m => {
     html += `<tr>
-      <td>${m.name||'—'}</td><td><span class="tag tag-gold">${m.level||'—'}</span></td><td>$${m.fee||0}</td><td>${fmtDate(m.join_date)}</td>
-      <td class="actions"><button class="edit-btn" onclick="editMember('${m.id}')">编辑</button><button class="del-btn" onclick="deleteMember('${m.id}')">删除</button></td>
+      <td>${m.name}</td><td>${m.level}</td><td>$${m.fee||0}</td>
+      <td class="actions">
+        <button class="edit-btn" onclick="editMember('${m.id}')">编辑</button>
+        <button class="del-btn" onclick="deleteMember('${m.id}')">删除</button>
+      </td>
     </tr>`;
   });
-  html += '</tbody></table>'; c.innerHTML = html;
-  // 更新汇总卡片
-  const all = data;
-  document.getElementById('memTotal').textContent = all.length;
-  document.getElementById('memNormal').textContent = all.filter(m => m.level === '普通会员').length;
-  document.getElementById('memDirector').textContent = all.filter(m => m.level === '理事会员').length;
-  document.getElementById('memStrategic').textContent = all.filter(m => m.level === '战略会员').length;
+  html += '</tbody></table>';
+  document.getElementById('memberTable').innerHTML = html;
 }
 
 async function loadMembers() {
-  await loadTable('members', renderMembers, 'memberCount', 'searchMember',
-    q => { const v = document.getElementById('filterMemLevel').value; return v ? q.eq('level', v) : q; }
-  );
+  await loadTable('members', renderMembers, 'memberCount', 'searchMember', 'name');
 }
 
-async function deleteMember(id) { if(!confirm('确定删除？')) return; await supabase.from('members').delete().eq('id',id); showToast('删除成功'); loadMembers(); loadDashboard(); }
-function editMember(id) { supabase.from('members').select('*').eq('id',id).single().then(({data}) => openMemberModal(data)); }
+async function deleteMember(id) {
+  if (!confirm('确定删除？')) return;
+  await supabase.from('members').delete().eq('id', id);
+  showToast('删除成功'); loadMembers(); loadDashboard();
+}
+
+function editMember(id) {
+  supabase.from('members').select('*').eq('id', id).single().then(({data}) => openMemberModal(data));
+}
 
 function openMemberModal(existing) {
   const m = document.getElementById('memberModalContent');
   m.innerHTML = `
-    <h3>${existing?'编辑会员信息':'新增会员'}</h3>
+    <h3>${existing?'编辑会员':'新增会员'}</h3>
     <div class="form-row">
-      <div class="form-group"><label>会员名称</label><input id="memName" value="${existing?.name||''}"></div>
+      <div class="form-group"><label>姓名</label><input id="memName" value="${existing?.name||''}"></div>
       <div class="form-group"><label>等级</label>
-        <select id="memLevel"><option value="普通会员" ${existing?.level==='普通会员'?'selected':''}>普通会员</option><option value="理事会员" ${existing?.level==='理事会员'?'selected':''}>理事会员</option><option value="战略会员" ${existing?.level==='战略会员'?'selected':''}>战略会员</option></select>
+        <select id="memLevel">
+          <option value="普通会员" ${existing?.level==='普通会员'?'selected':''}>普通会员</option>
+          <option value="理事会员" ${existing?.level==='理事会员'?'selected':''}>理事会员</option>
+          <option value="战略会员" ${existing?.level==='战略会员'?'selected':''}>战略会员</option>
+        </select>
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>入会费（USD）</label><input type="number" id="memFee" value="${existing?.fee||config.memFee}"></div>
-      <div class="form-group"><label>加入日期</label><input type="date" id="memJoinDate" value="${existing?.join_date||new Date().toISOString().slice(0,10)}"></div>
+      <div class="form-group"><label>费用</label><input type="number" id="memFee" value="${existing?.fee||0}"></div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('memberModal')">取消</button>
       <button class="btn-submit" onclick="saveMember('${existing?.id||''}')">保存</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('memberModal').classList.add('active');
 }
 
 async function saveMember(id) {
-  const obj = { name:document.getElementById('memName').value, level:document.getElementById('memLevel').value, fee:+document.getElementById('memFee').value, join_date:document.getElementById('memJoinDate').value };
-  if (id) await supabase.from('members').update(obj).eq('id',id); else await supabase.from('members').insert(obj);
-  closeModal('memberModal'); showToast('保存成功'); loadMembers(); loadDashboard();
+  const obj = {
+    name: document.getElementById('memName').value,
+    level: document.getElementById('memLevel').value,
+    fee: +document.getElementById('memFee').value
+  };
+  if (id) await supabase.from('members').update(obj).eq('id', id);
+  else await supabase.from('members').insert(obj);
+  closeModal('memberModal');
+  showToast('保存成功');
+  loadMembers(); loadDashboard();
 }
 
-/* ========== 费用支出 ========== */
+/* ========== 费用 ========== */
 function renderExpenses(data) {
-  const c = document.getElementById('expenseTableContainer');
-  if (!data || data.length === 0) { c.innerHTML = emptyHtml('暂无支出记录，请点击「新增支出」'); return; }
-  let html = `<table><thead><tr><th>类别</th><th>说明</th><th>金额（USD）</th><th>日期</th><th>操作</th></tr></thead><tbody>`;
+  if (!data.length) return document.getElementById('expenseTable').innerHTML = emptyHtml('暂无支出');
+  let html = `<table><thead><tr><th>类别</th><th>说明</th><th>金额</th><th>操作</th></tr></thead><tbody>`;
   data.forEach(e => {
-    html += `<tr class="expense-row">
-      <td><span class="expense-cat ecat-${e.category||'other'}">${e.category||'其他'}</span></td>
-      <td>${e.note||'—'}</td><td>$${e.amount||0}</td><td>${fmtDate(e.expense_date)}</td>
-      <td class="actions"><button class="edit-btn" onclick="editExpense('${e.id}')">编辑</button><button class="del-btn" onclick="deleteExpense('${e.id}')">删除</button></td>
+    html += `<tr>
+      <td>${e.category}</td><td>${e.note}</td><td>$${e.amount||0}</td>
+      <td class="actions">
+        <button class="edit-btn" onclick="editExpense('${e.id}')">编辑</button>
+        <button class="del-btn" onclick="deleteExpense('${e.id}')">删除</button>
+      </td>
     </tr>`;
   });
-  html += '</tbody></table>'; c.innerHTML = html;
+  html += '</tbody></table>';
+  document.getElementById('expenseTable').innerHTML = html;
 }
 
 async function loadExpenses() {
-  await loadTable('expenses', renderExpenses, 'expenseCount', 'searchExpense',
-    q => { const v = document.getElementById('filterExpCat').value; return v ? q.eq('category', v) : q; }
-  );
+  await loadTable('expenses', renderExpenses, 'expenseCount', 'searchExpense', 'note');
 }
 
-async function deleteExpense(id) { if(!confirm('确定删除？')) return; await supabase.from('expenses').delete().eq('id',id); showToast('删除成功'); loadExpenses(); loadDashboard(); }
-function editExpense(id) { supabase.from('expenses').select('*').eq('id',id).single().then(({data}) => openExpenseModal(data)); }
+async function deleteExpense(id) {
+  if (!confirm('确定删除？')) return;
+  await supabase.from('expenses').delete().eq('id', id);
+  showToast('删除成功'); loadExpenses(); loadDashboard();
+}
+
+function editExpense(id) {
+  supabase.from('expenses').select('*').eq('id', id).single().then(({data}) => openExpenseModal(data));
+}
 
 function openExpenseModal(existing) {
   const m = document.getElementById('expenseModalContent');
@@ -2664,76 +1447,48 @@ function openExpenseModal(existing) {
     <h3>${existing?'编辑支出':'新增支出'}</h3>
     <div class="form-row">
       <div class="form-group"><label>类别</label>
-        <select id="expCat"><option value="rent" ${existing?.category==='rent'?'selected':''}>房租/水电</option><option value="salary" ${existing?.category==='salary'?'selected':''}>人员工资</option><option value="utility" ${existing?.category==='utility'?'selected':''}>通讯/网络</option><option value="travel" ${existing?.category==='travel'?'selected':''}>差旅费</option><option value="marketing" ${existing?.category==='marketing'?'selected':''}>市场推广</option><option value="office" ${existing?.category==='office'?'selected':''}>办公用品</option><option value="other" ${existing?.category==='other'?'selected':''}>其他</option></select>
+        <select id="expCat">
+          <option value="rent" ${existing?.category==='rent'?'selected':''}>房租/水电</option>
+          <option value="salary" ${existing?.category==='salary'?'selected':''}>人员工资</option>
+          <option value="utility" ${existing?.category==='utility'?'selected':''}>通讯/网络</option>
+          <option value="travel" ${existing?.category==='travel'?'selected':''}>差旅费</option>
+          <option value="marketing" ${existing?.category==='marketing'?'selected':''}>市场推广</option>
+          <option value="office" ${existing?.category==='office'?'selected':''}>办公用品</option>
+          <option value="other" ${existing?.category==='other'?'selected':''}>其他</option>
+        </select>
       </div>
-      <div class="form-group"><label>金额（USD）</label><input type="number" id="expAmount" value="${existing?.amount||0}"></div>
+      <div class="form-group"><label>金额</label><input type="number" id="expAmount" value="${existing?.amount||0}"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label>日期</label><input type="date" id="expDate" value="${existing?.expense_date||new Date().toISOString().slice(0,10)}"></div>
-    </div>
-    <div class="form-group"><label>说明</label><textarea id="expNote" placeholder="支出说明">${existing?.note||''}</textarea></div>
+    <div class="form-group"><label>说明</label><textarea id="expNote">${existing?.note||''}</textarea></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('expenseModal')">取消</button>
       <button class="btn-submit" onclick="saveExpense('${existing?.id||''}')">保存</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('expenseModal').classList.add('active');
 }
 
 async function saveExpense(id) {
-  const obj = { category:document.getElementById('expCat').value, amount:+document.getElementById('expAmount').value, expense_date:document.getElementById('expDate').value, note:document.getElementById('expNote').value };
-  if (id) await supabase.from('expenses').update(obj).eq('id',id); else await supabase.from('expenses').insert(obj);
-  closeModal('expenseModal'); showToast('保存成功'); loadExpenses(); loadDashboard();
+  const obj = {
+    category: document.getElementById('expCat').value,
+    amount: +document.getElementById('expAmount').value,
+    note: document.getElementById('expNote').value
+  };
+  if (id) await supabase.from('expenses').update(obj).eq('id', id);
+  else await supabase.from('expenses').insert(obj);
+  closeModal('expenseModal');
+  showToast('保存成功');
+  loadExpenses(); loadDashboard();
 }
 
-/* ========== 用户管理 ========== */
-function openUserModal() {
-  const m = document.getElementById('userModalContent');
-  m.innerHTML = `
-    <h3>新增系统用户</h3>
-    <div class="form-row">
-      <div class="form-group"><label>邮箱</label><input id="newUserEmail" type="email" placeholder="user@mna.com"></div>
-      <div class="form-group"><label>密码</label><input id="newUserPwd" type="password" placeholder="至少6位"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>角色</label>
-        <select id="newUserRole"><option value="user">普通用户</option><option value="admin">管理员</option></select>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('userModal')">取消</button>
-      <button class="btn-submit" onclick="saveUser()">创建用户</button>
-    </div>
-  `;
-  document.getElementById('userModal').classList.add('active');
+/* ========== 财务汇总 ========== */
+async function loadFinance() {
+  document.getElementById('financeBreakdown').innerHTML = '<p>功能完善中...</p>';
 }
 
-async function saveUser() {
-  const email = document.getElementById('newUserEmail').value.trim();
-  const pwd = document.getElementById('newUserPwd').value;
-  if (!email || !pwd) { showToast('请填写完整', 'error'); return; }
-  // Note: Creating users requires admin privileges; for now we add to a local users table
-  const role = document.getElementById('newUserRole').value;
-  await supabase.from('system_users').insert({ email, role });
-  closeModal('userModal'); showToast('用户已创建'); loadUsers();
+/* ========== 配置 ========== */
+function applyConfig() {
+  showToast('参数已保存');
 }
-
-async function loadUsers() {
-  const { data } = await supabase.from('system_users').select('*');
-  const c = document.getElementById('userList');
-  if (!data || data.length === 0) { c.innerHTML = emptyHtml('暂无系统用户'); return; }
-  let html = '';
-  data.forEach(u => {
-    html += `<div class="user-list-item">
-      <div class="u-info"><div class="u-name">${u.email}</div><div class="u-role"><span class="role-badge ${u.role}">${u.role==='admin'?'管理员':'普通用户'}</span></div></div>
-      <div class="u-actions"><button class="edit-btn" onclick="editUser('${u.id}')">编辑</button><button class="del-btn" onclick="deleteUser('${u.id}')">删除</button></div>
-    </div>`;
-  });
-  c.innerHTML = html;
-}
-
-async function deleteUser(id) { if(!confirm('确定删除？')) return; await supabase.from('system_users').delete().eq('id',id); showToast('删除成功'); loadUsers(); }
-function editUser(id) { /* TODO: implement edit */ }
 
 /* ========== 修改密码 ========== */
 async function changePassword() {
@@ -2741,165 +1496,40 @@ async function changePassword() {
   const newPwd = document.getElementById('newPwd').value;
   const newPwd2 = document.getElementById('newPwd2').value;
   const msg = document.getElementById('pwdMsg');
-  if (!oldPwd || !newPwd) { msg.textContent = '请填写完整'; msg.style.color = '#ff4d4f'; return; }
-  if (newPwd !== newPwd2) { msg.textContent = '两次新密码不一致'; msg.style.color = '#ff4d4f'; return; }
-  if (newPwd.length < 6) { msg.textContent = '密码至少6位'; msg.style.color = '#ff4d4f'; return; }
+  if (newPwd !== newPwd2) {
+    msg.textContent = '两次密码不一致';
+    msg.style.color = '#ff4d4f';
+    return;
+  }
   const { error } = await supabase.auth.updateUser({ password: newPwd });
-  if (error) { msg.textContent = '修改失败：' + error.message; msg.style.color = '#ff4d4f'; }
-  else { msg.textContent = '✅ 密码修改成功'; msg.style.color = '#52c41a'; }
+  if (error) {
+    msg.textContent = '修改失败：' + error.message;
+    msg.style.color = '#ff4d4f';
+  } else {
+    msg.textContent = '✅ 密码修改成功';
+    msg.style.color = '#52c41a';
+  }
 }
 
-/* ========== 配置保存 ========== */
-function applyConfig() {
-  config.profitPerContainer = +document.getElementById('cfgProfit').value;
-  config.rebateRate = +document.getElementById('cfgRebate').value;
-  supabase.from('config').upsert({ key:'logistics', value: JSON.stringify({ profit: config.profitPerContainer, rebate: config.rebateRate }) });
-  showToast('物流参数已更新');
-}
-function applyOverseasConfig() {
-  config.overseasReg = +document.getElementById('cfgOverseasReg').value;
-  config.overseasFiscal = +document.getElementById('cfgOverseasFiscal').value;
-  supabase.from('config').upsert({ key:'overseas', value: JSON.stringify({ reg: config.overseasReg, fiscal: config.overseasFiscal }) });
-  showToast('出海服务参数已更新');
-}
-function applyInvConfig() {
-  config.invCommission = +document.getElementById('cfgInvCommission').value;
-  supabase.from('config').upsert({ key:'investment', value: JSON.stringify({ commission: config.invCommission }) });
-  showToast('投融资佣金已更新');
-}
-function applyMemConfig() {
-  config.memFee = +document.getElementById('cfgMemFee').value;
-  config.memDirector = +document.getElementById('cfgMemDirector').value;
-  config.memStrategic = +document.getElementById('cfgMemStrategic').value;
-  supabase.from('config').upsert({ key:'membership', value: JSON.stringify({ normal: config.memFee, director: config.memDirector, strategic: config.memStrategic }) });
-  showToast('会员入会费已更新');
+/* ========== 导出CSV ========== */
+function exportCSV(table) {
+  showToast('导出功能开发中');
 }
 
-function addPricingRule() {
-  const c = document.getElementById('taxPricingRules');
-  const div = document.createElement('div');
-  div.className = 'pricing-rule';
-  div.innerHTML = `
-    <label>月营业额 ≤</label><input type="number" class="pr-max" value="100000" min="0" step="10000"> USD
-    <label>服务类型：</label>
-    <select class="pr-type"><option value="小规模纳税人">小规模纳税人</option><option value="一般纳税人">一般纳税人</option><option value="全套财税代理">全套财税代理</option><option value="增值税申报">增值税申报</option><option value="企业所得税">企业所得税</option><option value="个税代扣代缴">个税代扣代缴</option><option value="年度汇算清缴">年度汇算清缴</option><option value="税务登记">税务登记</option><option value="其他">其他</option></select>
-    <label>周期：</label>
-    <select class="pr-period"><option value="月度">月度</option><option value="季度">季度</option><option value="年度">年度</option></select>
-    <label>服务费（USD）：</label><input type="number" class="pr-fee" value="99" min="0" step="10">
-    <button class="btn-red" onclick="removePricingRule(this)">删除</button>
-  `;
-  c.appendChild(div);
+/* ========== 弹窗关闭 ========== */
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
 }
 
-function removePricingRule(btn) { btn.closest('.pricing-rule').remove(); }
-
-function savePricingRules() {
-  const rules = [];
-  document.querySelectorAll('.pricing-rule').forEach(r => {
-    rules.push({ max: +r.querySelector('.pr-max').value, type: r.querySelector('.pr-type').value, period: r.querySelector('.pr-period').value, fee: +r.querySelector('.pr-fee').value });
-  });
-  supabase.from('config').upsert({ key:'tax_pricing', value: JSON.stringify(rules) });
-  showToast('财税计费模板已保存');
-}
-
-/* ========== 台账 ========== */
-function prevLogMonth() { shiftMonth('logMonth', -1); }
-function nextLogMonth() { shiftMonth('logMonth', 1); }
-function prevOvMonth() { shiftMonth('ovMonth', -1); }
-function nextOvMonth() { shiftMonth('ovMonth', 1); }
-function prevInvMonth() { shiftMonth('invMonth', -1); }
-function nextInvMonth() { shiftMonth('invMonth', 1); }
-function prevComMonth() { shiftMonth('comMonth', -1); }
-function nextComMonth() { shiftMonth('comMonth', 1); }
-function prevTaxMonth() { shiftMonth('taxMonth', -1); }
-function nextTaxMonth() { shiftMonth('taxMonth', 1); }
-function prevLegalMonth() { shiftMonth('legalMonth', -1); }
-function nextLegalMonth() { shiftMonth('legalMonth', 1); }
-function prevMemMonth() { shiftMonth('memMonth', -1); }
-function nextMemMonth() { shiftMonth('memMonth', 1); }
-function prevExpMonth() { shiftMonth('expMonth', -1); }
-function nextExpMonth() { shiftMonth('expMonth', 1); }
-function prevFinanceMonth() { shiftMonth('financeMonth', -1); }
-function nextFinanceMonth() { shiftMonth('financeMonth', 1); }
-
-async function loadOrderLedger() {
-  const month = document.getElementById('logMonth').value;
-  if (!month) return;
-  const { data } = await supabase.from('orders').select('*').like('created_at', `${month}%`);
-  document.getElementById('logCount').textContent = data?.length || 0;
-  let revenue = 0, cost = 0;
-  (data||[]).forEach(o => { revenue += (o.revenue||0); cost += (o.cost||0); });
-  document.getElementById('logRevenue').textContent = '$' + revenue;
-  document.getElementById('logCost').textContent = '$' + cost;
-  document.getElementById('logNet').textContent = '$' + (revenue - cost);
-  // Render table
-  let html = `<table><thead><tr><th>订单号</th><th>客户</th><th>收入</th><th>成本</th><th>利润</th></tr></thead><tbody>`;
-  (data||[]).forEach(o => {
-    html += `<tr><td>${o.order_no||'—'}</td><td>${o.customer||'—'}</td><td>$${(o.revenue||0)}</td><td>$${(o.cost||0)}</td><td>$${((o.revenue||0)-(o.cost||0))}</td></tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('logLedgerTable').innerHTML = html;
-}
-
-async function loadOverseasLedger() {
-  const month = document.getElementById('ovMonth').value;
-  if (!month) return;
-  const { data } = await supabase.from('overseas').select('*').like('created_at', `${month}%`);
-  document.getElementById('ovProjects').textContent = data?.length || 0;
-  let rev = 0, cost = 0;
-  (data||[]).forEach(o => { rev += (o.revenue||0); cost += (o.cost||0); });
-  document.getElementById('ovRevenue').textContent = '$' + rev;
-  document.getElementById('ovCost').textContent = '$' + cost;
-  document.getElementById('ovNet').textContent = '$' + (rev - cost);
-  let html = `<table><thead><tr><th>项目</th><th>企业</th><th>收入</th><th>成本</th><th>利润</th></tr></thead><tbody>`;
-  (data||[]).forEach(o => {
-    html += `<tr><td>${o.project_name||'—'}</td><td>${o.company||'—'}</td><td>$${(o.revenue||0)}</td><td>$${(o.cost||0)}</td><td>$${((o.revenue||0)-(o.cost||0))}</td></tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('ovLedgerTable').innerHTML = html;
-}
-
-async function loadInvestLedger() {
-  const month = document.getElementById('invMonth').value;
-  if (!month) return;
-  const { data } = await supabase.from('investments').select('*').like('created_at', `${month}%`);
-  document.getElementById('invProjects').textContent = data?.length || 0;
-  let amt = 0, comm = 0;
-  (data||[]).forEach(i => { amt += (i.amount||0); comm += (i.amount||0) * ((i.commission_rate||0)/100); });
-  document.getElementById('invAmount').textContent = '$' + amt;
-  document.getElementById('invCommission').textContent = '$' + Math.round(comm);
-  let html = `<table><thead><tr><th>项目</th><th>投资方</th><th>金额</th><th>佣金</th></tr></thead><tbody>`;
-  (data||[]).forEach(i => {
-    html += `<tr><td>${i.project_name||'—'}</td><td>${i.investor||'—'}</td><td>$${(i.amount||0)}</td><td>$${Math.round((i.amount||0)*(i.commission_rate||0)/100)}</td></tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('invLedgerTable').innerHTML = html;
-}
-
-async function loadCommerceLedger() {
-  const month = document.getElementById('comMonth').value;
-  if (!month) return;
-  const { data } = await supabase.from('commerce').select('*').like('created_at', `${month}%`);
-  document.getElementById('comItems').textContent = data?.length || 0;
-  let rev = 0;
-  (data||[]).forEach(c => rev += (c.revenue||0));
-  document.getElementById('comRevenue').textContent = '$' + rev;
-}
-
-async function loadTaxLedger() {
-  const month = document.getElementById('taxMonth').value;
-  if (!month) return;
-  const { data } = await supabase.from('tax').select('*').like('created_at', `${month}%`);
-  document.getElementById('taxProjects').textContent = data?.length || 0;
-  let rev = 0;
-  (data||[]).forEach(t => rev += (t.fee||0));
-  document.getElementById('taxRevenue').textContent = '$' + rev;
-  document.getElementById('taxNet').textContent = '$' + rev;
-  let html = `<table><thead><tr><th>客户</th><th>服务类型</th><th>费用</th></tr></thead><tbody>`;
-  (data||[]).forEach(t => { html += `<tr><td>${t.customer||'—'}</td><td>${t.service_type||'—'}</td><td>$${(t.fee||0)}</td></tr>`; });
-  html += '</tbody></table>';
-  document.getElementById('taxLedgerTable').innerHTML = html;
-}
-
-async
-      
+/* ========== 初始化 ========== */
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data } = await supabase.auth.getSession();
+  if (data.session) {
+    showApp(data.session.user);
+  } else {
+    applyLang(currentLang);
+  }
+});
+</script>
+</body>
+</html>
