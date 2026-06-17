@@ -251,7 +251,16 @@
   .tag-teal { background: #e6fffb; color: #13c2c2; }
   .tag-purple { background: #f9e6ff; color: #722ed1; }
   .tag-gold { background: #fff7e6; color: #d48806; }
-</style>
+.lang-switch {
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 12px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.lang-switch:hover { background: rgba(255,255,255,0.25); }</style>
 </head>
 <body>
 
@@ -324,7 +333,9 @@
       </div>
     </div>
     <div class="user-bar">
-      <div class="avatar">👤</div>
+      <div class="lang-switch" onclick="toggleLang()">
+  🌐 <span id="langLabel">EN</span>
+</div><div class="avatar">👤</div>
       <div class="user-info">
         <div class="uname" id="currentUserName"></div>
         <div class="urole" id="currentUserRole"></div>
@@ -3438,5 +3449,45 @@ window.addPricingRule = addPricingRule;
 window.initDefaultUsers = initDefaultUsers;
 console.log('MNA System: All functions bound to window');
 </script>
-</body>
+<script>
+const i18n = {
+ zh: {
+   login_title:"MNA 业务管理平台",
+   username:"👤 用户名",
+   password:"🔑 密码",
+   login_btn:"登 录",
+   logout:"退出登录",
+   dashboard:"仪表盘",
+   logistics:"物流订单跟踪",
+   tax:"财税业务",
+   legal:"法律咨询合规"
+ },
+ en: {
+   login_title:"MNA Business Platform",
+   username:"👤 Username",
+   password:"🔑 Password",
+   login_btn:"Sign In",
+   logout:"Logout",
+   dashboard:"Dashboard",
+   logistics:"Logistics Tracking",
+   tax:"Tax & Accounting",
+   legal:"Legal Compliance"
+ }
+};
+let currentLang = localStorage.getItem('mna_lang') || 'zh';
+function applyLang(lang){
+  currentLang = lang;
+  localStorage.setItem('mna_lang', lang);
+  const d = i18n[lang];
+  Object.keys(d).forEach(k=>{
+    const el = document.getElementById('txt_'+k);
+    if(el) el.innerHTML = d[k];
+  });
+  document.getElementById('langLabel').innerText = lang==='zh'?'EN':'中';
+}
+function toggleLang(){
+  applyLang(currentLang==='zh'?'en':'zh');
+}
+document.addEventListener('DOMContentLoaded', ()=>applyLang(currentLang));
+</script></body>
 </html>
