@@ -154,7 +154,7 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
     <div class="login-form">
       <div class="form-group"><label data-i18n="username">👤 用户名（邮箱）</label><input type="email" id="loginUser" placeholder="admin@mna.com" autocomplete="username" autofocus></div>
       <div class="form-group"><label data-i18n="password">🔑 密码</label><input type="password" id="loginPass" placeholder="请输入密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <button class="login-btn" onclick="doLogin()" data-i18n="login_btn">登 录</button>
+      <button class="login-btn" onclick="doLogin()">登 录</button>
       <div class="login-error" id="loginError"></div>
     </div>
     <div class="login-links"><a onclick="alert('请联系管理员重置密码')" data-i18n="forgot">忘记密码？</a></div>
