@@ -1,164 +1,261 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MNA 湄公产业资本联盟 · 财税业务管理平台</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<title>MNA 湄公产业资本联盟 · 业务管理平台</title>
 <style>
-/* ==================== 全局样式 ==================== */
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'WenQuanYi Micro Hei','Noto Sans CJK SC',sans-serif; background:#f0f2f5; color:#333; font-size:14px; min-height:100vh; }
-a { text-decoration:none; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'WenQuanYi Micro Hei','Noto Sans CJK SC',sans-serif;background:#f0f2f5;color:#333;font-size:14px;min-height:100vh}
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f2b5e 0%,#1a4a8a 40%,#1e6fb3 100%);position:relative;overflow:hidden}
+.login-page::before{content:'';position:absolute;width:500px;height:500px;background:rgba(255,255,255,.04);border-radius:50%;top:-150px;left:-150px}
+.login-page::after{content:'';position:absolute;width:400px;height:400px;background:rgba(255,255,255,.03);border-radius:50%;bottom:-120px;right:-120px}
+.login-box{background:#fff;border-radius:16px;padding:44px 40px;width:440px;max-width:92vw;box-shadow:0 16px 50px rgba(0,0,0,.2);position:relative;z-index:1}
+.login-logo{text-align:center;margin-bottom:6px}
+.login-logo .icon{font-size:52px}
+.login-logo h2{font-size:22px;color:#0f2b5e;margin:8px 0 4px}
+.login-logo p{font-size:12px;color:#888;line-height:1.6}
+.login-form{margin-top:28px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-weight:500;color:#555;margin-bottom:6px;font-size:13px}
+.form-group input,.form-group select{width:100%;padding:10px 14px;border:1px solid #d9d9d9;border-radius:8px;font-size:14px;font-family:inherit;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus{border-color:#1a4a8a;outline:none;box-shadow:0 0 0 2px rgba(26,74,138,.12)}
+.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,#0f2b5e,#1a4a8a);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s;font-family:inherit}
+.login-btn:hover{opacity:.9}
+.login-error{color:#ff4d4f;font-size:13px;text-align:center;margin-top:12px;min-height:20px}
+.login-footer{text-align:center;margin-top:24px;font-size:11px;color:#bbb}
+.login-links{display:flex;justify-content:space-between;margin-top:14px;font-size:12px}
+.login-links a{color:#1a4a8a;cursor:pointer;text-decoration:none}
+.login-links a:hover{text-decoration:underline}
 
-/* 登录页 */
-.login-page { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#0f2b5e 0%,#1a4a8a 40%,#1e6fb3 100%); position:relative; overflow:hidden; }
-.login-box { background:#fff; border-radius:16px; padding:44px 40px; width:440px; max-width:92vw; box-shadow:0 16px 50px rgba(0,0,0,.2); position:relative; z-index:1; }
-.login-logo { text-align:center; margin-bottom:6px; }
-.login-logo .icon { font-size:52px; }
-.login-logo h2 { font-size:22px; color:#0f2b5e; margin:8px 0 4px; }
-.login-logo p { font-size:12px; color:#888; line-height:1.6; }
-.form-group { margin-bottom:18px; }
-.form-group label { display:block; font-weight:500; color:#555; margin-bottom:6px; font-size:13px; }
-.login-form input { width:100%; padding:10px 14px; border:1px solid #d9d9d9; border-radius:8px; font-size:14px; font-family:inherit; transition:border-color .2s; }
-.login-form input:focus { border-color:#1a4a8a; outline:none; box-shadow:0 0 0 2px rgba(26,74,138,.12); }
-.login-btn { width:100%; padding:12px; background:linear-gradient(135deg,#0f2b5e,#1a4a8a); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; transition:opacity .2s; font-family:inherit; }
-.login-btn:hover { opacity:.9; }
-.login-error { color:#ff4d4f; font-size:13px; text-align:center; margin-top:12px; min-height:20px; }
-.login-footer { text-align:center; margin-top:24px; font-size:11px; color:#bbb; }
-.login-links { display:flex; justify-content:space-between; margin-top:14px; font-size:12px; }
-.login-links a { color:#1a4a8a; cursor:pointer; }
-.login-links a:hover { text-decoration:underline; }
+/* App */
+.app-container{display:none;min-height:100vh}
+.app-header{background:linear-gradient(135deg,#0f2b5e 0%,#1a4a8a 100%);color:#fff;padding:0 32px;height:64px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.app-header .brand{display:flex;align-items:center;gap:12px}
+.app-header .brand .logo-icon{font-size:28px}
+.app-header .brand .brand-text h1{font-size:18px;font-weight:700;letter-spacing:1px}
+.app-header .brand .brand-text p{font-size:10px;opacity:.7;margin-top:1px}
+.app-header .user-bar{display:flex;align-items:center;gap:14px;font-size:13px}
+.app-header .user-bar .avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:16px}
+.app-header .user-bar .user-info{text-align:right}
+.app-header .user-bar .user-info .uname{font-weight:600}
+.app-header .user-bar .user-info .urole{font-size:11px;opacity:.6}
+.app-header .user-bar button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;transition:background .2s}
+.app-header .user-bar button:hover{background:rgba(255,255,255,.22)}
 
-/* 主应用 */
-.app-container { display:none; min-height:100vh; }
-.app-header { background:linear-gradient(135deg,#0f2b5e 0%,#1a4a8a 100%); color:#fff; padding:0 32px; height:64px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.15); }
-.app-header .brand { display:flex; align-items:center; gap:12px; }
-.app-header .brand .logo-icon { font-size:28px; }
-.app-header .brand .brand-text h1 { font-size:18px; font-weight:700; letter-spacing:1px; }
-.app-header .brand .brand-text p { font-size:10px; opacity:.7; margin-top:1px; }
-.app-header .user-bar { display:flex; align-items:center; gap:14px; font-size:13px; }
-.app-header .user-bar .avatar { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.15); display:flex; align-items:center; justify-content:center; font-size:16px; }
-.app-header .user-bar .user-info { text-align:right; }
-.app-header .user-bar .user-info .uname { font-weight:600; }
-.app-header .user-bar .user-info .urole { font-size:11px; opacity:.6; }
-.app-header .user-bar button { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); color:#fff; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; font-family:inherit; transition:background .2s; }
-.app-header .user-bar button:hover { background:rgba(255,255,255,.22); }
-.lang-switch { cursor:pointer; padding:4px 10px; border-radius:6px; background:rgba(255,255,255,.15); color:#fff; font-size:12px; border:1px solid rgba(255,255,255,.3); user-select:none; display:flex; align-items:center; gap:4px; }
-.lang-switch:hover { background:rgba(255,255,255,.25); }
+.main-body{display:flex;min-height:calc(100vh - 64px)}
+.sidebar{width:240px;background:#fff;border-right:1px solid #e8e8e8;padding:16px 0;flex-shrink:0;overflow-y:auto}
+.sidebar .nav-group{margin-bottom:8px}
+.sidebar .nav-group-title{padding:6px 20px;font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.sidebar .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:#555;font-size:13.5px;font-weight:500;transition:all .2s;border-left:3px solid transparent;background:none;border-top:none;border-right:none;border-bottom:none;width:100%;text-align:left;font-family:inherit}
+.sidebar .nav-item .nav-icon{font-size:18px;width:24px;text-align:center}
+.sidebar .nav-item:hover{background:#f6f9ff;color:#1a4a8a}
+.sidebar .nav-item.active{background:#eef3ff;color:#1a4a8a;border-left-color:#1a4a8a;font-weight:600}
+.content-area{flex:1;padding:24px;overflow-y:auto}
 
-.main-body { display:flex; min-height:calc(100vh - 64px); }
-.sidebar { width:240px; background:#fff; border-right:1px solid #e8e8e8; padding:16px 0; flex-shrink:0; overflow-y:auto; }
-.sidebar .nav-group { margin-bottom:8px; }
-.sidebar .nav-group-title { padding:6px 20px; font-size:11px; color:#aaa; text-transform:uppercase; letter-spacing:1px; font-weight:600; }
-.sidebar .nav-item { display:flex; align-items:center; gap:10px; padding:10px 20px; cursor:pointer; color:#555; font-size:13.5px; font-weight:500; transition:all .2s; border-left:3px solid transparent; background:none; border-top:none; border-right:none; border-bottom:none; width:100%; text-align:left; font-family:inherit; }
-.sidebar .nav-item .nav-icon { font-size:18px; width:24px; text-align:center; }
-.sidebar .nav-item:hover { background:#f6f9ff; color:#1a4a8a; }
-.sidebar .nav-item.active { background:#eef3ff; color:#1a4a8a; border-left-color:#1a4a8a; font-weight:600; }
-.content-area { flex:1; padding:24px; overflow-y:auto; }
+.page-section{display:none;animation:fadeIn .2s ease}
+.page-section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-.page-section { display:none; animation:fadeIn .2s ease; }
-.page-section.active { display:block; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.panel{background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:20px}
+.panel h3{font-size:16px;color:#0f2b5e;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel h3 .sub{font-size:12px;color:#999;font-weight:400}
 
-.panel { background:#fff; border-radius:12px; padding:24px; box-shadow:0 1px 6px rgba(0,0,0,.06); margin-bottom:20px; }
-.panel h3 { font-size:16px; color:#0f2b5e; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-.controls { display:flex; gap:12px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
-.controls label { font-weight:500; color:#555; white-space:nowrap; font-size:13px; }
-.controls select,.controls input,.controls button { padding:7px 14px; border:1px solid #d9d9d9; border-radius:6px; font-size:13px; font-family:inherit; }
-.controls select,.controls input { background:#fff; }
-.controls button { background:#1a4a8a; color:#fff; border:none; cursor:pointer; transition:background .2s; font-weight:500; }
-.controls button:hover { background:#0f2b5e; }
-.btn-green { background:#52c41a!important; } .btn-green:hover { background:#389e0d!important; }
-.btn-red { background:#ff4d4f!important; } .btn-red:hover { background:#cf1322!important; }
-.btn-orange { background:#fa8c16!important; } .btn-orange:hover { background:#d46b08!important; }
-.btn-teal { background:#13c2c2!important; } .btn-teal:hover { background:#08979c!important; }
-.btn-purple { background:#722ed1!important; } .btn-purple:hover { background:#531dab!important; }
-.btn-gold { background:#d48806!important; } .btn-gold:hover { background:#b37f00!important; }
+.controls{display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.controls label{font-weight:500;color:#555;white-space:nowrap;font-size:13px}
+.controls select,.controls input,.controls button{padding:7px 14px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;font-family:inherit}
+.controls select,.controls input{background:#fff}
+.controls button{background:#1a4a8a;color:#fff;border:none;cursor:pointer;transition:background .2s;font-weight:500}
+.controls button:hover{background:#0f2b5e}
+.btn-green{background:#52c41a!important}.btn-green:hover{background:#389e0d!important}
+.btn-red{background:#ff4d4f!important}.btn-red:hover{background:#cf1322!important}
+.btn-orange{background:#fa8c16!important}.btn-orange:hover{background:#d46b08!important}
+.btn-gray{background:#f5f5f5!important;color:#666!important}.btn-gray:hover{background:#e8e8e8!important}
+.btn-teal{background:#13c2c2!important}.btn-teal:hover{background:#08979c!important}
+.btn-purple{background:#722ed1!important}.btn-purple:hover{background:#531dab!important}
+.btn-gold{background:#d48806!important}.btn-gold:hover{background:#b37f00!important}
+.btn-old{background:#7cb305!important}.btn-old:hover{background:#5b8c00!important}
 
-.summary-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
-.card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 1px 6px rgba(0,0,0,.06); text-align:center; border-top:3px solid #1a4a8a; }
-.card .label { font-size:12px; color:#888; margin-bottom:8px; }
-.card .value { font-size:28px; font-weight:700; color:#0f2b5e; }
+.summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 6px rgba(0,0,0,.06);text-align:center;border-top:3px solid #1a4a8a}
+.card .label{font-size:12px;color:#888;margin-bottom:8px}
+.card .value{font-size:28px;font-weight:700;color:#0f2b5e}
+.card .value.profit{color:#52c41a}.card .value.rebate{color:#fa8c16}.card .value.cost{color:#ff4d4f}
+.card .unit{font-size:11px;color:#aaa;margin-top:4px}
 
-.table-wrapper { background:#fff; border-radius:12px; box-shadow:0 1px 6px rgba(0,0,0,.06); overflow:hidden; }
-.table-header { padding:16px 20px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
-.table-header h3 { font-size:15px; color:#0f2b5e; }
-table { width:100%; border-collapse:collapse; font-size:12.5px; }
-thead th { background:#fafbfc; padding:11px 8px; text-align:center; font-weight:600; color:#555; border-bottom:1px solid #e8e8e8; font-size:12px; }
-tbody td { padding:10px 6px; text-align:center; border-bottom:1px solid #f5f5f5; }
-tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
-.empty-state { text-align:center; padding:48px 20px; color:#bbb; }
-.empty-state .icon { font-size:48px; margin-bottom:12px; }
+.table-wrapper{background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.table-header h3{font-size:15px;color:#0f2b5e}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead th{background:#fafbfc;padding:11px 8px;text-align:center;font-weight:600;color:#555;border-bottom:1px solid #e8e8e8;font-size:12px}
+tbody td{padding:10px 6px;text-align:center;border-bottom:1px solid #f5f5f5}
+tbody tr:hover{background:#f6f9ff}
 
-.dashboard-welcome { background:linear-gradient(135deg,#0f2b5e,#1a4a8a); color:#fff; border-radius:12px; padding:28px; margin-bottom:24px; }
-.dashboard-welcome h2 { font-size:22px; margin-bottom:6px; }
-.dashboard-welcome p { font-size:13px; opacity:.8; }
-.dashboard-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-bottom:24px; }
-.dashboard-card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 1px 6px rgba(0,0,0,.06); border-left:4px solid #1a4a8a; }
-.dashboard-card h4 { font-size:14px; color:#333; margin-bottom:8px; }
-.dashboard-card .big-num { font-size:32px; font-weight:700; color:#1a4a8a; }
+.status-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.st-0{background:#e6f7ff;color:#1a4a8a}.st-1{background:#fff7e6;color:#d46b08}
+.st-2{background:#f6ffed;color:#389e0d}.st-3{background:#f9e6ff;color:#722ed1}
+.st-4{background:#e6fffb;color:#08979c}.st-5{background:#fff1e6;color:#fa8c16}
+.st-6{background:#f6ffed;color:#52c41a}.st-7{background:#f0f5ff;color:#0f2b5e}
+.st-active{background:#e6f7ff;color:#1a4a8a;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(26,74,138,.25)}50%{box-shadow:0 0 0 6px rgba(26,74,138,0)}}
 
-.status-badge { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:600; white-space:nowrap; }
-.st-0 { background:#e6f7ff; color:#1a4a8a; } .st-1 { background:#fff7e6; color:#d46b08; }
-.st-2 { background:#f6ffed; color:#389e0d; } .st-3 { background:#f9e6ff; color:#722ed1; }
-.st-4 { background:#e6fffb; color:#08979c; } .st-5 { background:#fff1e6; color:#fa8c16; }
-.st-6 { background:#f6ffed; color:#52c41a; }
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:1000;justify-content:center;align-items:center}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;border-radius:14px;padding:28px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.18)}
+.modal h3{margin-bottom:20px;color:#0f2b5e;font-size:18px}
+.form-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.form-group{margin-bottom:12px;flex:1;min-width:180px}
+.form-group label{display:block;margin-bottom:5px;font-weight:500;color:#555;font-size:12.5px}
+.form-group textarea{resize:vertical;min-height:60px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.modal-actions button{padding:8px 22px;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit;border:none;font-weight:500}
+.modal-actions .btn-cancel{background:#f5f5f5;color:#666}.modal-actions .btn-cancel:hover{background:#e8e8e8}
+.modal-actions .btn-submit{background:#1a4a8a;color:#fff}.modal-actions .btn-submit:hover{background:#0f2b5e}
 
-.actions button { padding:3px 10px; font-size:11.5px; border:none; border-radius:4px; cursor:pointer; margin:0 1px; font-family:inherit; }
-.actions .edit-btn { background:#e6f7ff; color:#1a4a8a; }
-.actions .del-btn { background:#fff1f0; color:#ff4d4f; }
+.timeline{position:relative;padding-left:28px;margin-top:12px}
+.timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:#e8e8e8}
+.timeline-item{position:relative;margin-bottom:16px}
+.timeline-item::before{content:'';position:absolute;left:-22px;top:3px;width:12px;height:12px;border-radius:50%;border:2px solid #d9d9d9;background:#fff;z-index:1}
+.timeline-item.done::before{background:#52c41a;border-color:#52c41a}
+.timeline-item.active::before{background:#1a4a8a;border-color:#1a4a8a;animation:pulse 1.5s infinite}
+.timeline-item .tl-title{font-weight:600;font-size:13px;color:#333}
+.timeline-item .tl-time{font-size:12px;color:#999;margin-top:2px}
+.timeline-item .tl-detail{font-size:12px;color:#666;margin-top:2px}
 
-.modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.45); z-index:1000; justify-content:center; align-items:center; }
-.modal-overlay.active { display:flex; }
-.modal { background:#fff; border-radius:14px; padding:28px; width:600px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 12px 40px rgba(0,0,0,.18); }
-.modal h3 { margin-bottom:20px; color:#0f2b5e; font-size:18px; }
-.form-row { display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
-.form-group { margin-bottom:12px; flex:1; min-width:180px; }
-.form-group label { display:block; margin-bottom:5px; font-weight:500; color:#555; font-size:12.5px; }
-.form-group input,.form-group select,.form-group textarea { width:100%; padding:8px 12px; border:1px solid #d9d9d9; border-radius:6px; font-size:13.5px; font-family:inherit; }
-.form-group textarea { resize:vertical; min-height:60px; }
-.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
-.modal-actions button { padding:8px 22px; border-radius:6px; font-size:14px; cursor:pointer; font-family:inherit; border:none; font-weight:500; }
-.modal-actions .btn-cancel { background:#f5f5f5; color:#666; } .modal-actions .btn-cancel:hover { background:#e8e8e8; }
-.modal-actions .btn-submit { background:#1a4a8a; color:#fff; } .modal-actions .btn-submit:hover { background:#0f2b5e; }
+.empty-state{text-align:center;padding:48px 20px;color:#bbb}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
 
-.toast { position:fixed; top:20px; right:20px; padding:12px 24px; border-radius:8px; color:#fff; font-size:14px; z-index:2000; display:none; animation:slideIn .3s ease; }
-.toast.show { display:block; } .toast.success { background:#52c41a; } .toast.error { background:#ff4d4f; }
-@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+.toast{position:fixed;top:20px;right:20px;padding:12px 24px;border-radius:8px;color:#fff;font-size:14px;z-index:2000;display:none;animation:slideIn .3s ease}
+.toast.show{display:block}.toast.success{background:#52c41a}.toast.error{background:#ff4d4f}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 
-.sub-tabs { display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid #e8e8e8; }
-.sub-tabs button { padding:10px 20px; cursor:pointer; font-weight:500; color:#888; border:none; border-bottom:2px solid transparent; background:none; font-size:13.5px; font-family:inherit; transition:all .2s; }
-.sub-tabs button.active { color:#1a4a8a; border-bottom-color:#1a4a8a; }
-.sub-tabs button:hover { color:#1a4a8a; }
+.footer-note{text-align:center;padding:20px;color:#bbb;font-size:12px}
+.dashboard-welcome{background:linear-gradient(135deg,#0f2b5e,#1a4a8a);color:#fff;border-radius:12px;padding:28px;margin-bottom:24px}
+.dashboard-welcome h2{font-size:22px;margin-bottom:6px}
+.dashboard-welcome p{font-size:13px;opacity:.8}
+.dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px}
+.dashboard-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 6px rgba(0,0,0,.06);border-left:4px solid #1a4a8a}
+.dashboard-card h4{font-size:14px;color:#333;margin-bottom:8px}
+.dashboard-card p{font-size:12px;color:#888;line-height:1.8}
+.dashboard-card .big-num{font-size:32px;font-weight:700;color:#1a4a8a}
 
-.finance-summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
-.finance-card { background:#fff; border-radius:10px; padding:16px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.06); border-top:3px solid #1a4a8a; }
-.finance-card .flabel { font-size:11px; color:#999; margin-bottom:6px; }
-.finance-card .fvalue { font-size:22px; font-weight:700; }
-.finance-card .fvalue.positive { color:#52c41a; }
-.finance-card .fvalue.negative { color:#ff4d4f; }
+.detail-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f0f0f0}
+.detail-header h3{font-size:18px;color:#0f2b5e}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+.detail-item{background:#fafafa;padding:10px 14px;border-radius:8px}
+.detail-item .di-label{font-size:11px;color:#999;margin-bottom:4px}
+.detail-item .di-value{font-size:14px;font-weight:600;color:#333}
+
+.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.filter-bar select,.filter-bar input{padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;font-family:inherit}
+
+.sub-tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid #e8e8e8}
+.sub-tabs button{padding:10px 20px;cursor:pointer;font-weight:500;color:#888;border:none;border-bottom:2px solid transparent;background:none;font-size:13.5px;font-family:inherit;transition:all .2s}
+.sub-tabs button.active{color:#1a4a8a;border-bottom-color:#1a4a8a}
+.sub-tabs button:hover{color:#1a4a8a}
+
+.section-title{font-size:15px;color:#0f2b5e;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:11px;font-weight:500;background:#f0f0f0;color:#666}
+.tag-blue{background:#e6f7ff;color:#1a4a8a}.tag-green{background:#f6ffed;color:#52c41a}
+.tag-orange{background:#fff7e6;color:#d46b08}.tag-purple{background:#f9e6ff;color:#722ed1}
+.tag-teal{background:#e6fffb;color:#08979c}.tag-red{background:#fff1f0;color:#ff4d4f}
+.tag-gold{background:#fff7e6;color:#d48806}
+
+.progress-bar-wrap{width:100%;height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin-bottom:2px}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#1a4a8a,#52c41a);border-radius:4px;transition:width .3s}
+
+.order-no{font-family:'Courier New',monospace;font-weight:700;color:#0f2b5e;font-size:12px}
+.role-badge{display:inline-block;padding:1px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.role-badge.admin{background:#fff7e6;color:#d46b08}
+.role-badge.user{background:#e6f7ff;color:#1a4a8a}
+.user-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid #f0f0f0;border-radius:8px;margin-bottom:8px;background:#fafafa}
+.user-list-item .u-info{text-align:left}
+.user-list-item .u-name{font-weight:600;color:#333}
+.user-list-item .u-role{font-size:12px;color:#999}
+.user-list-item .u-actions{display:flex;gap:6px}
+.user-list-item .u-actions button{padding:3px 10px;font-size:12px;border-radius:4px;border:none;cursor:pointer;font-family:inherit}
+
+.actions button{padding:3px 10px;font-size:11.5px;border:none;border-radius:4px;cursor:pointer;margin:0 1px;font-family:inherit}
+.actions .edit-btn{background:#e6f7ff;color:#1a4a8a}
+.actions .del-btn{background:#fff1f0;color:#ff4d4f}
+.actions .view-btn{background:#f6ffed;color:#52c41a}
+
+.expense-cat{display:inline-block;padding:1px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.ecat-rent{background:#fff1f0;color:#ff4d4f}.ecat-salary{background:#fff7e6;color:#d48806}
+.ecat-utility{background:#e6f7ff;color:#1a4a8a}.ecat-travel{background:#f6ffed;color:#52c41a}
+.ecat-marketing{background:#f9e6ff;color:#722ed1}.ecat-office{background:#e6fffb;color:#08979c}
+.ecat-other{background:#f0f0f0;color:#666}
+
+.finance-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.finance-card{background:#fff;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06);border-top:3px solid #1a4a8a}
+.finance-card .flabel{font-size:11px;color:#999;margin-bottom:6px}
+.finance-card .fvalue{font-size:22px;font-weight:700}
+.finance-card .fvalue.positive{color:#52c41a}
+.finance-card .fvalue.negative{color:#ff4d4f}
+.finance-card .fvalue.neutral{color:#0f2b5e}
+.finance-card .fsub{font-size:11px;color:#bbb;margin-top:4px}
+
+#shareQrCode canvas,#shareQrCode img{border:1px solid #eee;border-radius:8px;padding:8px;background:#fff}
 </style>
 </head>
 <body>
 
-<!-- ==================== 登录页 ==================== -->
+<!-- ==================== 登录页面 ==================== -->
 <div class="login-page" id="loginPage">
   <div class="login-box">
     <div class="login-logo">
       <div class="icon">🏛️</div>
       <h2 data-i18n="login_title">MNA 业务管理平台</h2>
-      <p data-i18n="login_sub">湄公产业资本联盟 Mekong Nexus Association<br>连接产业 · 资本 · 政府 · 国际资源</p>
+      <p data-i18n="login_subtitle">湄公产业资本联盟 Mekong Nexus Association<br>连接产业 · 资本 · 政府 · 国际资源</p>
     </div>
     <div class="login-form">
-      <div class="form-group"><label data-i18n="username">👤 用户名（邮箱）</label><input type="email" id="loginUser" placeholder="admin@mna.com" autocomplete="username" autofocus></div>
-      <div class="form-group"><label data-i18n="password">🔑 密码</label><input type="password" id="loginPass" placeholder="请输入密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <button class="login-btn" onclick="doLogin()">登 录</button>
+      <div class="form-group"><label data-i18n="username_label">👤 用户名</label><input type="text" id="loginUser" placeholder="请输入用户名" autocomplete="username" autofocus></div>
+      <div class="form-group"><label data-i18n="password_label">🔑 密码</label><input type="password" id="loginPass" placeholder="请输入密码" autocomplete="current-password"></div>
+      <button class="login-btn" onclick="doLogin()" data-i18n="login_btn">登 录</button>
       <div class="login-error" id="loginError"></div>
     </div>
-    <div class="login-links"><a onclick="alert('请联系管理员重置密码')" data-i18n="forgot">忘记密码？</a></div>
-    <div class="login-footer">© 2025 MNA · 仅授权用户可访问 · 数据加密存储</div>
+    <div class="login-links">
+      <a onclick="showResetPassword()" data-i18n="forgot_pwd">忘记密码？</a>
+      <span id="registerLink"><a onclick="showRegister()" data-i18n="register_link">注册新用户</a></span>
+    </div>
+    <div class="login-footer">© 2025 MNA · <span data-i18n="login_footer">仅授权用户可访问 · 数据加密存储</span></div>
+  </div>
+</div>
+
+<!-- ==================== 注册页面 ==================== -->
+<div class="login-page" id="registerPage" style="display:none">
+  <div class="login-box">
+    <div class="login-logo"><div class="icon">📝</div><h2 data-i18n="register_title">注册新账户</h2><p data-i18n="register_subtitle">创建您的 MNA 系统账户</p></div>
+    <div class="login-form">
+      <div class="form-group"><label data-i18n="username_label">👤 用户名</label><input type="text" id="regUser" placeholder="请输入用户名（3-20位）"></div>
+      <div class="form-group"><label data-i18n="password_label">🔑 密码</label><input type="password" id="regPass" placeholder="请输入密码（至少6位）"></div>
+      <div class="form-group"><label data-i18n="confirm_pwd_label">🔑 确认密码</label><input type="password" id="regPass2" placeholder="请再次输入密码"></div>
+      <div class="form-group">
+        <label data-i18n="role_label">🎭 角色</label>
+        <select id="regRole" style="width:100%;padding:10px 14px;border:1px solid #d9d9d9;border-radius:8px;font-size:14px;font-family:inherit">
+          <option value="user" data-i18n="role_user">普通用户</option>
+          <option value="admin" data-i18n="role_admin">管理员</option>
+        </select>
+      </div>
+      <button class="login-btn" onclick="doRegister()" data-i18n="register_btn">注 册</button>
+      <div class="login-error" id="regError"></div>
+    </div>
+    <div class="login-links"><a onclick="backToLogin()" data-i18n="back_to_login">← 返回登录</a></div>
+  </div>
+</div>
+
+<!-- ==================== 重置密码页面 ==================== -->
+<div class="login-page" id="resetPage" style="display:none">
+  <div class="login-box">
+    <div class="login-logo"><div class="icon">🔑</div><h2 data-i18n="reset_title">重置密码</h2><p data-i18n="reset_subtitle">请设置新密码</p></div>
+    <div class="login-form">
+      <div class="form-group"><label data-i18n="username_label">👤 用户名</label><input type="text" id="resetUser" placeholder="请输入用户名"></div>
+      <div class="form-group"><label data-i18n="new_pwd_label">🔑 新密码</label><input type="password" id="resetPass" placeholder="请输入新密码（至少6位）"></div>
+      <div class="form-group"><label data-i18n="confirm_pwd_label">🔑 确认新密码</label><input type="password" id="resetPass2" placeholder="请再次输入新密码"></div>
+      <button class="login-btn" onclick="doReset()" data-i18n="reset_btn">重置密码</button>
+      <div class="login-error" id="resetError"></div>
+    </div>
+    <div class="login-links"><a onclick="backToLogin()" data-i18n="back_to_login">← 返回登录</a></div>
   </div>
 </div>
 
@@ -168,1367 +265,1163 @@ tbody tr:hover { background:#f6f9ff; } tbody tr { cursor:pointer; }
     <div class="brand">
       <div class="logo-icon">🏛️</div>
       <div class="brand-text">
-        <h1 data-i18n="brand">MNA 湄公产业资本联盟</h1>
-        <p data-i18n="brand_sub">Mekong Nexus Association · 业务管理平台</p>
+        <h1 data-i18n="brand_title">MNA 湄公产业资本联盟</h1>
+        <p data-i18n="brand_subtitle">Mekong Nexus Association · 业务管理平台</p>
       </div>
     </div>
     <div class="user-bar">
-      <div class="lang-switch" onclick="toggleLang()">🌐 <span id="langLabel">EN</span></div>
       <div class="avatar">👤</div>
       <div class="user-info">
         <div class="uname" id="currentUserName"></div>
         <div class="urole" id="currentUserRole"></div>
       </div>
-      <button onclick="doLogout()" data-i18n="logout">退出登录</button>
+      <button onclick="doLogout()" data-i18n="logout_btn">退出登录</button>
+      <button onclick="toggleLang()" id="langToggleBtn" style="font-size:18px;padding:4px 8px;min-width:40px">🇬🇧</button>
     </div>
   </div>
 
   <div class="main-body">
     <div class="sidebar">
       <div class="nav-group">
-        <div class="nav-group-title" data-i18n="overview">📊 概览</div>
-        <button class="nav-item active" onclick="switchPage('dashboard', event)"><span class="nav-icon">🏠</span> <span data-i18n="dashboard">仪表盘</span></button>
+        <div class="nav-group-title" data-i18n="nav_overview">📊 概览</div>
+        <button class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+          <span class="nav-icon">🏠</span> <span data-i18n="nav_dashboard">仪表盘</span>
+        </button>
       </div>
       <div class="nav-group">
-        <div class="nav-group-title" data-i18n="business">🚢 业务板块</div>
-        <button class="nav-item" onclick="switchPage('logistics', event)"><span class="nav-icon">🚢</span> <span data-i18n="logistics">物流订单跟踪</span></button>
-        <button class="nav-item" onclick="switchPage('overseas', event)"><span class="nav-icon">🏗️</span> <span data-i18n="overseas">出海落地服务</span></button>
-        <button class="nav-item" onclick="switchPage('investment', event)"><span class="nav-icon">💰</span> <span data-i18n="investment">投融资对接</span></button>
-        <button class="nav-item" onclick="switchPage('commerce', event)"><span class="nav-icon">🤝</span> <span data-i18n="commerce">商务合作/会员</span></button>
-        <button class="nav-item" onclick="switchPage('policy', event)"><span class="nav-icon">📋</span> <span data-i18n="policy">政策解读/政府对接</span></button>
-        <button class="nav-item" onclick="switchPage('tax', event)"><span class="nav-icon">🧾</span> <span data-i18n="tax">财税业务</span></button>
-        <button class="nav-item" onclick="switchPage('training', event)"><span class="nav-icon">🎓</span> <span data-i18n="training">职业技能培训</span></button>
-        <button class="nav-item" onclick="switchPage('legal', event)"><span class="nav-icon">⚖️</span> <span data-i18n="legal">法律咨询合规</span></button>
+        <div class="nav-group-title" data-i18n="nav_business">🚢 业务板块</div>
+        <button class="nav-item" data-page="logistics" onclick="switchPage('logistics')"><span class="nav-icon">🚢</span> <span data-i18n="nav_logistics">物流订单跟踪</span></button>
+        <button class="nav-item" data-page="overseas" onclick="switchPage('overseas')"><span class="nav-icon">🏗️</span> <span data-i18n="nav_overseas">出海落地服务</span></button>
+        <button class="nav-item" data-page="investment" onclick="switchPage('investment')"><span class="nav-icon">💰</span> <span data-i18n="nav_investment">投融资对接</span></button>
+        <button class="nav-item" data-page="commerce" onclick="switchPage('commerce')"><span class="nav-icon">🤝</span> <span data-i18n="nav_commerce">商务合作/会员</span></button>
+        <button class="nav-item" data-page="policy" onclick="switchPage('policy')"><span class="nav-icon">📋</span> <span data-i18n="nav_policy">政策解读/政府对接</span></button>
+        <button class="nav-item" data-page="tax" onclick="switchPage('tax')"><span class="nav-icon">🧾</span> <span data-i18n="nav_tax">财税业务</span></button>
+        <button class="nav-item" data-page="training" onclick="switchPage('training')"><span class="nav-icon">🎓</span> <span data-i18n="nav_training">职业技能培训</span></button>
+        <button class="nav-item" data-page="legal" onclick="switchPage('legal')"><span class="nav-icon">⚖️</span> <span data-i18n="nav_legal">法律咨询合规</span></button>
       </div>
       <div class="nav-group admin-only" id="navGroupFinance" style="display:none">
-        <div class="nav-group-title">💰 财务中心</div>
-        <button class="nav-item" onclick="switchPage('finance', event)"><span class="nav-icon">📊</span> <span data-i18n="finance">统一财务报表</span></button>
-        <button class="nav-item" onclick="switchPage('membership', event)"><span class="nav-icon">🏅</span> <span data-i18n="membership">会员管理</span></button>
-        <button class="nav-item" onclick="switchPage('expenses', event)"><span class="nav-icon">💸</span> <span data-i18n="expenses">日常费用支出</span></button>
+        <div class="nav-group-title" data-i18n="nav_finance">💰 财务中心</div>
+        <button class="nav-item" data-page="finance" onclick="switchPage('finance')"><span class="nav-icon">📊</span> <span data-i18n="nav_finance_report">统一财务报表</span></button>
+        <button class="nav-item" data-page="membership" onclick="switchPage('membership')"><span class="nav-icon">🏅</span> <span data-i18n="nav_membership">会员管理</span></button>
+        <button class="nav-item" data-page="expenses" onclick="switchPage('expenses')"><span class="nav-icon">💸</span> <span data-i18n="nav_expenses">日常费用支出</span></button>
+      </div>
+      <div class="nav-group admin-only" id="navGroupAdmin" style="display:none">
+        <div class="nav-group-title" data-i18n="nav_admin">🔒 管理后台</div>
+        <button class="nav-item" data-page="taxPricing" onclick="switchPage('taxPricing')"><span class="nav-icon">🧾</span> <span data-i18n="nav_tax_pricing">财税计费模板</span></button>
+        <button class="nav-item" data-page="taxAlliance" onclick="switchPage('taxAlliance')"><span class="nav-icon">📑</span> <span data-i18n="nav_tax_alliance">财税联盟参考价</span></button>
+        <button class="nav-item" data-page="legalPricing" onclick="switchPage('legalPricing')"><span class="nav-icon">⚖️</span> <span data-i18n="nav_legal_pricing">法律计费参数</span></button>
+        <button class="nav-item" data-page="legalRisk" onclick="switchPage('legalRisk')"><span class="nav-icon">🔔</span> <span data-i18n="nav_legal_risk">法律风险预警</span></button>
       </div>
       <div class="nav-group">
-        <div class="nav-group-title">⚙️ 系统</div>
-        <button class="nav-item" onclick="switchPage('config', event)"><span class="nav-icon">⚙️</span> <span data-i18n="config">参数设置</span></button>
-        <button class="nav-item" onclick="switchPage('pwd', event)"><span class="nav-icon">🔑</span> <span data-i18n="change_pwd">修改密码</span></button>
+        <div class="nav-group-title" data-i18n="nav_system">⚙️ 系统</div>
+        <button class="nav-item" data-page="config" onclick="switchPage('config')"><span class="nav-icon">⚙️</span> <span data-i18n="nav_config">参数设置</span></button>
+        <button class="nav-item" data-page="users" id="navUsers" style="display:none" onclick="switchPage('users')"><span class="nav-icon">👥</span> <span data-i18n="nav_users">用户管理</span></button>
+        <button class="nav-item" data-page="pwd" onclick="switchPage('pwd')"><span class="nav-icon">🔑</span> <span data-i18n="nav_pwd">修改密码</span></button>
       </div>
     </div>
 
     <div class="content-area">
 
-      <!-- ===== 仪表盘 ===== -->
+      <!-- ==================== 仪表盘 ==================== -->
       <div class="page-section active" id="pageDashboard">
         <div class="dashboard-welcome">
-          <h2 data-i18n="welcome">👋 欢迎回来</h2>
-          <p>今天是 <span id="todayDate"></span> · 以下是您的业务概览</p>
+          <h2 id="welcomeTitle">👋 <span data-i18n="welcome_back">欢迎回来</span></h2>
+          <p id="welcomeSub"><span data-i18n="today_is">今天是</span> <span id="todayDate"></span> · <span data-i18n="today_overview">以下是您的业务概览</span></p>
         </div>
         <div class="dashboard-grid">
-          <div class="dashboard-card"><h4>🚢 物流在途订单</h4><div class="big-num" id="dbLogistics">—</div><p>个订单正在进行中</p></div>
-          <div class="dashboard-card" style="border-left-color:#d48806"><h4>🏅 协会会员</h4><div class="big-num" id="dbMembers" style="color:#d48806">—</div><p>位注册会员</p></div>
-          <div class="dashboard-card" style="border-left-color:#52c41a"><h4>💰 本月净收入</h4><div class="big-num" id="dbRevenue" style="color:#52c41a">—</div><p>总收入 - 总支出</p></div>
-          <div class="dashboard-card" style="border-left-color:#fa8c16"><h4>🏗️ 出海项目</h4><div class="big-num" id="dbOverseas" style="color:#fa8c16">—</div><p>个企业落地项目进行中</p></div>
-          <div class="dashboard-card" style="border-left-color:#722ed1"><h4>💰 投融资项目</h4><div class="big-num" id="dbInvestment" style="color:#722ed1">—</div><p>个项目在跟进中</p></div>
-          <div class="dashboard-card" style="border-left-color:#ff4d4f"><h4>💸 本月支出</h4><div class="big-num" id="dbExpenses" style="color:#ff4d4f">—</div><p>日常运营费用</p></div>
-          <div class="dashboard-card" style="border-left-color:#7cb305"><h4>🧾 财税项目</h4><div class="big-num" id="dbTax" style="color:#7cb305">—</div><p>工厂财税服务进行中</p></div>
-          <div class="dashboard-card" style="border-left-color:#13c2c2"><h4>🎓 培训项目</h4><div class="big-num" id="dbTraining" style="color:#13c2c2">—</div><p>培训项目进行中</p></div>
-          <div class="dashboard-card" style="border-left-color:#722ed1"><h4>⚖️ 法律项目</h4><div class="big-num" id="dbLegal" style="color:#722ed1">—</div><p>法律项目进行中</p></div>
-          <div class="dashboard-card" style="border-left-color:#d48806"><h4>📋 政策项目</h4><div class="big-num" id="dbPolicy" style="color:#d48806">—</div><p>政策项目进行中</p></div>
+          <div class="dashboard-card" style="border-left-color:#1a4a8a"><h4 data-i18n="db_logistics">🚢 物流在途订单</h4><div class="big-num" id="dbLogistics">0</div><p data-i18n="db_logistics_desc">个订单正在进行中</p></div>
+          <div class="dashboard-card" style="border-left-color:#d48806"><h4 data-i18n="db_members">🏅 协会会员</h4><div class="big-num" id="dbMembers" style="color:#d48806">0</div><p data-i18n="db_members_desc">位注册会员</p></div>
+          <div class="dashboard-card" style="border-left-color:#52c41a"><h4 data-i18n="db_revenue">💰 本月净收入</h4><div class="big-num" id="dbRevenue" style="color:#52c41a">$0</div><p data-i18n="db_revenue_desc">总收入 - 总支出</p></div>
+          <div class="dashboard-card" style="border-left-color:#fa8c16"><h4 data-i18n="db_overseas">🏗️ 出海项目</h4><div class="big-num" id="dbOverseas" style="color:#fa8c16">0</div><p data-i18n="db_overseas_desc">个企业落地项目进行中</p></div>
+          <div class="dashboard-card" style="border-left-color:#722ed1"><h4 data-i18n="db_investment">💰 投融资项目</h4><div class="big-num" id="dbInvestment" style="color:#722ed1">0</div><p data-i18n="db_investment_desc">个项目在跟进中</p></div>
+          <div class="dashboard-card" style="border-left-color:#ff4d4f"><h4 data-i18n="db_expenses">💸 本月支出</h4><div class="big-num" id="dbExpenses" style="color:#ff4d4f">$0</div><p data-i18n="db_expenses_desc">日常运营费用</p></div>
+          <div class="dashboard-card" style="border-left-color:#7cb305"><h4 data-i18n="db_tax">🧾 财税项目</h4><div class="big-num" id="dbTax" style="color:#7cb305">0</div><p data-i18n="db_tax_desc">工厂财税服务进行中</p></div>
+          <div class="dashboard-card" style="border-left-color:#13c2c2"><h4 data-i18n="db_training">🎓 职业技能培训</h4><div class="big-num" id="dbTraining" style="color:#13c2c2">0</div><p data-i18n="db_training_desc">培训项目进行中</p></div>
+          <div class="dashboard-card" style="border-left-color:#722ed1"><h4 data-i18n="db_legal">⚖️ 法律咨询合规</h4><div class="big-num" id="dbLegal" style="color:#722ed1">0</div><p data-i18n="db_legal_desc">法律项目进行中</p></div>
+          <div class="dashboard-card" style="border-left-color:#d48806"><h4 data-i18n="db_policy">📋 政策解读/政府对接</h4><div class="big-num" id="dbPolicy" style="color:#d48806">0</div><p data-i18n="db_policy_desc">政策项目进行中</p></div>
+        </div>
+        <div class="panel">
+          <h3 data-i18n="recent_activity">📌 近期活动</h3>
+          <div id="recentActivity" style="font-size:13px;color:#888;line-height:2"><p data-i18n="no_activity">暂无近期活动记录</p></div>
         </div>
       </div>
 
-      <!-- ===== 物流订单 ===== -->
+      <!-- ==================== 物流订单跟踪 ==================== -->
       <div class="page-section" id="pageLogistics">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'logList')">📋 订单列表</button>
-          <button onclick="switchSubTab(this,'logLedger')">📊 月度台账</button>
-        </div>
-        <div id="logList">
-          <div class="controls">
-            <button class="btn-green" onclick="openOrderModal()">➕ 新建物流订单</button>
-            <div style="flex:1"></div>
-            <select id="filterStatus" onchange="loadOrders()">
-              <option value="-1">全部状态</option>
-              <option value="0">待发柜</option><option value="1">已发柜（在途）</option>
-              <option value="2">已到港</option><option value="3">清关中</option>
-              <option value="4">已清关</option><option value="5">已到工厂</option>
-              <option value="6">已结单</option>
+        <div class="controls">
+          <button class="btn-green" onclick="openOrderModal()" data-i18n="new_logistics_order">➕ 新建物流订单</button>
+          <div style="flex:1"></div>
+          <div class="filter-bar">
+            <label data-i18n="filter_status">状态：</label>
+            <select id="filterStatus" onchange="renderOrders()">
+              <option value="-1" data-i18n="all">全部</option>
+              <option value="0" data-i18n="st0">待发柜</option>
+              <option value="1" data-i18n="st1">已发柜（在途）</option>
+              <option value="2" data-i18n="st2">已到港</option>
+              <option value="3" data-i18n="st3">清关中</option>
+              <option value="4" data-i18n="st4">已清关</option>
+              <option value="5" data-i18n="st5">已到工厂</option>
+              <option value="6" data-i18n="st6">已结单</option>
             </select>
-            <input type="text" id="searchOrder" placeholder="搜索客户/订单号..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadOrders()">
-            <button class="btn-orange" onclick="exportCSV('orders')">📥 导出CSV</button>
+            <input type="text" id="filterKeyword" placeholder="搜索客户/订单号/货柜号" data-i18n-placeholder="search_placeholder_logistics" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="renderOrders()">
           </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>📋 物流订单列表</h3><span style="font-size:12px;color:#aaa" id="orderCount">加载中...</span></div>
-            <div id="orderTable"></div>
-          </div>
+          <button class="btn-orange" onclick="exportOrdersCSV()" data-i18n="export_csv">📥 导出CSV</button>
         </div>
-        <div id="logLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="logMonth" onchange="loadOrderLedger()">
-            <button onclick="prevLogMonth()">◀</button><button onclick="nextLogMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('orders')">📥 导出CSV</button>
+        <div class="table-wrapper">
+          <div class="table-header"><h3 data-i18n="logistics_list">📋 物流订单列表</h3><span style="font-size:12px;color:#aaa" id="orderCount" data-i18n="total_orders">共 0 条订单</span></div>
+          <div id="orderTableContainer">
+            <div class="empty-state"><div class="icon">📭</div><p data-i18n="no_orders">暂无订单，请点击「新建物流订单」开始录入</p></div>
           </div>
-          <div class="summary-cards" id="logSummary">
-            <div class="card"><div class="label">订单数</div><div class="value" id="logCount">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value positive" id="logRevenue">$0</div></div>
-            <div class="card"><div class="label">总成本</div><div class="value negative" id="logCost">$0</div></div>
-            <div class="card"><div class="label">净利润</div><div class="value" id="logNet">$0</div></div>
-          </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="logLedgerTable"></div></div>
         </div>
       </div>
 
-      <!-- ===== 出海落地服务 ===== -->
+      <!-- ==================== 出海落地服务 ==================== -->
       <div class="page-section" id="pageOverseas">
         <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'ovList')">📋 项目列表</button>
-          <button onclick="switchSubTab(this,'ovLedger')">📊 月度台账</button>
+          <button class="active" onclick="switchSubTab(this,'overseasList')" data-i18n="tab_project_list">📋 项目列表</button>
+          <button onclick="switchSubTab(this,'overseasLedger')" data-i18n="tab_monthly_ledger">📊 月度台账</button>
         </div>
-        <div id="ovList">
+        <div id="overseasList">
           <div class="controls">
-            <button class="btn-green" onclick="openOverseasModal()">➕ 新建出海项目</button>
+            <button class="btn-green" onclick="openOverseasModal()" data-i18n="new_overseas">➕ 新建出海项目</button>
             <div style="flex:1"></div>
-            <input type="text" id="searchOverseas" placeholder="搜索客户/项目..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadOverseas()">
+            <input type="text" placeholder="搜索客户/项目名称..." data-i18n-placeholder="search_placeholder_overseas" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="renderOverseas(this.value)">
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>🏗️ 出海落地服务</h3><span style="font-size:12px;color:#aaa" id="overseasCount">加载中...</span></div>
-            <div id="overseasTable"></div>
+            <div class="table-header"><h3 data-i18n="overseas_list">🏗️ 出海落地项目</h3><span style="font-size:12px;color:#aaa" id="overseasCount" data-i18n="total_projects">共 0 个项目</span></div>
+            <div id="overseasTableContainer">
+              <div class="empty-state"><div class="icon">📭</div><p data-i18n="no_overseas">暂无出海项目，请点击「新建出海项目」</p></div>
+            </div>
           </div>
         </div>
-        <div id="ovLedger" style="display:none">
+        <div id="overseasLedger" style="display:none">
           <div class="controls">
-            <label>📅 月份：</label><input type="month" id="ovMonth" onchange="loadOverseasLedger()">
-            <button onclick="prevOvMonth()">◀</button><button onclick="nextOvMonth()">▶</button>
+            <label data-i18n="select_month">📅 月份：</label><input type="month" id="overseasMonth" onchange="renderOverseasLedger()">
+            <button onclick="prevOverseasMonth()">◀</button><button onclick="nextOverseasMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('overseas')">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportOverseasCSV()" data-i18n="export_csv">📥 导出CSV</button>
           </div>
-          <div class="summary-cards" id="ovSummary">
-            <div class="card"><div class="label">项目数</div><div class="value" id="ovProjects">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value positive" id="ovRevenue">$0</div></div>
-            <div class="card"><div class="label">总成本</div><div class="value negative" id="ovCost">$0</div></div>
-            <div class="card"><div class="label">净利润</div><div class="value" id="ovNet">$0</div></div>
+          <div class="summary-cards" id="overseasSummary">
+            <div class="card"><div class="label" data-i18n="sum_projects">项目数</div><div class="value" id="osProjects">0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_revenue">总收入</div><div class="value profit" id="osRevenue">$0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_cost">总成本</div><div class="value cost" id="osCost">$0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_net_profit">净利润</div><div class="value" id="osNet">$0</div></div>
           </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="ovLedgerTable"></div></div>
+          <div class="table-wrapper"><div class="table-header"><h3 data-i18n="monthly_detail">📊 月度明细</h3></div><div id="overseasLedgerTable"></div></div>
         </div>
       </div>
 
-      <!-- ===== 投融资对接 ===== -->
+      <!-- ==================== 投融资对接 ==================== -->
       <div class="page-section" id="pageInvestment">
         <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'invList')">📋 项目列表</button>
-          <button onclick="switchSubTab(this,'invLedger')">📊 月度台账</button>
+          <button class="active" onclick="switchSubTab(this,'invList')" data-i18n="tab_project_list">📋 项目列表</button>
+          <button onclick="switchSubTab(this,'invLedger')" data-i18n="tab_monthly_ledger">📊 月度台账</button>
         </div>
         <div id="invList">
           <div class="controls">
-            <button class="btn-purple" onclick="openInvestModal()">➕ 新建投融资项目</button>
+            <button class="btn-purple" onclick="openInvestModal()" data-i18n="new_invest">➕ 新建投融资项目</button>
             <div style="flex:1"></div>
-            <input type="text" id="searchInvest" placeholder="搜索项目/投资方..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadInvest()">
+            <input type="text" placeholder="搜索项目名称/投资方..." data-i18n-placeholder="search_placeholder_invest" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="renderInvest(this.value)">
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>💰 投融资项目列表</h3><span style="font-size:12px;color:#aaa" id="investCount">加载中...</span></div>
-            <div id="investTable"></div>
+            <div class="table-header"><h3 data-i18n="invest_list">💰 投融资项目列表</h3><span style="font-size:12px;color:#aaa" id="invCount" data-i18n="total_projects">共 0 个项目</span></div>
+            <div id="invTableContainer">
+              <div class="empty-state"><div class="icon">📭</div><p data-i18n="no_invest">暂无投融资项目</p></div>
+            </div>
           </div>
         </div>
         <div id="invLedger" style="display:none">
           <div class="controls">
-            <label>📅 月份：</label><input type="month" id="invMonth" onchange="loadInvestLedger()">
+            <label data-i18n="select_month">📅 月份：</label><input type="month" id="invMonth" onchange="renderInvLedger()">
             <button onclick="prevInvMonth()">◀</button><button onclick="nextInvMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('investments')">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportInvCSV()" data-i18n="export_csv">📥 导出CSV</button>
           </div>
           <div class="summary-cards" id="invSummary">
-            <div class="card"><div class="label">项目数</div><div class="value" id="invProjects">0</div></div>
-            <div class="card"><div class="label">涉及金额</div><div class="value" id="invAmount">$0</div></div>
-            <div class="card"><div class="label">佣金收入</div><div class="value positive" id="invCommission">$0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_projects">项目数</div><div class="value" id="ivProjects">0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_amount">涉及金额</div><div class="value" id="ivAmount">$0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_commission">佣金收入</div><div class="value profit" id="ivCommission">$0</div></div>
           </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="invLedgerTable"></div></div>
+          <div class="table-wrapper"><div class="table-header"><h3 data-i18n="monthly_detail">📊 月度明细</h3></div><div id="invLedgerTable"></div></div>
         </div>
       </div>
 
-      <!-- ===== 商务合作/会员 ===== -->
+      <!-- ==================== 商务合作/会员 ==================== -->
       <div class="page-section" id="pageCommerce">
         <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'comList')">📋 会员/活动列表</button>
-          <button onclick="switchSubTab(this,'comLedger')">📊 月度台账</button>
+          <button class="active" onclick="switchSubTab(this,'comList')" data-i18n="tab_member_list">📋 会员/活动列表</button>
+          <button onclick="switchSubTab(this,'comLedger')" data-i18n="tab_monthly_ledger">📊 月度台账</button>
         </div>
         <div id="comList">
           <div class="controls">
-            <button class="btn-teal" onclick="openCommerceModal()">➕ 新建商务项目</button>
+            <button class="btn-teal" onclick="openCommerceModal()" data-i18n="new_commerce">➕ 新建商务项目</button>
             <div style="flex:1"></div>
-            <input type="text" id="searchCommerce" placeholder="搜索会员/活动..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadCommerce()">
+            <input type="text" placeholder="搜索会员/活动名称..." data-i18n-placeholder="search_placeholder_commerce" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="renderCommerce(this.value)">
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>🤝 商务合作/会员</h3><span style="font-size:12px;color:#aaa" id="commerceCount">加载中...</span></div>
-            <div id="commerceTable"></div>
+            <div class="table-header"><h3 data-i18n="commerce_list">🤝 商务合作/会员</h3><span style="font-size:12px;color:#aaa" id="comCount" data-i18n="total_records">共 0 条记录</span></div>
+            <div id="comTableContainer">
+              <div class="empty-state"><div class="icon">📭</div><p data-i18n="no_commerce">暂无商务合作/会员记录</p></div>
+            </div>
           </div>
         </div>
         <div id="comLedger" style="display:none">
           <div class="controls">
-            <label>📅 月份：</label><input type="month" id="comMonth" onchange="loadCommerceLedger()">
+            <label data-i18n="select_month">📅 月份：</label><input type="month" id="comMonth" onchange="renderComLedger()">
             <button onclick="prevComMonth()">◀</button><button onclick="nextComMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('commerce')">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportComCSV()" data-i18n="export_csv">📥 导出CSV</button>
           </div>
           <div class="summary-cards">
-            <div class="card"><div class="label">会员/活动数</div><div class="value" id="comItems">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value positive" id="comRevenue">$0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_items">会员/活动数</div><div class="value" id="cmItems">0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_revenue">总收入</div><div class="value profit" id="cmRevenue">$0</div></div>
           </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="comLedgerTable"></div></div>
+          <div class="table-wrapper"><div class="table-header"><h3 data-i18n="monthly_detail">📊 月度明细</h3></div><div id="comLedgerTable"></div></div>
         </div>
       </div>
 
-      <!-- ===== 政策解读 ===== -->
+      <!-- ==================== 政策解读/政府对接 ==================== -->
       <div class="page-section" id="pagePolicy">
         <div class="controls">
-          <button class="btn-red" onclick="openPolicyModal()">➕ 新建政策项目</button>
+          <button class="btn-red" onclick="openPolicyModal()" data-i18n="new_policy">➕ 新建政策项目</button>
           <div style="flex:1"></div>
-          <input type="text" id="searchPolicy" placeholder="搜索项目/部门..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadPolicy()">
+          <input type="text" placeholder="搜索项目名称/对接部门..." data-i18n-placeholder="search_placeholder_policy" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="renderPolicy(this.value)">
         </div>
         <div class="table-wrapper">
-          <div class="table-header"><h3>📋 政策解读/政府对接</h3><span style="font-size:12px;color:#aaa" id="policyCount">加载中...</span></div>
-          <div id="policyTable"></div>
+          <div class="table-header"><h3 data-i18n="policy_list">📋 政策解读/政府对接项目</h3><span style="font-size:12px;color:#aaa" id="policyCount" data-i18n="total_projects">共 0 个项目</span></div>
+          <div id="policyTableContainer">
+            <div class="empty-state"><div class="icon">📭</div><p data-i18n="no_policy">暂无政策项目</p></div>
+          </div>
         </div>
       </div>
 
-      <!-- ===== 财税业务 ===== -->
-      <div class="page-section" id="pageTax">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'taxList')">📋 项目列表</button>
-          <button onclick="switchSubTab(this,'taxLedger')">📊 月度台账</button>
-        </div>
-        <div id="taxList">
-          <div class="controls">
-            <button class="btn-old" onclick="openTaxModal()">➕ 新建财税项目</button>
-            <div style="flex:1"></div>
-            <select id="filterTaxType" onchange="loadTax()">
-              <option value="">全部类型</option>
-              <option value="小规模纳税人">小规模纳税人</option>
-              <option value="一般纳税人">一般纳税人</option>
-              <option value="全套财税代理">全套财税代理</option>
-            </select>
-            <input type="text" id="searchTax" placeholder="搜索客户/类型..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadTax()">
-            <button class="btn-orange" onclick="exportCSV('tax')">📥 导出CSV</button>
-          </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>🧾 财税服务项目</h3><span style="font-size:12px;color:#aaa" id="taxCount">加载中...</span></div>
-            <div id="taxTable"></div>
-          </div>
-        </div>
-        <div id="taxLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="taxMonth" onchange="loadTaxLedger()">
-            <button onclick="prevTaxMonth()">◀</button><button onclick="nextTaxMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('tax')">📥 导出CSV</button>
-          </div>
-          <div class="summary-cards" id="taxSummary">
-            <div class="card"><div class="label">项目数</div><div class="value" id="taxProjects">0</div></div>
-            <div class="card"><div class="label">总收入</div><div class="value positive" id="taxRevenue">$0</div></div>
-            <div class="card"><div class="label">净利润</div><div class="value" id="taxNet">$0</div></div>
-          </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="taxLedgerTable"></div></div>
-        </div>
-      </div>
-
-      <!-- ===== 培训 ===== -->
-      <div class="page-section" id="pageTraining">
-        <div class="controls">
-          <button class="btn-teal" onclick="openTrainingModal()">➕ 新建培训项目</button>
-          <div style="flex:1"></div>
-          <select id="filterTrainingStatus" onchange="loadTraining()">
-            <option value="-1">全部状态</option>
-            <option value="0">招生中</option><option value="1">进行中</option><option value="2">已结课</option>
-          </select>
-          <input type="text" id="searchTraining" placeholder="搜索课程/学员..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadTraining()">
-        </div>
-        <div class="table-wrapper">
-          <div class="table-header"><h3>🎓 职业技能培训</h3><span style="font-size:12px;color:#aaa" id="trainingCount">加载中...</span></div>
-          <div id="trainingTable"></div>
-        </div>
-      </div>
-
-      <!-- ===== 法律 ===== -->
-      <div class="page-section" id="pageLegal">
-        <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'legalList')">📋 项目列表</button>
-          <button onclick="switchSubTab(this,'legalLedger')">📊 月度台账</button>
-        </div>
-        <div id="legalList">
-          <div class="controls">
-            <button class="btn-purple" onclick="openLegalModal()">➕ 新建法律项目</button>
-            <div style="flex:1"></div>
-            <select id="filterLegalStatus" onchange="loadLegal()">
-              <option value="-1">全部状态</option>
-              <option value="0">咨询中</option><option value="1">处理中</option><option value="2">已结案</option>
-            </select>
-            <input type="text" id="searchLegal" placeholder="搜索客户/案件..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadLegal()">
-          </div>
-          <div class="table-wrapper">
-            <div class="table-header"><h3>⚖️ 法律咨询合规</h3><span style="font-size:12px;color:#aaa" id="legalCount">加载中...</span></div>
-            <div id="legalTable"></div>
-          </div>
-        </div>
-        <div id="legalLedger" style="display:none">
-          <div class="controls">
-            <label>📅 月份：</label><input type="month" id="legalMonth" onchange="loadLegalLedger()">
-            <button onclick="prevLegalMonth()">◀</button><button onclick="nextLegalMonth()">▶</button>
-            <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('legal')">📥 导出CSV</button>
-          </div>
-          <div class="summary-cards" id="legalSummary">
-            <div class="card"><div class="label">案件数</div><div class="value" id="legalCases">0</div></div>
-            <div class="card"><div class="label">服务收入</div><div class="value positive" id="legalRevenue">$0</div></div>
-          </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="legalLedgerTable"></div></div>
-        </div>
-      </div>
-
-      <!-- ===== 会员 ===== -->
+      <!-- ==================== 会员管理 ==================== -->
       <div class="page-section" id="pageMembership">
         <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'memList')">🏅 会员列表</button>
-          <button onclick="switchSubTab(this,'memLedger')">📊 月度台账</button>
+          <button class="active" onclick="switchSubTab(this,'memList')" data-i18n="tab_member_list">👥 会员列表</button>
+          <button onclick="switchSubTab(this,'memLedger')" data-i18n="tab_monthly_ledger">📊 月度台账</button>
         </div>
         <div id="memList">
           <div class="controls">
-            <button class="btn-gold" onclick="openMemberModal()">➕ 新增会员</button>
+            <button class="btn-gold" onclick="openMemberModal()" data-i18n="new_member">➕ 新增会员</button>
             <div style="flex:1"></div>
-            <select id="filterMemLevel" onchange="loadMembers()">
-              <option value="">全部等级</option>
-              <option value="普通会员">普通会员</option>
-              <option value="理事会员">理事会员</option>
-              <option value="战略会员">战略会员</option>
-            </select>
-            <input type="text" id="searchMember" placeholder="搜索会员..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="loadMembers()">
+            <input type="text" placeholder="搜索会员名称..." data-i18n-placeholder="search_placeholder_members" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="renderMembers(this.value)">
           </div>
-          <div class="summary-cards" id="memberSummary">
-            <div class="card"><div class="label">会员总数</div><div class="value" id="memTotal">0</div></div>
-            <div class="card"><div class="label">普通会员</div><div class="value" id="memNormal">0</div></div>
-            <div class="card"><div class="label">理事会员</div><div class="value" id="memDirector">0</div></div>
-            <div class="card"><div class="label">战略会员</div><div class="value" id="memStrategic">0</div></div>
+          <div class="summary-cards" id="memberSummaryCards">
+            <div class="card"><div class="label" data-i18n="sum_total_members">会员总数</div><div class="value" id="memTotal">0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_normal_members">普通会员</div><div class="value" id="memNormal">0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_director_members">理事会员</div><div class="value" id="memDirector">0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_strategic_members">战略会员</div><div class="value" id="memStrategic">0</div></div>
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>🏅 协会会员列表</h3><span style="font-size:12px;color:#aaa" id="memberCount">加载中...</span></div>
-            <div id="memberTable"></div>
+            <div class="table-header"><h3 data-i18n="member_list">🏅 协会会员列表</h3><span style="font-size:12px;color:#aaa" id="memCount" data-i18n="total_members">共 0 位会员</span></div>
+            <div id="memTableContainer">
+              <div class="empty-state"><div class="icon">📭</div><p data-i18n="no_members">暂无会员记录，请点击「新增会员」</p></div>
+            </div>
           </div>
         </div>
         <div id="memLedger" style="display:none">
           <div class="controls">
-            <label>📅 月份：</label><input type="month" id="memMonth" onchange="loadMemberLedger()">
+            <label data-i18n="select_month">📅 月份：</label><input type="month" id="memMonth" onchange="renderMemLedger()">
             <button onclick="prevMemMonth()">◀</button><button onclick="nextMemMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('members')">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportMemCSV()" data-i18n="export_csv">📥 导出CSV</button>
           </div>
           <div class="summary-cards">
-            <div class="card"><div class="label">本月新增</div><div class="value" id="memNew">0</div></div>
-            <div class="card"><div class="label">会员费收入</div><div class="value positive" id="memRevenue">$0</div></div>
-            <div class="card"><div class="label">累计会员</div><div class="value" id="memTotal2">0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_new_members">本月新增会员</div><div class="value" id="mlNew">0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_member_fee">本月会员费收入</div><div class="value profit" id="mlRevenue">$0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_cumul_members">累计会员数</div><div class="value" id="mlTotal">0</div></div>
           </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="memberLedgerTable"></div></div>
+          <div class="table-wrapper"><div class="table-header"><h3 data-i18n="monthly_detail">📊 月度明细</h3></div><div id="memLedgerTable"></div></div>
         </div>
       </div>
 
-      <!-- ===== 费用 ===== -->
+      <!-- ==================== 日常费用支出 ==================== -->
       <div class="page-section" id="pageExpenses">
         <div class="sub-tabs">
-          <button class="active" onclick="switchSubTab(this,'expList')">📋 支出记录</button>
-          <button onclick="switchSubTab(this,'expLedger')">📊 月度台账</button>
+          <button class="active" onclick="switchSubTab(this,'expList')" data-i18n="tab_expense_list">📋 支出记录</button>
+          <button onclick="switchSubTab(this,'expLedger')" data-i18n="tab_monthly_ledger">📊 月度台账</button>
         </div>
         <div id="expList">
           <div class="controls">
-            <button class="btn-red" onclick="openExpenseModal()">➕ 新增支出</button>
+            <button class="btn-red" onclick="openExpenseModal()" data-i18n="new_expense">➕ 新增支出</button>
             <div style="flex:1"></div>
-            <select id="filterExpCat" onchange="loadExpenses()">
-              <option value="">全部</option>
-              <option value="rent">房租/水电</option>
-              <option value="salary">人员工资</option>
-              <option value="utility">通讯/网络</option>
-              <option value="travel">差旅费</option>
-              <option value="marketing">市场推广</option>
-              <option value="office">办公用品</option>
-              <option value="other">其他</option>
+            <label data-i18n="filter_category">类别：</label>
+            <select id="filterExpCat" onchange="renderExpenses()">
+              <option value="" data-i18n="all">全部</option>
+              <option value="rent" data-i18n="cat_rent">房租/水电</option>
+              <option value="salary" data-i18n="cat_salary">人员工资</option>
+              <option value="utility" data-i18n="cat_utility">通讯/网络</option>
+              <option value="travel" data-i18n="cat_travel">差旅费</option>
+              <option value="marketing" data-i18n="cat_marketing">市场推广</option>
+              <option value="office" data-i18n="cat_office">办公用品</option>
+              <option value="other" data-i18n="cat_other">其他</option>
             </select>
-            <input type="text" id="searchExpense" placeholder="搜索..." style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:180px" oninput="loadExpenses()">
+            <input type="text" placeholder="搜索..." data-i18n-placeholder="search_placeholder_expenses" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:180px" oninput="renderExpenses(this.value)">
           </div>
           <div class="table-wrapper">
-            <div class="table-header"><h3>💸 日常费用支出</h3><span style="font-size:12px;color:#aaa" id="expenseCount">加载中...</span></div>
-            <div id="expenseTable"></div>
+            <div class="table-header"><h3 data-i18n="expense_list">💸 日常费用支出</h3><span style="font-size:12px;color:#aaa" id="expCount" data-i18n="total_records">共 0 条记录</span></div>
+            <div id="expTableContainer">
+              <div class="empty-state"><div class="icon">📭</div><p data-i18n="no_expenses">暂无支出记录，请点击「新增支出」</p></div>
+            </div>
           </div>
         </div>
         <div id="expLedger" style="display:none">
           <div class="controls">
-            <label>📅 月份：</label><input type="month" id="expMonth" onchange="loadExpenseLedger()">
+            <label data-i18n="select_month">📅 月份：</label><input type="month" id="expMonth" onchange="renderExpLedger()">
             <button onclick="prevExpMonth()">◀</button><button onclick="nextExpMonth()">▶</button>
             <div style="flex:1"></div>
-            <button class="btn-orange" onclick="exportCSV('expenses')">📥 导出CSV</button>
+            <button class="btn-orange" onclick="exportExpCSV()" data-i18n="export_csv">📥 导出CSV</button>
           </div>
           <div class="summary-cards">
-            <div class="card"><div class="label">支出笔数</div><div class="value" id="expCount">0</div></div>
-            <div class="card"><div class="label">支出总额</div><div class="value negative" id="expTotal">$0</div></div>
-            <div class="card"><div class="label">最大单笔</div><div class="value" id="expMax">$0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_count">支出笔数</div><div class="value" id="elCount">0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_total">支出总额</div><div class="value cost" id="elTotal">$0</div></div>
+            <div class="card"><div class="label" data-i18n="sum_max_single">最大单笔</div><div class="value" id="elMax">$0</div></div>
           </div>
-          <div class="table-wrapper"><div class="table-header"><h3>📊 月度明细</h3></div><div id="expenseLedgerTable"></div></div>
+          <div class="table-wrapper"><div class="table-header"><h3 data-i18n="monthly_detail">📊 月度明细</h3></div><div id="expLedgerTable"></div></div>
         </div>
       </div>
 
-      <!-- ===== 财务 ===== -->
+      <!-- ==================== 统一财务报表 ==================== -->
       <div class="page-section" id="pageFinance">
         <div class="panel">
-          <h3>📊 全业务营收概览</h3>
+          <h3 data-i18n="finance_overview">📊 全业务营收概览</h3>
           <div class="controls">
-            <label>📅 选择月份：</label><input type="month" id="financeMonth" onchange="loadFinance()">
+            <label data-i18n="select_month">📅 选择月份：</label><input type="month" id="financeMonth" onchange="renderFinance()">
             <button onclick="prevFinanceMonth()">◀</button><button onclick="nextFinanceMonth()">▶</button>
           </div>
-          <div class="finance-summary-grid" id="financeSummary">
-            <div class="finance-card"><div class="flabel">物流利润</div><div class="fvalue" id="finLogistics">$0</div><div class="fsub">货柜运输</div></div>
-            <div class="finance-card"><div class="flabel">出海收入</div><div class="fvalue" id="finOverseas">$0</div><div class="fsub">企业落地</div></div>
-            <div class="finance-card"><div class="flabel">投融资佣金</div><div class="fvalue" id="finInvest">$0</div><div class="fsub">资本对接</div></div>
-            <div class="finance-card"><div class="flabel">商务/会员</div><div class="fvalue" id="finCommerce">$0</div><div class="fsub">合作·活动</div></div>
-            <div class="finance-card" style="border-top-color:#7cb305"><div class="flabel">🧾 财税收入</div><div class="fvalue" id="finTax" style="color:#7cb305">$0</div><div class="fsub">报税·财税</div></div>
-            <div class="finance-card" style="border-top-color:#13c2c2"><div class="flabel">🎓 培训收入</div><div class="fvalue" id="finTraining" style="color:#13c2c2">$0</div><div class="fsub">职业技能</div></div>
-            <div class="finance-card" style="border-top-color:#722ed1"><div class="flabel">⚖️ 法律收入</div><div class="fvalue" id="finLegal" style="color:#722ed1">$0</div><div class="fsub">法律咨询</div></div>
-            <div class="finance-card" style="border-top-color:#ff4d4f"><div class="flabel">政策收入</div><div class="fvalue" id="finPolicy">$0</div><div class="fsub">政府对接</div></div>
-            <div class="finance-card" style="border-top-color:#fa8c16"><div class="flabel">💰 本月总收入</div><div class="fvalue positive" id="finTotal" style="font-size:36px">$0</div><div class="fsub">所有板块合计</div></div>
+          <div class="summary-cards" id="financeSummary">
+            <div class="card"><div class="label" data-i18n="fin_logistics">物流利润</div><div class="value" id="finLogistics">$0</div><div class="unit" data-i18n="fin_logistics_desc">货柜运输</div></div>
+            <div class="card"><div class="label" data-i18n="fin_overseas">出海服务收入</div><div class="value" id="finOverseas">$0</div><div class="unit" data-i18n="fin_overseas_desc">企业落地</div></div>
+            <div class="card"><div class="label" data-i18n="fin_invest">投融资佣金</div><div class="value" id="finInvest">$0</div><div class="unit" data-i18n="fin_invest_desc">资本对接</div></div>
+            <div class="card"><div class="label" data-i18n="fin_commerce">商务/会员收入</div><div class="value" id="finCommerce">$0</div><div class="unit" data-i18n="fin_commerce_desc">合作·活动</div></div>
+            <div class="card" style="border-top-color:#7cb305"><div class="label" data-i18n="fin_tax">🧾 财税服务收入</div><div class="value" id="finTax" style="color:#7cb305">$0</div><div class="unit" data-i18n="fin_tax_desc">报税·财税</div></div>
+            <div class="card" style="border-top-color:#13c2c2"><div class="label" data-i18n="fin_training">🎓 培训服务收入</div><div class="value" id="finTraining" style="color:#13c2c2">$0</div><div class="unit" data-i18n="fin_training_desc">职业技能</div></div>
+            <div class="card" style="border-top-color:#722ed1"><div class="label" data-i18n="fin_legal">⚖️ 法律服务收入</div><div class="value" id="finLegal" style="color:#722ed1">$0</div><div class="unit" data-i18n="fin_legal_desc">法律咨询</div></div>
+            <div class="card" style="border-top-color:#ff4d4f"><div class="label" data-i18n="fin_policy">政策项目收入</div><div class="value" id="finPolicy">$0</div><div class="unit" data-i18n="fin_policy_desc">政府对接</div></div>
+            <div class="card" style="border-top-color:#fa8c16"><div class="label" data-i18n="fin_total_revenue">💰 本月总收入</div><div class="value profit" id="finTotal" style="font-size:36px">$0</div><div class="unit" data-i18n="fin_total_desc">所有板块合计</div></div>
           </div>
         </div>
         <div class="panel">
-          <h3>📈 收入构成</h3>
-          <div id="financeBreakdown" style="font-size:13px;color:#666;line-height:2">加载中...</div>
+          <h3 data-i18n="revenue_breakdown">📈 收入构成</h3>
+          <div id="financeBreakdown" style="font-size:13px;color:#666;line-height:2"><p data-i18n="no_data">暂无数据</p></div>
         </div>
       </div>
 
-      <!-- ===== 参数设置 ===== -->
+      <!-- ==================== 参数设置 ==================== -->
       <div class="page-section" id="pageConfig">
         <div class="panel">
-          <h3>⚙️ 物流计费参数</h3>
-          <div class="controls">
-            <label>每货柜利润（USD）：</label><input type="number" id="cfgProfit" value="180" min="0" step="10">
-            <label>返点比例（%）：</label><input type="number" id="cfgRebate" value="3" min="0" max="100" step="0.5">
-            <button class="btn-green" onclick="applyConfig()">应用参数</button>
+          <h3 data-i18n="cfg_logistics">⚙️ 物流计费参数</h3>
+          <div class="config-row">
+            <label data-i18n="cfg_profit_per">每货柜利润（USD）：</label><input type="number" id="cfgProfit" value="180" min="0" step="10">
+            <label data-i18n="cfg_rebate_pct">返点比例（%）：</label><input type="number" id="cfgRebate" value="3" min="0" max="100" step="0.5">
+            <button class="btn-green" onclick="applyConfig()" data-i18n="apply_config">应用参数</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h3 data-i18n="cfg_rebate_info">📌 返点说明</h3>
+          <ul style="font-size:13px;color:#666;line-height:2;padding-left:20px">
+            <li data-i18n="cfg_rebate_1">每笔订单利润 = 货柜数量 × 每货柜利润（默认 $180）</li>
+            <li data-i18n="cfg_rebate_2">返点金额 = 利润 × 返点比例（默认 3%）</li>
+            <li data-i18n="cfg_rebate_3">净收益 = 利润 - 返点</li>
+            <li data-i18n="cfg_rebate_4">修改参数后，历史数据会自动按新参数重新计算</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3 data-i18n="cfg_overseas">⚙️ 出海服务收费模板</h3>
+          <div class="config-row">
+            <label data-i18n="cfg_overseas_reg">公司注册（USD）：</label><input type="number" id="cfgOverseasReg" value="2000" min="0" step="100">
+            <label data-i18n="cfg_overseas_fiscal">财税代理/月（USD）：</label><input type="number" id="cfgOverseasFiscal" value="300" min="0" step="50">
+            <button class="btn-green" onclick="applyOverseasConfig()" data-i18n="save">保存</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h3 data-i18n="cfg_invest">⚙️ 投融资佣金比例</h3>
+          <div class="config-row">
+            <label data-i18n="cfg_invest_comm">成功佣金（%）：</label><input type="number" id="cfgInvCommission" value="3" min="0" max="20" step="0.5">
+            <button class="btn-green" onclick="applyInvConfig()" data-i18n="save">保存</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h3 data-i18n="cfg_member_fee">⚙️ 会员入会费</h3>
+          <div class="config-row">
+            <label data-i18n="cfg_normal_fee">普通会员入会费（USD）：</label><input type="number" id="cfgMemFee" value="999" min="0" step="50">
+            <label data-i18n="cfg_director_fee">理事会员入会费（USD）：</label><input type="number" id="cfgMemDirector" value="2999" min="0" step="100">
+            <label data-i18n="cfg_strategic_fee">战略会员入会费（USD）：</label><input type="number" id="cfgMemStrategic" value="9999" min="0" step="100">
+            <button class="btn-green" onclick="applyMemConfig()" data-i18n="save">保存</button>
           </div>
         </div>
       </div>
 
-      <!-- ===== 修改密码 ===== -->
-      <div class="page-section" id="pagePwd">
-        <div class="panel" style="max-width:500px">
-          <h3>🔑 修改密码</h3>
-          <div class="form-group"><label>当前密码</label><input type="password" id="oldPwd" placeholder="当前密码"></div>
-          <div class="form-group"><label>新密码</label><input type="password" id="newPwd" placeholder="至少6位"></div>
-          <div class="form-group"><label>确认新密码</label><input type="password" id="newPwd2" placeholder="再次输入"></div>
-          <button class="btn-green" onclick="changePassword()">提交修改</button>
-          <div id="pwdMsg" style="margin-top:10px;font-size:13px"></div>
+      <!-- ==================== 财税服务计费模板 ==================== -->
+      <div class="page-section" id="pageTaxPricing">
+        <div class="panel">
+          <h3>🧾 <span data-i18n="tax_pricing_title">财税服务计费模板</span> <span class="sub" data-i18n="tax_pricing_sub">（自定义服务费阶梯定价，管理员后台配置）</span></h3>
+          <div id="taxPricingRules">
+            <div class="pricing-rule" style="display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_turnover_le">月营业额 ≤</label>
+              <input type="number" class="pr-max" value="100000" min="0" step="10000" style="width:100px;padding:6px;border:1px solid #d9d9d9;border-radius:6px"> USD
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_service_type">服务类型：</label>
+              <select class="pr-type" style="padding:6px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px">
+                <option value="小规模纳税人" data-i18n="st_small_taxpayer">小规模纳税人</option>
+                <option value="一般纳税人" data-i18n="st_normal_taxpayer">一般纳税人</option>
+                <option value="全套财税代理" data-i18n="st_full_service">全套财税代理</option>
+                <option value="增值税申报" data-i18n="st_vat_decl">增值税申报</option>
+                <option value="企业所得税" data-i18n="st_corp_income_tax">企业所得税</option>
+                <option value="个税代扣代缴" data-i18n="st_indiv_tax">个税代扣代缴</option>
+                <option value="年度汇算清缴" data-i18n="st_annual_settle">年度汇算清缴</option>
+                <option value="税务登记" data-i18n="st_tax_reg">税务登记</option>
+                <option value="其他" data-i18n="st_other">其他</option>
+              </select>
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_period">周期：</label>
+              <select class="pr-period" style="padding:6px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px">
+                <option value="月度" data-i18n="period_monthly">月度</option>
+                <option value="季度" data-i18n="period_quarterly">季度</option>
+                <option value="年度" data-i18n="period_yearly">年度</option>
+              </select>
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_fee">服务费（USD）：</label>
+              <input type="number" class="pr-fee" value="99" min="0" step="10" style="width:90px;padding:6px;border:1px solid #d9d9d9;border-radius:6px">
+              <button class="btn-red" style="padding:4px 10px;border:none;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px" onclick="removePricingRule(this)" data-i18n="delete">删除</button>
+            </div>
+            <div class="pricing-rule" style="display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_turnover_le">月营业额 ≤</label>
+              <input type="number" class="pr-max" value="500000" min="0" step="10000" style="width:100px;padding:6px;border:1px solid #d9d9d9;border-radius:6px"> USD
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_service_type">服务类型：</label>
+              <select class="pr-type" style="padding:6px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px">
+                <option value="一般纳税人" data-i18n="st_normal_taxpayer">一般纳税人</option>
+                <option value="小规模纳税人" data-i18n="st_small_taxpayer">小规模纳税人</option>
+                <option value="全套财税代理" data-i18n="st_full_service">全套财税代理</option>
+                <option value="增值税申报" data-i18n="st_vat_decl">增值税申报</option>
+                <option value="企业所得税" data-i18n="st_corp_income_tax">企业所得税</option>
+                <option value="个税代扣代缴" data-i18n="st_indiv_tax">个税代扣代缴</option>
+                <option value="年度汇算清缴" data-i18n="st_annual_settle">年度汇算清缴</option>
+                <option value="税务登记" data-i18n="st_tax_reg">税务登记</option>
+                <option value="其他" data-i18n="st_other">其他</option>
+              </select>
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_period">周期：</label>
+              <select class="pr-period" style="padding:6px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px">
+                <option value="月度" data-i18n="period_monthly">月度</option>
+                <option value="季度" data-i18n="period_quarterly">季度</option>
+                <option value="年度" data-i18n="period_yearly">年度</option>
+              </select>
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_fee">服务费（USD）：</label>
+              <input type="number" class="pr-fee" value="199" min="0" step="10" style="width:90px;padding:6px;border:1px solid #d9d9d9;border-radius:6px">
+              <button class="btn-red" style="padding:4px 10px;border:none;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px" onclick="removePricingRule(this)" data-i18n="delete">删除</button>
+            </div>
+            <div class="pricing-rule" style="display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_turnover_le">月营业额 ≤</label>
+              <input type="number" class="pr-max" value="2000000" min="0" step="10000" style="width:100px;padding:6px;border:1px solid #d9d9d9;border-radius:6px"> USD
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_service_type">服务类型：</label>
+              <select class="pr-type" style="padding:6px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px">
+                <option value="全套财税代理" data-i18n="st_full_service">全套财税代理</option>
+                <option value="一般纳税人" data-i18n="st_normal_taxpayer">一般纳税人</option>
+                <option value="小规模纳税人" data-i18n="st_small_taxpayer">小规模纳税人</option>
+                <option value="增值税申报" data-i18n="st_vat_decl">增值税申报</option>
+                <option value="企业所得税" data-i18n="st_corp_income_tax">企业所得税</option>
+                <option value="个税代扣代缴" data-i18n="st_indiv_tax">个税代扣代缴</option>
+                <option value="年度汇算清缴" data-i18n="st_annual_settle">年度汇算清缴</option>
+                <option value="税务登记" data-i18n="st_tax_reg">税务登记</option>
+                <option value="其他" data-i18n="st_other">其他</option>
+              </select>
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_period">周期：</label>
+              <select class="pr-period" style="padding:6px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px">
+                <option value="月度" data-i18n="period_monthly">月度</option>
+                <option value="季度" data-i18n="period_quarterly">季度</option>
+                <option value="年度" data-i18n="period_yearly">年度</option>
+              </select>
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_fee">服务费（USD）：</label>
+              <input type="number" class="pr-fee" value="399" min="0" step="10" style="width:90px;padding:6px;border:1px solid #d9d9d9;border-radius:6px">
+              <button class="btn-red" style="padding:4px 10px;border:none;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px" onclick="removePricingRule(this)" data-i18n="delete">删除</button>
+            </div>
+            <div class="pricing-rule" style="display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_turnover_gt">月营业额 ></label>
+              <input type="number" class="pr-max" value="2000000" min="0" step="10000" style="width:100px;padding:6px;border:1px solid #d9d9d9;border-radius:6px"> USD
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_service_type">服务类型：</label>
+              <select class="pr-type" style="padding:6px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px">
+                <option value="VIP 定制财税" data-i18n="st_vip_tax">VIP 定制财税</option>
+                <option value="全套财税代理" data-i18n="st_full_service">全套财税代理</option>
+                <option value="一般纳税人" data-i18n="st_normal_taxpayer">一般纳税人</option>
+                <option value="增值税申报" data-i18n="st_vat_decl">增值税申报</option>
+                <option value="企业所得税" data-i18n="st_corp_income_tax">企业所得税</option>
+                <option value="个税代扣代缴" data-i18n="st_indiv_tax">个税代扣代缴</option>
+                <option value="年度汇算清缴" data-i18n="st_annual_settle">年度汇算清缴</option>
+                <option value="税务登记" data-i18n="st_tax_reg">税务登记</option>
+                <option value="其他" data-i18n="st_other">其他</option>
+              </select>
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_period">周期：</label>
+              <select class="pr-period" style="padding:6px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px">
+                <option value="月度" data-i18n="period_monthly">月度</option>
+                <option value="季度" data-i18n="period_quarterly">季度</option>
+                <option value="年度" data-i18n="period_yearly">年度</option>
+              </select>
+              <label style="font-size:12px;white-space:nowrap" data-i18n="pr_fee">服务费（USD）：</label>
+              <input type="number" class="pr-fee" value="899" min="0" step="10" style="width:90px;padding:6px;border:1px solid #d9d9d9;border-radius:6px">
+              <button class="btn-red" style="padding:4px 10px;border:none;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px" onclick="removePricingRule(this)" data-i18n="delete">删除</button>
+            </div>
+          </div>
+          <div style="margin:12px 0">
+            <button class="btn-green" onclick="addPricingRule()" style="padding:6px 16px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px" data-i18n="add_pricing_rule">➕ 添加定价规则</button>
+            <button class="btn-green" onclick="applyTaxPricing()" style="padding:6px 16px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;margin-left:8px" data-i18n="save_all_pricing">💾 保存全部定价规则</button>
+          </div>
+          <div class="config-row" style="margin-top:12px">
+            <label data-i18n="cfg_default_tax_fee">默认单次财税服务费（USD）：</label><input type="number" id="cfgTaxDefaultFee" value="180" min="0" step="10">
+            <label data-i18n="cfg_tax_rebate_pct">记账类返点比例（%）：</label><input type="number" id="cfgTaxRebatePct" value="20" min="0" max="50" step="1">
+            <label data-i18n="cfg_tax_warn_days">风险预警阈值（天）：</label><input type="number" id="cfgTaxWarnDays" value="3" min="1" max="30" step="1">
+            <label data-i18n="cfg_tax_danger_days">逾期红线（天）：</label><input type="number" id="cfgTaxDangerDays" value="7" min="1" max="30" step="1">
+            <button class="btn-green" onclick="applyTaxRiskConfig()" data-i18n="save_warning">保存预警设置</button>
+          </div>
         </div>
       </div>
 
+      <!-- ==================== 财税联盟合作参考价 ==================== -->
+      <div class="page-section" id="pageTaxAlliance">
+        <div class="panel">
+          <h3>📑 <span data-i18n="tax_alliance_title">财税联盟合作参考价</span> <span class="sub" data-i18n="tax_alliance_sub">（Local & CDC 公司服务代理价，联盟再定价销售）</span></h3>
+          <div style="overflow-x:auto">
+            <table style="min-width:700px">
+              <thead><tr><th data-i18n="ta_type">类型</th><th data-i18n="ta_service">服务</th><th>Small</th><th>Medium</th><th>Large</th><th data-i18n="ta_duration">办理时间</th><th data-i18n="ta_rebate">返点</th></tr></thead>
+              <tbody>
+                <tr><td rowspan="6" style="font-weight:600;color:#1a4a8a" data-i18n="ta_local">Local<br>Company<br>Service</td>
+                  <td style="text-align:left;padding-left:8px" data-i18n="ta_company_reg">公司注册</td><td>$450</td><td>$1,300</td><td>$1,600</td><td>30天</td><td>—</td></tr>
+                <tr><td style="text-align:left;padding-left:8px" data-i18n="ta_factory_reg">工厂注册</td><td>—</td><td>$1,400</td><td>$1,700</td><td>30天</td><td>—</td></tr>
+                <tr><td style="text-align:left;padding-left:8px" data-i18n="ta_company_suspend">公司停业</td><td>$400</td><td>$600</td><td>$800</td><td>30天</td><td>—</td></tr>
+                <tr><td style="text-align:left;padding-left:8px" data-i18n="ta_company_cancel">公司注销</td><td>$900</td><td>$1,500</td><td>$2,000</td><td>8-10个月</td><td>—</td></tr>
+                <tr><td style="text-align:left;padding-left:8px" data-i18n="ta_bookkeeping_basic">记账+税务申报+QB（基础）</td><td>$100</td><td>$150</td><td>$200</td><td data-i18n="ta_monthly">每月</td><td style="color:#fa8c16">20%</td></tr>
+                <tr><td style="text-align:left;padding-left:8px" data-i18n="ta_bookkeeping_turnover">记账+税务申报+QB（有营业额）</td><td>$101~150</td><td>$200~300</td><td>$250~400</td><td data-i18n="ta_monthly">每月</td><td style="color:#fa8c16">20%</td></tr>
+                <tr><td rowspan="4" style="font-weight:600;color:#1a4a8a">CDC<br>Company<br>Service</td>
+                  <td style="text-align:left;padding-left:8px" data-i18n="ta_cdc_reg">CDC 公司注册</td><td colspan="3">$26,000 ~ $30,000</td><td>3-4个月</td><td>—</td></tr>
+                <tr><td style="text-align:left;padding-left:8px" data-i18n="ta_cdc_bookkeeping_basic">记账+税务申报+QB（基础）</td><td colspan="3">$300</td><td data-i18n="ta_monthly">每月</td><td style="color:#fa8c16">20%</td></tr>
+                <tr><td style="text-align:left;padding-left:8px" data-i18n="ta_cdc_bookkeeping_turnover">记账+税务申报+QB（有营业额）</td><td colspan="3">$300 ~ $600</td><td data-i18n="ta_monthly">每月</td><td style="color:#fa8c16">20%</td></tr>
+                <tr><td style="text-align:left;padding-left:8px" data-i18n="ta_cdc_industrial_report">出工业部生产报表</td><td colspan="3">$200</td><td data-i18n="ta_monthly">每月</td><td style="color:#fa8c16">20%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:11px;color:#aaa;margin-top:8px" data-i18n="ta_note">💡 非记账类服务为代理价，MNA 可在此基础上加价销售给会员；记账类服务实收金额返点 20%</p>
+        </div>
+      </div>
+
+      <!-- ==================== 法律咨询合规计费参数 ==================== -->
+      <div class="page-section" id="pageLegalPricing">
+        <div class="panel">
+          <h3>⚖️ <span data-i18n="legal_pricing_title">法律咨询合规计费参数</span> <span class="sub" data-i18n="legal_pricing_sub">（自定义法律服务计费标准）</span></h3>
+          <div class="config-row">
+            <label data-i18n="legal_hourly_rate">按小时费率（USD/h）：</label><input type="number" id="legalHourlyRate" value="150" min="0" step="10">
+            <label data-i18n="legal_fixed_fee">固定费用（USD）：</label><input type="number" id="legalFixedFee" value="500" min="0" step="50">
+            <label data-i18n="legal_percent_rate">按标的额比例（%）：</label><input type="number" id="legalPercentRate" value="3" min="0" max="20" step="0.5">
+            <button class="btn-green" onclick="applyLegalConfig()" data-i18n="save">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== 法律合规风险预警阈值 ==================== -->
+      <div class="page-section" id="pageLegalRisk">
+        <div class="panel">
+          <h3 data-i18n="legal_risk_title">⚖️ 法律合规风险预警阈值</h3>
+          <div class="config-row">
+            <label data-i18n="legal_urgency_threshold">审批递交通道预警阈值（天）：</label><input type="number" id="legalUrgencyThreshold" value="3" min="1" max="30" step="1">
+            <label data-i18n="legal_overdue_threshold">逾期红线（天）：</label><input type="number" id="legalOverdueThreshold" value="7" min="1" max="30" step="1">
+            <button class="btn-green" onclick="applyLegalConfig()" data-i18n="save">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== 用户管理 ==================== -->
+      <div class="page-section" id="pageUsers">
+        <div class="panel">
+          <h3 data-i18n="user_mgmt_title">👥 用户账户管理</h3>
+          <div id="userList" style="margin-bottom:16px"></div>
+          <button class="btn-green" onclick="showAddUserModal()" data-i18n="add_user">➕ 添加用户</button>
+        </div>
+      </div>
+
+      <!-- ==================== 修改密码 ==================== -->
+      <div class="page-section" id="pagePwd">
+        <div class="panel">
+          <h3 data-i18n="change_pwd_title">🔑 修改密码</h3>
+          <div style="max-width:400px;margin:0 auto">
+            <div class="form-group"><label data-i18n="old_pwd_label">当前密码</label><input type="password" id="oldPwd" placeholder="请输入当前密码"></div>
+            <div class="form-group"><label data-i18n="new_pwd_label">新密码</label><input type="password" id="newPwd" placeholder="请输入新密码（至少6位）"></div>
+            <div class="form-group"><label data-i18n="confirm_pwd_label">确认新密码</label><input type="password" id="newPwd2" placeholder="请再次输入新密码"></div>
+            <button class="btn-green" onclick="doChangePassword()" style="width:100%;padding:10px;border-radius:8px;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit" data-i18n="confirm_change">确认修改</button>
+            <div class="login-error" id="changePwdError" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </div><!-- /main-body -->
+
+  <div class="footer-note">© 2025 Mekong Nexus Association (MNA) · <span data-i18n="footer_text">湄公产业资本联盟业务管理平台 · 当前用户：</span><span id="footerUser"></span></div>
+</div><!-- /appContainer -->
+
+<!-- ==================== 弹窗：物流订单 ==================== -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <h3 id="orderModalTitle" data-i18n="new_logistics_order">➕ 新建物流订单</h3>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="customer_name">客户名称 *</label><input type="text" id="fCustomer" placeholder="请输入客户名称"></div>
+      <div class="form-group"><label data-i18n="order_date">订单日期 *</label><input type="date" id="fOrderDate"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="container_no">货柜编号 *</label><input type="text" id="fContainerNo" placeholder="如：MSKU1234567"></div>
+      <div class="form-group"><label data-i18n="container_type">货柜类型</label>
+        <select id="fType"><option value="20GP">20GP</option><option value="40GP">40GP</option><option value="40HQ" selected>40HQ</option><option value="45HQ">45HQ</option><option value="其他">其他</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="container_qty">货柜数量 *</label><input type="number" id="fQty" min="1" value="1"></div>
+      <div class="form-group"><label data-i18n="profit_per_container">每柜利润(USD)</label><input type="number" id="fProfitPer" min="0" step="10" placeholder="留空用默认"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="from_port">起运港</label><input type="text" id="fFromPort" placeholder="如：深圳蛇口"></div>
+      <div class="form-group"><label data-i18n="to_port">目的港/目的地</label><input type="text" id="fToPort" placeholder="如：柬埔寨西哈努克港"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="factory_addr">工厂地址</label><input type="text" id="fFactoryAddr" placeholder="如：金边市XX工业区"></div>
+      <div class="form-group"><label data-i18n="vessel_name">船名/航次</label><input type="text" id="fVessel" placeholder="如：COSCO SHIPPING XX"></div>
+    </div>
+    <div class="form-group"><label data-i18n="remark">备注</label><textarea id="fRemark" placeholder="其他备注信息"></textarea></div>
+    <h4 style="font-size:14px;color:#0f2b5e;margin:16px 0 8px;border-top:1px solid #f0f0f0;padding-top:12px" data-i18n="logistics_nodes">📍 物流节点时间</h4>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="ship_date">🚢 发柜日期</label><input type="date" id="fShipDate"></div>
+      <div class="form-group"><label data-i18n="arrive_port_date">⚓ 到港日期</label><input type="date" id="fArrivePort"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="clearance_start">📋 清关开始</label><input type="date" id="fClearanceStart"></div>
+      <div class="form-group"><label data-i18n="clearance_done">✅ 清关完成</label><input type="date" id="fClearanceDone"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="arrive_factory_date">🏭 到工厂</label><input type="date" id="fArriveFactory"></div>
+      <div class="form-group"><label data-i18n="close_date">🔚 结单日期</label><input type="date" id="fCloseDate"></div>
+    </div>
+    <h4 style="font-size:14px;color:#0f2b5e;margin:16px 0 8px;border-top:1px solid #f0f0f0;padding-top:12px" data-i18n="fee_detail">💰 费用明细</h4>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="freight_fee">运费(USD)</label><input type="number" id="fFreightFee" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label data-i18n="clearance_fee">清关费(USD)</label><input type="number" id="fClearanceFee" min="0" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="truck_fee">拖车费(USD)</label><input type="number" id="fTruckFee" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label data-i18n="other_fee">其他费用(USD)</label><input type="number" id="fOtherFee" min="0" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="form-group"><label data-i18n="rebate_pct">返点比例(%) — 留空用默认值</label><input type="number" id="fRebatePct" min="0" max="100" step="0.5" placeholder="默认3%"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeOrderModal()" data-i18n="cancel">取消</button>
+      <button class="btn-submit" onclick="submitOrder()" data-i18n="confirm_submit">确认提交</button>
     </div>
   </div>
 </div>
 
-<!-- ==================== 弹窗 ==================== -->
-<div class="modal-overlay" id="orderModal"><div class="modal" id="orderModalContent"></div></div>
-<div class="modal-overlay" id="overseasModal"><div class="modal" id="overseasModalContent"></div></div>
-<div class="modal-overlay" id="investModal"><div class="modal" id="investModalContent"></div></div>
-<div class="modal-overlay" id="commerceModal"><div class="modal" id="commerceModalContent"></div></div>
-<div class="modal-overlay" id="policyModal"><div class="modal" id="policyModalContent"></div></div>
-<div class="modal-overlay" id="taxModal"><div class="modal" id="taxModalContent"></div></div>
-<div class="modal-overlay" id="trainingModal"><div class="modal" id="trainingModalContent"></div></div>
-<div class="modal-overlay" id="legalModal"><div class="modal" id="legalModalContent"></div></div>
-<div class="modal-overlay" id="memberModal"><div class="modal" id="memberModalContent"></div></div>
-<div class="modal-overlay" id="expenseModal"><div class="modal" id="expenseModalContent"></div></div>
-
-<script>
-/* ========== Supabase 初始化 ========== */
-const { createClient } = window.supabase;
- 'https://dicapkasnfjzbfmfyzib.supabase.co',
-  'sb_publishable_vSH9T39fUA4mfxC2E3QCig_vHObIYCg'
-);
-
-/* ========== 语言包 ========== */
-const i18n = {
-  zh: {
-    login_title:'MNA 业务管理平台', login_sub:'湄公产业资本联盟 Mekong Nexus Association<br>连接产业 · 资本 · 政府 · 国际资源',
-    username:'👤 用户名（邮箱）', password:'🔑 密码', login_btn:'登 录', forgot:'忘记密码？', logout:'退出登录',
-    brand:'MNA 湄公产业资本联盟', brand_sub:'Mekong Nexus Association · 业务管理平台',
-    overview:'📊 概览', business:'🚢 业务板块', dashboard:'仪表盘', welcome:'👋 欢迎回来',
-    logistics:'物流订单跟踪', overseas:'出海落地服务', investment:'投融资对接',
-    commerce:'商务合作/会员', policy:'政策解读/政府对接', tax:'财税业务',
-    training:'职业技能培训', legal:'法律咨询合规',
-    finance:'统一财务报表', membership:'会员管理', expenses:'日常费用支出',
-    config:'参数设置', change_pwd:'修改密码'
-  },
-  en: {
-    login_title:'MNA Business Platform', login_sub:'Mekong Nexus Association<br>Connecting Industry · Capital · Government · Global Resources',
-    username:'👤 Email', password:'🔑 Password', login_btn:'Sign In', forgot:'Forgot password?', logout:'Logout',
-    brand:'MNA Mekong Nexus Association', brand_sub:'Business Management Platform',
-    overview:'📊 Overview', business:'🚢 Business Modules', dashboard:'Dashboard', welcome:'👋 Welcome back',
-    logistics:'Logistics Tracking', overseas:'Overseas Services', investment:'Investment Matching',
-    commerce:'Commerce / Membership', policy:'Policy & Gov Liaison', tax:'Tax & Accounting',
-    training:'Vocational Training', legal:'Legal & Compliance',
-    finance:'Financial Report', membership:'Membership', expenses:'Daily Expenses',
-    config:'System Config', change_pwd:'Change Password'
-  }
-};
-
-let currentLang = localStorage.getItem('mna_lang') || 'zh';
-
-/* ========== 工具函数 ========== */
-function applyLang(lang) {
-  currentLang = lang;
-  localStorage.setItem('mna_lang', lang);
-  document.documentElement.setAttribute('data-lang', lang);
-  const d = i18n[lang];
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.getAttribute('data-i18n');
-    if (d[k]) el.innerHTML = d[k];
-  });
-  document.getElementById('langLabel').innerText = lang === 'zh' ? 'EN' : '中';
-}
-function toggleLang() { applyLang(currentLang === 'zh' ? 'en' : 'zh'); }
-
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('zh-CN') : '—'; }
-function emptyHtml(msg) { return `<div class="empty-state"><div class="icon">📭</div><p>${msg}</p></div>`; }
-function showToast(msg, type='success') {
-  let t = document.querySelector('.toast');
-  if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-/* ========== 登录 ========== */
-async function doLogin() {
-  const email = document.getElementById('loginUser').value.trim();
-  const pwd = document.getElementById('loginPass').value;
-  const err = document.getElementById('loginError');
-  err.textContent = '';
-  if (!email || !pwd) { err.textContent = '请输入邮箱和密码'; return; }
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd });
-  if (error || !data?.user) { err.textContent = '登录失败：' + (error?.message || '未知错误'); return; }
-  showApp(data.user);
-}
-
-async function doLogout() {
-  await supabase.auth.signOut();
-  location.reload();
-}
-
-/* ========== 主应用 ========== */
-function showApp(user) {
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('appContainer').style.display = 'flex';
-  document.getElementById('currentUserName').textContent = user.email;
-  document.getElementById('currentUserRole').textContent = '管理员';
-  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'});
-  applyLang(currentLang);
-  loadAllData();
-}
-
-/* ========== 页面切换 ========== */
-function switchPage(page, evt) {
-  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-  const t = document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1));
-  if (t) t.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  evt?.target?.closest('.nav-item')?.classList.add('active');
-}
-
-function switchSubTab(btn, tabId) {
-  const parent = btn.closest('.sub-tabs');
-  parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const section = btn.closest('.page-section');
-  section.querySelectorAll('[id$="List"],[id$="Ledger"]').forEach(d => d.style.display = 'none');
-  document.getElementById(tabId).style.display = 'block';
-}
-
-/* ========== 通用加载器 ========== */
-async function loadTable(table, renderFn, countId, searchId, searchField, extraFilter) {
-  let query = supabase.from(table).select('*',{count:'exact'}).order('created_at',{ascending:false});
-  if (searchId && searchField) {
-    const kw = document.getElementById(searchId).value.trim();
-    if (kw) query = query.ilike(searchField, `%${kw}%`);
-  }
-  if (extraFilter) query = extraFilter(query);
-  const { data, error, count } = await query;
-  document.getElementById(countId).textContent = error ? '加载失败' : `共 ${count ?? 0} 条`;
-  renderFn(data || []);
-}
-
-/* ========== 仪表盘 ========== */
-async function loadDashboard() {
-  const [lo, mem, ov, inv, ex, tx, tr, lg, po] = await Promise.all([
-    supabase.from('orders').select('*',{count:'exact',head:true}),
-    supabase.from('members').select('*',{count:'exact',head:true}),
-    supabase.from('overseas').select('*',{count:'exact',head:true}),
-    supabase.from('investments').select('*',{count:'exact',head:true}),
-    supabase.from('expenses').select('*',{count:'exact',head:true}),
-    supabase.from('tax').select('*',{count:'exact',head:true}),
-    supabase.from('training').select('*',{count:'exact',head:true}),
-    supabase.from('legal').select('*',{count:'exact',head:true}),
-    supabase.from('policy').select('*',{count:'exact',head:true})
-  ]);
-  document.getElementById('dbLogistics').textContent = lo.count ?? 0;
-  document.getElementById('dbMembers').textContent = mem.count ?? 0;
-  document.getElementById('dbOverseas').textContent = ov.count ?? 0;
-  document.getElementById('dbInvestment').textContent = inv.count ?? 0;
-  document.getElementById('dbExpenses').textContent = '$' + (ex.count ?? 0);
-  document.getElementById('dbTax').textContent = tx.count ?? 0;
-  document.getElementById('dbTraining').textContent = tr.count ?? 0;
-  document.getElementById('dbLegal').textContent = lg.count ?? 0;
-  document.getElementById('dbPolicy').textContent = po.count ?? 0;
-}
-
-/* ========== 物流 ========== */
-function renderOrders(data) {
-  if (!data.length) return document.getElementById('orderTable').innerHTML = emptyHtml('暂无订单');
-  let html = `<table><thead><tr><th>订单号</th><th>客户</th><th>货柜</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(o => {
-    html += `<tr>
-      <td>${o.order_no||'—'}</td>
-      <td>${o.customer||'—'}</td>
-      <td>${o.container_count||0}</td>
-      <td><span class="status-badge st-${o.status??0}">${['待发柜','已发柜','已到港','清关中','已清关','已到厂','已结单'][o.status]||'未知'}</span></td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editOrder('${o.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteOrder('${o.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('orderTable').innerHTML = html;
-}
-
-async function loadOrders() {
-  await loadTable('orders', renderOrders, 'orderCount', 'searchOrder', 'customer');
-}
-
-async function deleteOrder(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('orders').delete().eq('id', id);
-  showToast('删除成功'); loadOrders(); loadDashboard();
-}
-
-function editOrder(id) {
-  supabase.from('orders').select('*').eq('id', id).single().then(({data}) => openOrderModal(data));
-}
-
-function openOrderModal(existing) {
-  const m = document.getElementById('orderModalContent');
-  m.innerHTML = `
-    <h3>${existing?'编辑订单':'新建订单'}</h3>
-    <div class="form-row">
-      <div class="form-group"><label>客户</label><input id="oCustomer" value="${existing?.customer||''}"></div>
-      <div class="form-group"><label>订单号</label><input id="oOrderNo" value="${existing?.order_no||''}"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>货柜数</label><input type="number" id="oContainers" value="${existing?.container_count||1}"></div>
-      <div class="form-group"><label>状态</label>
-        <select id="oStatus">
-          ${[0,1,2,3,4,5,6].map(i=>`<option value="${i}" ${existing?.status===i?'selected':''}>${['待发柜','已发柜','已到港','清关中','已清关','已到厂','已结单'][i]}</option>`).join('')}
-        </select>
-      </div>
-    </div>
+<!-- ==================== 弹窗：订单详情 ==================== -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" style="width:720px">
+    <h3 id="detailModalTitle" data-i18n="order_detail">📦 订单详情</h3>
+    <div id="detailContent"></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('orderModal')">取消</button>
-      <button class="btn-submit" onclick="saveOrder('${existing?.id||''}')">保存</button>
-    </div>`;
-  document.getElementById('orderModal').classList.add('active');
-}
+      <button class="btn-cancel" onclick="closeDetailModal()" data-i18n="close">关闭</button>
+      <button class="btn-submit" id="detailEditBtn" onclick="editFromDetail()" data-i18n="edit_this_order">编辑此订单</button>
+    </div>
+  </div>
+</div>
 
-async function saveOrder(id) {
-  const obj = {
-    customer: document.getElementById('oCustomer').value,
-    order_no: document.getElementById('oOrderNo').value,
-    container_count: +document.getElementById('oContainers').value,
-    status: +document.getElementById('oStatus').value
-  };
-  if (id) await supabase.from('orders').update(obj).eq('id', id);
-  else await supabase.from('orders').insert(obj);
-  closeModal('orderModal');
-  showToast('保存成功');
-  loadOrders(); loadDashboard();
-}
-
-/* ========== 出海 ========== */
-function renderOverseas(data) {
-  if (!data.length) return document.getElementById('overseasTable').innerHTML = emptyHtml('暂无项目');
-  let html = `<table><thead><tr><th>项目</th><th>企业</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(o => {
-    html += `<tr>
-      <td>${o.project_name}</td><td>${o.company}</td><td>${o.service_type}</td>
-      <td><span class="status-badge st-${o.status}">${o.status?'已完成':'进行中'}</span></td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editOverseas('${o.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteOverseas('${o.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('overseasTable').innerHTML = html;
-}
-
-async function loadOverseas() {
-  await loadTable('overseas', renderOverseas, 'overseasCount', 'searchOverseas', 'project_name');
-}
-
-async function deleteOverseas(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('overseas').delete().eq('id', id);
-  showToast('删除成功'); loadOverseas(); loadDashboard();
-}
-
-function editOverseas(id) {
-  supabase.from('overseas').select('*').eq('id', id).single().then(({data}) => openOverseasModal(data));
-}
-
-function openOverseasModal(existing) {
-  const m = document.getElementById('overseasModalContent');
-  m.innerHTML = `
-    <h3>${existing?'编辑项目':'新建项目'}</h3>
+<!-- ==================== 弹窗：出海项目 ==================== -->
+<div class="modal-overlay" id="overseasModal">
+  <div class="modal">
+    <h3 id="overseasModalTitle" data-i18n="new_overseas">➕ 新建出海项目</h3>
     <div class="form-row">
-      <div class="form-group"><label>企业</label><input id="ovCompany" value="${existing?.company||''}"></div>
-      <div class="form-group"><label>项目名</label><input id="ovProject" value="${existing?.project_name||''}"></div>
+      <div class="form-group"><label data-i18n="customer_name">客户名称 *</label><input type="text" id="foCustomer" placeholder="企业名称"></div>
+      <div class="form-group"><label data-i18n="project_date">项目日期 *</label><input type="date" id="foDate"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>类型</label>
-        <select id="ovType">
-          <option value="公司注册" ${existing?.service_type==='公司注册'?'selected':''}>公司注册</option>
-          <option value="财税代理" ${existing?.service_type==='财税代理'?'selected':''}>财税代理</option>
-          <option value="法律合规" ${existing?.service_type==='法律合规'?'selected':''}>法律合规</option>
+      <div class="form-group"><label data-i18n="service_type">服务类型</label>
+        <select id="foServiceType">
+          <option value="公司注册" data-i18n="svc_company_reg">公司注册</option>
+          <option value="财税代理" data-i18n="svc_tax_agent">财税代理</option>
+          <option value="人力招聘" data-i18n="svc_hr_recruit">人力招聘</option>
+          <option value="全套落地" data-i18n="svc_full_landing">全套落地服务</option>
+          <option value="其他" data-i18n="st_other">其他</option>
         </select>
       </div>
-      <div class="form-group"><label>状态</label>
-        <select id="ovStatus">
-          <option value="0" ${!existing?.status?'selected':''}>进行中</option>
-          <option value="1" ${existing?.status?'selected':''}>已完成</option>
-        </select>
-      </div>
+      <div class="form-group"><label data-i18n="destination">目的地</label><input type="text" id="foDestination" placeholder="如：柬埔寨金边"></div>
     </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="contract_amount">合同金额(USD)</label><input type="number" id="foAmount" min="0" step="100" placeholder="0"></div>
+      <div class="form-group"><label data-i18n="received_amount">已收金额(USD)</label><input type="number" id="foReceived" min="0" step="100" placeholder="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="current_stage">当前阶段</label>
+        <select id="foStage">
+          <option value="需求沟通" data-i18n="stage_communicate">需求沟通</option>
+          <option value="公司注册" data-i18n="stage_company_reg">公司注册</option>
+          <option value="银行开户" data-i18n="stage_bank_open">银行开户</option>
+          <option value="税号申请" data-i18n="stage_tax_apply">税号申请</option>
+          <option value="财税代理" data-i18n="stage_tax_agent">财税代理</option>
+          <option value="人力招聘" data-i18n="stage_hr_recruit">人力招聘</option>
+          <option value="正式运营" data-i18n="stage_operation">正式运营</option>
+          <option value="已完成" data-i18n="stage_completed">已完成</option>
+        </select>
+      </div>
+      <div class="form-group"><label data-i18n="progress_pct">完成进度(%)</label><input type="number" id="foProgress" min="0" max="100" value="0" step="5"></div>
+    </div>
+    <div class="form-group"><label data-i18n="remark">备注</label><textarea id="foRemark" placeholder="项目备注"></textarea></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('overseasModal')">取消</button>
-      <button class="btn-submit" onclick="saveOverseas('${existing?.id||''}')">保存</button>
-    </div>`;
-  document.getElementById('overseasModal').classList.add('active');
-}
+      <button class="btn-cancel" onclick="closeOverseasModal()" data-i18n="cancel">取消</button>
+      <button class="btn-submit" onclick="submitOverseas()" data-i18n="confirm_submit">确认提交</button>
+    </div>
+  </div>
+</div>
 
-async function saveOverseas(id) {
-  const obj = {
-    company: document.getElementById('ovCompany').value,
-    project_name: document.getElementById('ovProject').value,
-    service_type: document.getElementById('ovType').value,
-    status: +document.getElementById('ovStatus').value
-  };
-  if (id) await supabase.from('overseas').update(obj).eq('id', id);
-  else await supabase.from('overseas').insert(obj);
-  closeModal('overseasModal');
-  showToast('保存成功');
-  loadOverseas(); loadDashboard();
-}
-
-/* ========== 投融资 ========== */
-function renderInvest(data) {
-  if (!data.length) return document.getElementById('investTable').innerHTML = emptyHtml('暂无项目');
-  let html = `<table><thead><tr><th>项目</th><th>投资方</th><th>金额</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(i => {
-    html += `<tr>
-      <td>${i.project_name}</td><td>${i.investor}</td><td>$${i.amount||0}</td>
-      <td><span class="status-badge st-${i.status}">${i.status?'已完成':'跟进中'}</span></td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editInvest('${i.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteInvest('${i.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('investTable').innerHTML = html;
-}
-
-async function loadInvest() {
-  await loadTable('investments', renderInvest, 'investCount', 'searchInvest', 'project_name');
-}
-
-async function deleteInvest(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('investments').delete().eq('id', id);
-  showToast('删除成功'); loadInvest(); loadDashboard();
-}
-
-function editInvest(id) {
-  supabase.from('investments').select('*').eq('id', id).single().then(({data}) => openInvestModal(data));
-}
-
-function openInvestModal(existing) {
-  const m = document.getElementById('investModalContent');
-  m.innerHTML = `
-    <h3>${existing?'编辑项目':'新建项目'}</h3>
+<!-- ==================== 弹窗：投融资项目 ==================== -->
+<div class="modal-overlay" id="investModal">
+  <div class="modal">
+    <h3 id="investModalTitle" data-i18n="new_invest">➕ 新建投融资项目</h3>
     <div class="form-row">
-      <div class="form-group"><label>项目名</label><input id="invProject" value="${existing?.project_name||''}"></div>
-      <div class="form-group"><label>投资方</label><input id="invInvestor" value="${existing?.investor||''}"></div>
+      <div class="form-group"><label data-i18n="project_name">项目名称 *</label><input type="text" id="fiName" placeholder="项目名称"></div>
+      <div class="form-group"><label data-i18n="project_date">项目日期 *</label><input type="date" id="fiDate"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>金额</label><input type="number" id="invAmount" value="${existing?.amount||0}"></div>
-      <div class="form-group"><label>状态</label>
-        <select id="invStatus">
-          <option value="0" ${!existing?.status?'selected':''}>跟进中</option>
-          <option value="1" ${existing?.status?'selected':''}>已完成</option>
+      <div class="form-group"><label data-i18n="project_company">项目方</label><input type="text" id="fiProjectCo" placeholder="融资方企业名称"></div>
+      <div class="form-group"><label data-i18n="investor">投资方</label><input type="text" id="fiInvestor" placeholder="投资方/机构名称"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="inv_amount">涉及金额(USD)</label><input type="number" id="fiAmount" min="0" step="1000" placeholder="0"></div>
+      <div class="form-group"><label data-i18n="inv_comm_pct">佣金比例(%)</label><input type="number" id="fiCommPct" min="0" max="20" step="0.5" placeholder="默认3%"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="inv_status">项目状态</label>
+        <select id="fiStatus">
+          <option value="项目入库" data-i18n="inv_st_inbound">项目入库</option>
+          <option value="初步评估" data-i18n="inv_st_eval">初步评估</option>
+          <option value="尽职调查" data-i18n="inv_st_dd">尽职调查</option>
+          <option value="路演对接" data-i18n="inv_st_roadshow">路演对接</option>
+          <option value="投融谈判" data-i18n="inv_st_negotiate">投融谈判</option>
+          <option value="资金到位" data-i18n="inv_st_funded">资金到位</option>
+          <option value="投后管理" data-i18n="inv_st_post_mgmt">投后管理</option>
         </select>
       </div>
+      <div class="form-group"><label data-i18n="inv_success_comm">成功佣金(USD)</label><input type="number" id="fiCommission" min="0" step="100" placeholder="自动计算" readonly style="background:#f5f5f5"></div>
     </div>
+    <div class="form-group"><label data-i18n="remark">备注</label><textarea id="fiRemark" placeholder="项目备注"></textarea></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('investModal')">取消</button>
-      <button class="btn-submit" onclick="saveInvest('${existing?.id||''}')">保存</button>
-    </div>`;
-  document.getElementById('investModal').classList.add('active');
-}
+      <button class="btn-cancel" onclick="closeInvestModal()" data-i18n="cancel">取消</button>
+      <button class="btn-submit" onclick="submitInvest()" data-i18n="confirm_submit">确认提交</button>
+    </div>
+  </div>
+</div>
 
-async function saveInvest(id) {
-  const obj = {
-    project_name: document.getElementById('invProject').value,
-    investor: document.getElementById('invInvestor').value,
-    amount: +document.getElementById('invAmount').value,
-    status: +document.getElementById('invStatus').value
-  };
-  if (id) await supabase.from('investments').update(obj).eq('id', id);
-  else await supabase.from('investments').insert(obj);
-  closeModal('investModal');
-  showToast('保存成功');
-  loadInvest(); loadDashboard();
-}
-
-/* ========== 商务 ========== */
-function renderCommerce(data) {
-  if (!data.length) return document.getElementById('commerceTable').innerHTML = emptyHtml('暂无记录');
-  let html = `<table><thead><tr><th>名称</th><th>类型</th><th>收入</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(c => {
-    html += `<tr>
-      <td>${c.name}</td><td>${c.type}</td><td>$${c.revenue||0}</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editCommerce('${c.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteCommerce('${c.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('commerceTable').innerHTML = html;
-}
-
-async function loadCommerce() {
-  await loadTable('commerce', renderCommerce, 'commerceCount', 'searchCommerce', 'name');
-}
-
-async function deleteCommerce(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('commerce').delete().eq('id', id);
-  showToast('删除成功'); loadCommerce(); loadDashboard();
-}
-
-function editCommerce(id) {
-  supabase.from('commerce').select('*').eq('id', id).single().then(({data}) => openCommerceModal(data));
-}
-
-function openCommerceModal(existing) {
-  const m = document.getElementById('commerceModalContent');
-  m.innerHTML = `
-    <h3>${existing?'编辑记录':'新建记录'}</h3>
+<!-- ==================== 弹窗：商务合作 ==================== -->
+<div class="modal-overlay" id="commerceModal">
+  <div class="modal">
+    <h3 id="commerceModalTitle" data-i18n="new_commerce">➕ 新建商务项目</h3>
     <div class="form-row">
-      <div class="form-group"><label>名称</label><input id="comName" value="${existing?.name||''}"></div>
-      <div class="form-group"><label>类型</label>
-        <select id="comType">
-          <option value="会员费" ${existing?.type==='会员费'?'selected':''}>会员费</option>
-          <option value="活动赞助" ${existing?.type==='活动赞助'?'selected':''}>活动赞助</option>
+      <div class="form-group"><label data-i18n="member_name">会员/活动名称 *</label><input type="text" id="fcName" placeholder="企业名称或活动名称"></div>
+      <div class="form-group"><label data-i18n="project_date">日期 *</label><input type="date" id="fcDate"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="member_type">类型</label>
+        <select id="fcType">
+          <option value="普通会员" data-i18n="mem_normal">普通会员</option>
+          <option value="理事会员" data-i18n="mem_director">理事会员</option>
+          <option value="战略会员" data-i18n="mem_strategic">战略会员</option>
+          <option value="活动收费" data-i18n="mem_activity">活动收费</option>
+          <option value="赞助" data-i18n="mem_sponsor">赞助</option>
+          <option value="其他" data-i18n="st_other">其他</option>
+        </select>
+      </div>
+      <div class="form-group"><label data-i18n="member_level">会员等级</label>
+        <select id="fcLevel">
+          <option value="普通" data-i18n="lvl_normal">普通</option>
+          <option value="VIP" data-i18n="lvl_vip">VIP</option>
+          <option value="理事" data-i18n="lvl_director">理事</option>
+          <option value="战略" data-i18n="lvl_strategic">战略</option>
         </select>
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>收入</label><input type="number" id="comRevenue" value="${existing?.revenue||0}"></div>
+      <div class="form-group"><label data-i18n="income_amount">收入金额(USD)</label><input type="number" id="fcAmount" min="0" step="50" placeholder="0"></div>
+      <div class="form-group"><label data-i18n="received_amount">已收金额(USD)</label><input type="number" id="fcReceived" min="0" step="50" placeholder="0"></div>
     </div>
+    <div class="form-group"><label data-i18n="remark">备注</label><textarea id="fcRemark" placeholder="备注信息"></textarea></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('commerceModal')">取消</button>
-      <button class="btn-submit" onclick="saveCommerce('${existing?.id||''}')">保存</button>
-    </div>`;
-  document.getElementById('commerceModal').classList.add('active');
-}
+      <button class="btn-cancel" onclick="closeCommerceModal()" data-i18n="cancel">取消</button>
+      <button class="btn-submit" onclick="submitCommerce()" data-i18n="confirm_submit">确认提交</button>
+    </div>
+  </div>
+</div>
 
-async function saveCommerce(id) {
-  const obj = {
-    name: document.getElementById('comName').value,
-    type: document.getElementById('comType').value,
-    revenue: +document.getElementById('comRevenue').value
-  };
-  if (id) await supabase.from('commerce').update(obj).eq('id', id);
-  else await supabase.from('commerce').insert(obj);
-  closeModal('commerceModal');
-  showToast('保存成功');
-  loadCommerce(); loadDashboard();
-}
-
-/* ========== 政策 ========== */
-function renderPolicy(data) {
-  if (!data.length) return document.getElementById('policyTable').innerHTML = emptyHtml('暂无项目');
-  let html = `<table><thead><tr><th>项目</th><th>部门</th><th>进度</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(p => {
-    html += `<tr>
-      <td>${p.project_name}</td><td>${p.department}</td>
-      <td>${p.progress||0}%</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editPolicy('${p.id}')">编辑</button>
-        <button class="del-btn" onclick="deletePolicy('${p.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('policyTable').innerHTML = html;
-}
-
-async function loadPolicy() {
-  await loadTable('policy', renderPolicy, 'policyCount', 'searchPolicy', 'project_name');
-}
-
-async function deletePolicy(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('policy').delete().eq('id', id);
-  showToast('删除成功'); loadPolicy(); loadDashboard();
-}
-
-function editPolicy(id) {
-  supabase.from('policy').select('*').eq('id', id).single().then(({data}) => openPolicyModal(data));
-}
-
-function openPolicyModal(existing) {
-  const m = document.getElementById('policyModalContent');
-  m.innerHTML = `
-    <h3>${existing?'编辑项目':'新建项目'}</h3>
+<!-- ==================== 弹窗：政策项目 ==================== -->
+<div class="modal-overlay" id="policyModal">
+  <div class="modal">
+    <h3 id="policyModalTitle" data-i18n="new_policy">➕ 新建政策项目</h3>
     <div class="form-row">
-      <div class="form-group"><label>项目名</label><input id="polProject" value="${existing?.project_name||''}"></div>
-      <div class="form-group"><label>部门</label><input id="polDept" value="${existing?.department||''}"></div>
+      <div class="form-group"><label data-i18n="project_name">项目名称 *</label><input type="text" id="fpName" placeholder="项目名称"></div>
+      <div class="form-group"><label data-i18n="project_date">日期 *</label><input type="date" id="fpDate"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>进度(%)</label><input type="number" id="polProgress" value="${existing?.progress||0}" min="0" max="100"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('policyModal')">取消</button>
-      <button class="btn-submit" onclick="savePolicy('${existing?.id||''}')">保存</button>
-    </div>`;
-  document.getElementById('policyModal').classList.add('active');
-}
-
-async function savePolicy(id) {
-  const obj = {
-    project_name: document.getElementById('polProject').value,
-    department: document.getElementById('polDept').value,
-    progress: +document.getElementById('polProgress').value
-  };
-  if (id) await supabase.from('policy').update(obj).eq('id', id);
-  else await supabase.from('policy').insert(obj);
-  closeModal('policyModal');
-  showToast('保存成功');
-  loadPolicy(); loadDashboard();
-}
-
-/* ========== 财税 ========== */
-function renderTax(data) {
-  if (!data.length) return document.getElementById('taxTable').innerHTML = emptyHtml('暂无项目');
-  let html = `<table><thead><tr><th>客户</th><th>类型</th><th>费用</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(t => {
-    html += `<tr>
-      <td>${t.customer}</td><td>${t.service_type}</td><td>$${t.fee||0}</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editTax('${t.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteTax('${t.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('taxTable').innerHTML = html;
-}
-
-async function loadTax() {
-  await loadTable('tax', renderTax, 'taxCount', 'searchTax', 'customer');
-}
-
-async function deleteTax(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('tax').delete().eq('id', id);
-  showToast('删除成功'); loadTax(); loadDashboard();
-}
-
-function editTax(id) {
-  supabase.from('tax').select('*').eq('id', id).single().then(({data}) => openTaxModal(data));
-}
-
-function openTaxModal(existing) {
-  const m = document.getElementById('taxModalContent');
-  m.innerHTML = `
-    <h3>${existing?'编辑项目':'新建项目'}</h3>
-    <div class="form-row">
-      <div class="form-group"><label>客户</label><input id="taxCustomer" value="${existing?.customer||''}"></div>
-      <div class="form-group"><label>类型</label>
-        <select id="taxType">
-          <option value="小规模纳税人" ${existing?.service_type==='小规模纳税人'?'selected':''}>小规模纳税人</option>
-          <option value="一般纳税人" ${existing?.service_type==='一般纳税人'?'selected':''}>一般纳税人</option>
-          <option value="全套财税代理" ${existing?.service_type==='全套财税代理'?'selected':''}>全套财税代理</option>
+      <div class="form-group"><label data-i18n="dept_name">对接部门</label><input type="text" id="fpDept" placeholder="如：柬埔寨商业部"></div>
+      <div class="form-group"><label data-i18n="policy_type">项目类型</label>
+        <select id="fpType">
+          <option value="政策解读" data-i18n="pt_interpret">政策解读</option>
+          <option value="政府对接" data-i18n="pt_gov_liaison">政府对接</option>
+          <option value="资质申请" data-i18n="pt_qual_apply">资质申请</option>
+          <option value="补贴申请" data-i18n="pt_subsidy">补贴申请</option>
+          <option value="其他" data-i18n="st_other">其他</option>
         </select>
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>费用</label><input type="number" id="taxFee" value="${existing?.fee||0}"></div>
+      <div class="form-group"><label data-i18n="service_income">服务收入(USD)</label><input type="number" id="fpAmount" min="0" step="100" placeholder="0"></div>
+      <div class="form-group"><label data-i18n="policy_status">状态</label>
+        <select id="fpStatus">
+          <option value="需求登记" data-i18n="ps_registered">需求登记</option>
+          <option value="政策研究" data-i18n="ps_research">政策研究</option>
+          <option value="报告交付" data-i18n="ps_report">报告交付</option>
+          <option value="政府沟通" data-i18n="ps_gov_comm">政府沟通</option>
+          <option value="结果反馈" data-i18n="ps_feedback">结果反馈</option>
+          <option value="已完成" data-i18n="ps_completed">已完成</option>
+        </select>
+      </div>
     </div>
+    <div class="form-group"><label data-i18n="remark">备注</label><textarea id="fpRemark" placeholder="备注信息"></textarea></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('taxModal')">取消</button>
-      <button class="btn-submit" onclick="saveTax('${existing?.id||''}')">保存</button>
-    </div>`;
-  document.getElementById('taxModal').classList.add('active');
-}
+      <button class="btn-cancel" onclick="closePolicyModal()" data-i18n="cancel">取消</button>
+      <button class="btn-submit" onclick="submitPolicy()" data-i18n="confirm_submit">确认提交</button>
+    </div>
+  </div>
+</div>
 
-async function saveTax(id) {
-  const obj = {
-    customer: document.getElementById('taxCustomer').value,
-    service_type: document.getElementById('taxType').value,
-    fee: +document.getElementById('taxFee').value
-  };
-  if (id) await supabase.from('tax').update(obj).eq('id', id);
-  else await supabase.from('tax').insert(obj);
-  closeModal('taxModal');
-  showToast('保存成功');
-  loadTax(); loadDashboard();
-}
+<!-- ==================== 职业技能培训页面 ==================== -->
+<div class="page-section" id="pageTraining">
+  <div class="sub-tabs">
+    <button class="active" onclick="switchSubTab(this,'trList')" data-i18n="tab_project_list">📋 培训项目列表</button>
+    <button onclick="switchSubTab(this,'trLedger')" data-i18n="tab_monthly_ledger">📊 月度台账</button>
+    <button onclick="switchSubTab(this,'trSchools')" data-i18n="tab_schools">🏫 合作院校</button>
+    <button onclick="switchSubTab(this,'trEnterprises')" data-i18n="tab_enterprises">🏢 合作企业</button>
+  </div>
+  <div id="trList">
+    <div class="controls">
+      <button class="btn-teal" onclick="openTrainingModal()" data-i18n="new_training">➕ 新增培训项目</button>
+      <div style="flex:1"></div>
+      <label data-i18n="filter_status">状态：</label>
+      <select id="filterTrStatus" onchange="renderTraining()">
+        <option value="" data-i18n="all">全部</option>
+        <option value="企业需求对接" data-i18n="tr_st_demand">企业需求对接</option>
+        <option value="院校联合选拔" data-i18n="tr_st_select">院校联合选拔</option>
+        <option value="定制化教学" data-i18n="tr_st_teaching">定制化教学</option>
+        <option value="技能考核认证" data-i18n="tr_st_certify">技能考核认证</option>
+        <option value="上岗就业" data-i18n="tr_st_employ">上岗就业</option>
+        <option value="已完成" data-i18n="tr_st_done">已完成</option>
+      </select>
+      <label data-i18n="filter_category">类别：</label>
+      <select id="filterTrCat" onchange="renderTraining()">
+        <option value="" data-i18n="all">全部</option>
+        <option value="职业资格" data-i18n="cat_prof_qual">职业资格</option>
+        <option value="语言培训" data-i18n="cat_lang_train">语言培训</option>
+        <option value="安全规范" data-i18n="cat_safety">安全规范</option>
+        <option value="管理技能" data-i18n="cat_mgmt_skill">管理技能</option>
+        <option value="其他" data-i18n="st_other">其他</option>
+      </select>
+      <input type="text" placeholder="搜索企业/院校/学员..." data-i18n-placeholder="search_placeholder_training" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="renderTraining(this.value)">
+    </div>
+    <div class="summary-cards" id="trSummaryCards">
+      <div class="card"><div class="label" data-i18n="sum_projects">培训项目数</div><div class="value" id="trTotal">0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_training_revenue">培训收入</div><div class="value profit" id="trRevenue">$0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_active">进行中</div><div class="value" id="trActive">0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_schools">合作院校</div><div class="value" id="trSchools">0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_enterprises">合作企业</div><div class="value" id="trEnterprises">0</div></div>
+    </div>
+    <div class="table-wrapper">
+      <div class="table-header"><h3 data-i18n="training_list">🎓 培训项目</h3><span style="font-size:12px;color:#aaa" id="trCount" data-i18n="total_projects">共 0 个项目</span></div>
+      <div id="trTableContainer">
+        <div class="empty-state"><div class="icon">📭</div><p data-i18n="no_training">暂无培训项目，请点击「新增培训项目」</p></div>
+      </div>
+    </div>
+  </div>
+  <div id="trLedger" style="display:none">
+    <div class="controls">
+      <label data-i18n="select_month">📅 月份：</label><input type="month" id="trMonth" onchange="renderTrLedger()">
+      <button onclick="prevTrMonth()">◀</button><button onclick="nextTrMonth()">▶</button>
+      <div style="flex:1"></div>
+      <button class="btn-orange" onclick="exportTrCSV()" data-i18n="export_csv">📥 导出CSV</button>
+    </div>
+    <div class="summary-cards">
+      <div class="card"><div class="label" data-i18n="sum_monthly_projects">本月项目数</div><div class="value" id="trlCount">0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_monthly_revenue">本月培训收入</div><div class="value profit" id="trlRevenue">$0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_monthly_students">本月学员数</div><div class="value" id="trlStudents">0</div></div>
+    </div>
+    <div class="table-wrapper"><div class="table-header"><h3 data-i18n="monthly_detail">📊 月度明细</h3></div><div id="trLedgerTable"></div></div>
+  </div>
+  <div id="trSchools" style="display:none">
+    <div class="controls">
+      <button class="btn-purple" onclick="openSchoolModal()" data-i18n="new_school">➕ 新增合作院校</button>
+      <div style="flex:1"></div>
+      <input type="text" placeholder="搜索院校名称..." data-i18n-placeholder="search_placeholder_schools" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="renderSchools(this.value)">
+    </div>
+    <div id="schoolTableContainer">
+      <div class="empty-state"><div class="icon">📭</div><p data-i18n="no_schools">暂无合作院校，请点击「新增合作院校」</p></div>
+    </div>
+  </div>
+  <div id="trEnterprises" style="display:none">
+    <div class="controls">
+      <button class="btn-gold" onclick="openEnterpriseModal()" data-i18n="new_enterprise">➕ 新增合作企业</button>
+      <div style="flex:1"></div>
+      <input type="text" placeholder="搜索企业名称..." data-i18n-placeholder="search_placeholder_enterprises" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:220px" oninput="renderEnterprises(this.value)">
+    </div>
+    <div id="enterpriseTableContainer">
+      <div class="empty-state"><div class="icon">📭</div><p data-i18n="no_enterprises">暂无合作企业，请点击「新增合作企业」</p></div>
+    </div>
+  </div>
+</div>
 
-/* ========== 培训 ========== */
-function renderTraining(data) {
-  if (!data.length) return document.getElementById('trainingTable').innerHTML = emptyHtml('暂无项目');
-  let html = `<table><thead><tr><th>课程</th><th>学员</th><th>费用</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(t => {
-    html += `<tr>
-      <td>${t.course}</td><td>${t.trainee}</td><td>$${t.fee||0}</td>
-      <td><span class="status-badge st-${t.status}">${['招生中','进行中','已结课'][t.status]}</span></td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editTraining('${t.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteTraining('${t.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('trainingTable').innerHTML = html;
-}
-
-async function loadTraining() {
-  await loadTable('training', renderTraining, 'trainingCount', 'searchTraining', 'course');
-}
-
-async function deleteTraining(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('training').delete().eq('id', id);
-  showToast('删除成功'); loadTraining(); loadDashboard();
-}
-
-function editTraining(id) {
-  supabase.from('training').select('*').eq('id', id).single().then(({data}) => openTrainingModal(data));
-}
-
-function openTrainingModal(existing) {
-  const m = document.getElementById('trainingModalContent');
-  m.innerHTML = `
-    <h3>${existing?'编辑项目':'新建项目'}</h3>
+<!-- ==================== 弹窗：培训项目 ==================== -->
+<div class="modal-overlay" id="trainingModal">
+  <div class="modal">
+    <h3 id="trainingModalTitle" data-i18n="new_training">➕ 新增培训项目</h3>
     <div class="form-row">
-      <div class="form-group"><label>课程</label><input id="trCourse" value="${existing?.course||''}"></div>
-      <div class="form-group"><label>学员</label><input id="trTrainee" value="${existing?.trainee||''}"></div>
+      <div class="form-group"><label data-i18n="enterprise_name">企业名称 *</label><input type="text" id="trEntName" placeholder="用工企业名称"></div>
+      <div class="form-group"><label data-i18n="school_name">院校名称 *</label><input type="text" id="trSchoolName" placeholder="合作院校名称"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>费用</label><input type="number" id="trFee" value="${existing?.fee||0}"></div>
-      <div class="form-group"><label>状态</label>
+      <div class="form-group"><label data-i18n="project_name">项目名称 *</label><input type="text" id="trProjName" placeholder="如：高级电工定制培训班"></div>
+      <div class="form-group"><label data-i18n="training_category">培训类别</label>
+        <select id="trCategory">
+          <option value="职业资格" data-i18n="cat_prof_qual">职业资格</option>
+          <option value="语言培训" data-i18n="cat_lang_train">语言培训</option>
+          <option value="安全规范" data-i18n="cat_safety">安全规范</option>
+          <option value="管理技能" data-i18n="cat_mgmt_skill">管理技能</option>
+          <option value="其他" data-i18n="st_other">其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="student_count">学员人数 *</label><input type="number" id="trStudents" min="1" value="1"></div>
+      <div class="form-group"><label data-i18n="training_days">培训天数</label><input type="number" id="trDays" min="1" value="30"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="fee_per_student">培训费用/人(USD) *</label><input type="number" id="trFee" min="0" step="50" placeholder="0"></div>
+      <div class="form-group"><label data-i18n="received_amount">已收金额(USD)</label><input type="number" id="trReceived" min="0" step="50" placeholder="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="cooperation_mode">合作模式</label>
+        <select id="trMode">
+          <option value="企业付费" data-i18n="mode_enterprise_pay">企业付费</option>
+          <option value="院校分成" data-i18n="mode_school_share">院校分成</option>
+          <option value="就业佣金" data-i18n="mode_employ_comm">就业佣金</option>
+        </select>
+      </div>
+      <div class="form-group"><label data-i18n="current_status">当前状态</label>
         <select id="trStatus">
-          <option value="0" ${existing?.status===0?'selected':''}>招生中</option>
-          <option value="1" ${existing?.status===1?'selected':''}>进行中</option>
-          <option value="2" ${existing?.status===2?'selected':''}>已结课</option>
+          <option value="企业需求对接" data-i18n="tr_st_demand">企业需求对接</option>
+          <option value="院校联合选拔" data-i18n="tr_st_select">院校联合选拔</option>
+          <option value="定制化教学" data-i18n="tr_st_teaching">定制化教学</option>
+          <option value="技能考核认证" data-i18n="tr_st_certify">技能考核认证</option>
+          <option value="上岗就业" data-i18n="tr_st_employ">上岗就业</option>
+          <option value="已完成" data-i18n="tr_st_done">已完成</option>
         </select>
       </div>
     </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="start_date">开班日期</label><input type="date" id="trStartDate"></div>
+      <div class="form-group"><label data-i18n="expected_end_date">预计结业日期</label><input type="date" id="trEndDate"></div>
+    </div>
+    <div class="form-group"><label data-i18n="remark">备注</label><textarea id="trRemark" placeholder="备注信息，如特殊培训需求等"></textarea></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('trainingModal')">取消</button>
-      <button class="btn-submit" onclick="saveTraining('${existing?.id||''}')">保存</button>
-    </div>`;
-  document.getElementById('trainingModal').classList.add('active');
-}
+      <button class="btn-cancel" onclick="closeTrainingModal()" data-i18n="cancel">取消</button>
+      <button class="btn-submit" onclick="submitTraining()" data-i18n="confirm_submit">确认提交</button>
+    </div>
+  </div>
+</div>
 
-async function saveTraining(id) {
-  const obj = {
-    course: document.getElementById('trCourse').value,
-    trainee: document.getElementById('trTrainee').value,
-    fee: +document.getElementById('trFee').value,
-    status: +document.getElementById('trStatus').value
-  };
-  if (id) await supabase.from('training').update(obj).eq('id', id);
-  else await supabase.from('training').insert(obj);
-  closeModal('trainingModal');
-  showToast('保存成功');
-  loadTraining(); loadDashboard();
-}
-
-/* ========== 法律 ========== */
-function renderLegal(data) {
-  if (!data.length) return document.getElementById('legalTable').innerHTML = emptyHtml('暂无项目');
-  let html = `<table><thead><tr><th>客户</th><th>案件</th><th>费用</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(l => {
-    html += `<tr>
-      <td>${l.customer}</td><td>${l.case_type}</td><td>$${l.fee||0}</td>
-      <td><span class="status-badge st-${l.status}">${['咨询中','处理中','已结案'][l.status]}</span></td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editLegal('${l.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteLegal('${l.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('legalTable').innerHTML = html;
-}
-
-async function loadLegal() {
-  await loadTable('legal', renderLegal, 'legalCount', 'searchLegal', 'customer');
-}
-
-async function deleteLegal(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('legal').delete().eq('id', id);
-  showToast('删除成功'); loadLegal(); loadDashboard();
-}
-
-function editLegal(id) {
-  supabase.from('legal').select('*').eq('id', id).single().then(({data}) => openLegalModal(data));
-}
-
-function openLegalModal(existing) {
-  const m = document.getElementById('legalModalContent');
-  m.innerHTML = `
-    <h3>${existing?'编辑项目':'新建项目'}</h3>
+<!-- ==================== 弹窗：合作院校 ==================== -->
+<div class="modal-overlay" id="schoolModal">
+  <div class="modal" style="width:560px">
+    <h3 id="schoolModalTitle" data-i18n="new_school">➕ 新增合作院校</h3>
     <div class="form-row">
-      <div class="form-group"><label>客户</label><input id="lgCustomer" value="${existing?.customer||''}"></div>
-      <div class="form-group"><label>案件</label>
-        <select id="lgCase">
-          <option value="合同审查" ${existing?.case_type==='合同审查'?'selected':''}>合同审查</option>
-          <option value="公司法务" ${existing?.case_type==='公司法务'?'selected':''}>公司法务</option>
-          <option value="劳动仲裁" ${existing?.case_type==='劳动仲裁'?'selected':''}>劳动仲裁</option>
+      <div class="form-group"><label data-i18n="school_name">院校名称 *</label><input type="text" id="schName" placeholder="院校全称"></div>
+      <div class="form-group"><label data-i18n="coop_type">合作类型</label>
+        <select id="schType">
+          <option value="实习基地" data-i18n="sch_internship">实习基地</option>
+          <option value="定向委培" data-i18n="sch定向委培">定向委培</option>
+          <option value="产学研合作" data-i18n="sch产学研">产学研合作</option>
         </select>
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>费用</label><input type="number" id="lgFee" value="${existing?.fee||0}"></div>
-      <div class="form-group"><label>状态</label>
+      <div class="form-group"><label data-i18n="major_strength">优势专业</label><input type="text" id="schMajor" placeholder="如：机械、焊接、中文"></div>
+      <div class="form-group"><label data-i18n="contact_person">联系人</label><input type="text" id="schContact" placeholder="院校负责人姓名"></div>
+    </div>
+    <div class="form-group"><label data-i18n="phone">联系电话</label><input type="text" id="schPhone" placeholder="联系电话"></div>
+    <div class="form-group"><label data-i18n="remark">备注</label><textarea id="schRemark" placeholder="院校备注信息"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeSchoolModal()" data-i18n="cancel">取消</button>
+      <button class="btn-submit" onclick="submitSchool()" data-i18n="confirm_submit">确认提交</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 弹窗：合作企业 ==================== -->
+<div class="modal-overlay" id="enterpriseModal">
+  <div class="modal" style="width:560px">
+    <h3 id="enterpriseModalTitle" data-i18n="new_enterprise">➕ 新增合作企业</h3>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="enterprise_name">企业名称 *</label><input type="text" id="entName" placeholder="企业全称"></div>
+      <div class="form-group"><label data-i18n="job_position">用工岗位</label><input type="text" id="entPosition" placeholder="如：电工、焊工、普工"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="headcount">需求人数</label><input type="number" id="entHeadcount" min="1" value="1"></div>
+      <div class="form-group"><label data-i18n="salary_range">薪资范围(USD)</label><input type="text" id="entSalary" placeholder="如：300-500/月"></div>
+    </div>
+    <div class="form-group"><label data-i18n="skill_requirement">技能要求</label><input type="text" id="entSkill" placeholder="岗位技能要求"></div>
+    <div class="form-group"><label data-i18n="contact_person">联系人</label><input type="text" id="entContact" placeholder="企业联系人"></div>
+    <div class="form-group"><label data-i18n="remark">备注</label><textarea id="entRemark" placeholder="企业备注信息"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEnterpriseModal()" data-i18n="cancel">取消</button>
+      <button class="btn-submit" onclick="submitEnterprise()" data-i18n="confirm_submit">确认提交</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 法律咨询合规页面 ==================== -->
+<div class="page-section" id="pageLegal">
+  <div class="sub-tabs">
+    <button class="active" onclick="switchSubTab(this,'legalList')" data-i18n="tab_case_list">📋 法律项目列表</button>
+    <button onclick="switchSubTab(this,'legalLedger')" data-i18n="tab_monthly_ledger">📊 月度台账</button>
+    <button onclick="switchSubTab(this,'legalClients')" data-i18n="tab_clients">🏢 企业客户</button>
+    <button onclick="switchSubTab(this,'legalLawyers')" data-i18n="tab_lawyers">👨‍⚖️ 律师团队</button>
+  </div>
+  <div id="legalList">
+    <div class="controls">
+      <button class="btn-purple" onclick="openLegalModal()" data-i18n="new_legal">➕ 新增法律项目</button>
+      <div style="flex:1"></div>
+      <label data-i18n="filter_status">状态：</label>
+      <select id="filterLegalStatus" onchange="renderLegal()">
+        <option value="" data-i18n="all">全部</option>
+        <option value="0" data-i18n="legal_st_consult">咨询接洽</option>
+        <option value="1" data-i18n="legal_st_draft">方案拟定</option>
+        <option value="2" data-i18n="legal_st_dd">尽职调查</option>
+        <option value="3" data-i18n="legal_st_doc">文书起草</option>
+        <option value="4" data-i18n="legal_st_submit">审批递交</option>
+        <option value="5" data-i18n="legal_st_archive">完成归档</option>
+      </select>
+      <label data-i18n="filter_service_type">服务类型：</label>
+      <select id="filterLegalType" onchange="renderLegal()">
+        <option value="" data-i18n="all">全部</option>
+        <option value="企业设立与架构设计" data-i18n="ls_corp_setup">企业设立与架构设计</option>
+        <option value="投资项目法律服务" data-i18n="ls_invest">投资项目法律服务</option>
+        <option value="商业合同管理" data-i18n="ls_contract">商业合同管理</option>
+        <option value="政府审批与合规" data-i18n="ls_gov_approve">政府审批与合规</option>
+        <option value="劳动与人力资源法务" data-i18n="ls_labor">劳动与人力资源法务</option>
+        <option value="争议解决与维权" data-i18n="ls_dispute">争议解决与维权</option>
+        <option value="特殊专项服务" data-i18n="ls_special">特殊专项服务</option>
+      </select>
+      <input type="text" id="filterLegalKeyword" placeholder="搜索企业/案件编号" data-i18n-placeholder="search_placeholder_legal" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:200px" oninput="renderLegal()">
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th data-i18n="th_case_no">案件编号</th><th data-i18n="th_client">委托企业</th><th data-i18n="th_service_type">服务类型</th><th data-i18n="th_lawyer">负责律师</th><th data-i18n="th_billing">计费方式</th><th data-i18n="th_fee">费用(USD)</th><th data-i18n="th_received">已收(USD)</th><th data-i18n="th_status">状态</th><th data-i18n="th_action">操作</th></tr></thead>
+        <tbody id="legalTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="legalEmpty" style="display:none"><div class="icon">⚖️</div><p data-i18n="no_legal">暂无法律项目，点击上方按钮新增</p></div>
+    </div>
+  </div>
+  <div id="legalLedger" style="display:none">
+    <div class="controls">
+      <label data-i18n="select_month">📅 月份：</label><input type="month" id="legalMonth" onchange="renderLegalLedger()">
+      <div style="flex:1"></div>
+      <button class="btn-purple" onclick="exportLegalLedger()" data-i18n="export_csv">📥 导出 CSV</button>
+    </div>
+    <div class="summary-cards" id="legalSummary">
+      <div class="card"><div class="label" data-i18n="sum_projects">项目数</div><div class="value" id="lgProjects">0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_service_revenue">服务费收入</div><div class="value profit" id="lgRevenue">$0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_received">已收金额</div><div class="value" id="lgReceived">$0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_pending">待收金额</div><div class="value cost" id="lgPending">$0</div></div>
+    </div>
+    <div class="table-wrapper" id="legalLedgerTable"></div>
+  </div>
+  <div id="legalClients" style="display:none">
+    <div class="controls">
+      <button class="btn-purple" onclick="openLegalClientModal()" data-i18n="new_client">➕ 新增企业客户</button>
+      <div style="flex:1"></div>
+      <input type="text" id="filterLegalClient" placeholder="搜索企业名称" data-i18n-placeholder="search_placeholder_clients" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:200px" oninput="renderLegalClients()">
+    </div>
+    <div class="summary-cards">
+      <div class="card"><div class="label" data-i18n="sum_client_total">企业客户总数</div><div class="value" id="lgClientCount">0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_client_active">活跃客户</div><div class="value profit" id="lgClientActive">0</div></div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th data-i18n="th_enterprise">企业名称</th><th data-i18n="th_contact">联系人</th><th data-i18n="th_phone">电话</th><th data-i18n="th_service_type">服务类型</th><th data-i18n="th_cumul_spend">累计消费(USD)</th><th data-i18n="th_status">状态</th><th data-i18n="th_remark">备注</th><th data-i18n="th_action">操作</th></tr></thead>
+        <tbody id="legalClientTable"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="legalLawyers" style="display:none">
+    <div class="controls">
+      <button class="btn-purple" onclick="openLawyerModal()" data-i18n="new_lawyer">➕ 新增律师</button>
+      <div style="flex:1"></div>
+      <input type="text" id="filterLawyer" placeholder="搜索律师姓名" data-i18n-placeholder="search_placeholder_lawyers" style="padding:6px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;width:200px" oninput="renderLawyers()">
+    </div>
+    <div class="summary-cards">
+      <div class="card"><div class="label" data-i18n="sum_lawyer_total">律师总数</div><div class="value" id="lgLawyerCount">0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_lawyer_cn">中方律师</div><div class="value" id="lgLawyerCN">0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_lawyer_kh">柬方律师</div><div class="value profit" id="lgLawyerKH">0</div></div>
+      <div class="card"><div class="label" data-i18n="sum_lawyer_en">英方律师</div><div class="value" id="lgLawyerEN">0</div></div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th data-i18n="th_lawyer_name">律师姓名</th><th data-i18n="th_language">语言</th><th data-i18n="th_expertise">专长领域</th><th data-i18n="th_qualification">资质</th><th data-i18n="th_case_count">负责案件数</th><th data-i18n="th_rate">费率(USD/h)</th><th data-i18n="th_status">状态</th><th data-i18n="th_action">操作</th></tr></thead>
+        <tbody id="lawyerTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 弹窗：法律项目 ==================== -->
+<div class="modal-overlay" id="legalModal">
+  <div class="modal" style="width:620px">
+    <h3 id="legalModalTitle" data-i18n="new_legal">➕ 新增法律项目</h3>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="enterprise_name">委托企业 *</label><input type="text" id="lgEntName" placeholder="企业全称"></div>
+      <div class="form-group"><label data-i18n="service_type">服务类型 *</label>
+        <select id="lgServiceType">
+          <option value="企业设立与架构设计" data-i18n="ls_corp_setup">企业设立与架构设计</option>
+          <option value="投资项目法律服务" data-i18n="ls_invest">投资项目法律服务</option>
+          <option value="商业合同管理" data-i18n="ls_contract">商业合同管理</option>
+          <option value="政府审批与合规" data-i18n="ls_gov_approve">政府审批与合规</option>
+          <option value="劳动与人力资源法务" data-i18n="ls_labor">劳动与人力资源法务</option>
+          <option value="争议解决与维权" data-i18n="ls_dispute">争议解决与维权</option>
+          <option value="特殊专项服务" data-i18n="ls_special">特殊专项服务</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="th_lawyer">负责律师</label>
+        <select id="lgLawyer"><option value="" data-i18n="select_lawyer">请选择律师</option></select>
+      </div>
+      <div class="form-group"><label data-i18n="th_billing">计费方式</label>
+        <select id="lgBilling">
+          <option value="按小时" data-i18n="bill_hourly">按小时</option>
+          <option value="固定费用" data-i18n="bill_fixed">固定费用</option>
+          <option value="按标的额比例" data-i18n="bill_percent">按标的额比例</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="th_fee">服务费用(USD) *</label><input type="number" id="lgFee" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label data-i18n="th_received">已收金额(USD)</label><input type="number" id="lgReceived" min="0" step="0.01" placeholder="0.00" value="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="urgency_level">紧急程度</label>
+        <select id="lgUrgency">
+          <option value="普通" data-i18n="urg_normal">🟢 普通</option>
+          <option value="重要" data-i18n="urg_important">🟡 重要</option>
+          <option value="紧急" data-i18n="urg_urgent">🔴 紧急</option>
+        </select>
+      </div>
+      <div class="form-group"><label data-i18n="current_status">当前状态</label>
         <select id="lgStatus">
-          <option value="0" ${existing?.status===0?'selected':''}>咨询中</option>
-          <option value="1" ${existing?.status===1?'selected':''}>处理中</option>
-          <option value="2" ${existing?.status===2?'selected':''}>已结案</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('legalModal')">取消</button>
-      <button class="btn-submit" onclick="saveLegal('${existing?.id||''}')">保存</button>
-    </div>`;
-  document.getElementById('legalModal').classList.add('active');
-}
-
-async function saveLegal(id) {
-  const obj = {
-    customer: document.getElementById('lgCustomer').value,
-    case_type: document.getElementById('lgCase').value,
-    fee: +document.getElementById('lgFee').value,
-    status: +document.getElementById('lgStatus').value
-  };
-  if (id) await supabase.from('legal').update(obj).eq('id', id);
-  else await supabase.from('legal').insert(obj);
-  closeModal('legalModal');
-  showToast('保存成功');
-  loadLegal(); loadDashboard();
-}
-
-/* ========== 会员 ========== */
-function renderMembers(data) {
-  if (!data.length) return document.getElementById('memberTable').innerHTML = emptyHtml('暂无会员');
-  let html = `<table><thead><tr><th>姓名</th><th>等级</th><th>费用</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(m => {
-    html += `<tr>
-      <td>${m.name}</td><td>${m.level}</td><td>$${m.fee||0}</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editMember('${m.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteMember('${m.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('memberTable').innerHTML = html;
-}
-
-async function loadMembers() {
-  await loadTable('members', renderMembers, 'memberCount', 'searchMember', 'name');
-}
-
-async function deleteMember(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('members').delete().eq('id', id);
-  showToast('删除成功'); loadMembers(); loadDashboard();
-}
-
-function editMember(id) {
-  supabase.from('members').select('*').eq('id', id).single().then(({data}) => openMemberModal(data));
-}
-
-function openMemberModal(existing) {
-  const m = document.getElementById('memberModalContent');
-  m.innerHTML = `
-    <h3>${existing?'编辑会员':'新增会员'}</h3>
-    <div class="form-row">
-      <div class="form-group"><label>姓名</label><input id="memName" value="${existing?.name||''}"></div>
-      <div class="form-group"><label>等级</label>
-        <select id="memLevel">
-          <option value="普通会员" ${existing?.level==='普通会员'?'selected':''}>普通会员</option>
-          <option value="理事会员" ${existing?.level==='理事会员'?'selected':''}>理事会员</option>
-          <option value="战略会员" ${existing?.level==='战略会员'?'selected':''}>战略会员</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>费用</label><input type="number" id="memFee" value="${existing?.fee||0}"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('memberModal')">取消</button>
-      <button class="btn-submit" onclick="saveMember('${existing?.id||''}')">保存</button>
-    </div>`;
-  document.getElementById('memberModal').classList.add('active');
-}
-
-async function saveMember(id) {
-  const obj = {
-    name: document.getElementById('memName').value,
-    level: document.getElementById('memLevel').value,
-    fee: +document.getElementById('memFee').value
-  };
-  if (id) await supabase.from('members').update(obj).eq('id', id);
-  else await supabase.from('members').insert(obj);
-  closeModal('memberModal');
-  showToast('保存成功');
-  loadMembers(); loadDashboard();
-}
-
-/* ========== 费用 ========== */
-function renderExpenses(data) {
-  if (!data.length) return document.getElementById('expenseTable').innerHTML = emptyHtml('暂无支出');
-  let html = `<table><thead><tr><th>类别</th><th>说明</th><th>金额</th><th>操作</th></tr></thead><tbody>`;
-  data.forEach(e => {
-    html += `<tr>
-      <td>${e.category}</td><td>${e.note}</td><td>$${e.amount||0}</td>
-      <td class="actions">
-        <button class="edit-btn" onclick="editExpense('${e.id}')">编辑</button>
-        <button class="del-btn" onclick="deleteExpense('${e.id}')">删除</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('expenseTable').innerHTML = html;
-}
-
-async function loadExpenses() {
-  await loadTable('expenses', renderExpenses, 'expenseCount', 'searchExpense', 'note');
-}
-
-async function deleteExpense(id) {
-  if (!confirm('确定删除？')) return;
-  await supabase.from('expenses').delete().eq('id', id);
-  showToast('删除成功'); loadExpenses(); loadDashboard();
-}
-
-function editExpense(id) {
-  supabase.from('expenses').select('*').eq('id', id).single().then(({data}) => openExpenseModal(data));
-}
-
-function openExpenseModal(existing) {
-  const m = document.getElementById('expenseModalContent');
-  m.innerHTML = `
-    <h3>${existing?'编辑支出':'新增支出'}</h3>
-    <div class="form-row">
-      <div class="form-group"><label>类别</label>
-        <select id="expCat">
-          <option value="rent" ${existing?.category==='rent'?'selected':''}>房租/水电</option>
-          <option value="salary" ${existing?.category==='salary'?'selected':''}>人员工资</option>
-          <option value="utility" ${existing?.category==='utility'?'selected':''}>通讯/网络</option>
-          <option value="travel" ${existing?.category==='travel'?'selected':''}>差旅费</option>
-          <option value="marketing" ${existing?.category==='marketing'?'selected':''}>市场推广</option>
-          <option value="office" ${existing?.category==='office'?'selected':''}>办公用品</option>
-          <option value="other" ${existing?.category==='other'?'selected':''}>其他</option>
-        </select>
-      </div>
-      <div class="form-group"><label>金额</label><input type="number" id="expAmount" value="${existing?.amount||0}"></div>
-    </div>
-    <div class="form-group"><label>说明</label><textarea id="expNote">${existing?.note||''}</textarea></div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('expenseModal')">取消</button>
-      <button class="btn-submit" onclick="saveExpense('${existing?.id||''}')">保存</button>
-    </div>`;
-  document.getElementById('expenseModal').classList.add('active');
-}
-
-async function saveExpense(id) {
-  const obj = {
-    category: document.getElementById('expCat').value,
-    amount: +document.getElementById('expAmount').value,
-    note: document.getElementById('expNote').value
-  };
-  if (id) await supabase.from('expenses').update(obj).eq('id', id);
-  else await supabase.from('expenses').insert(obj);
-  closeModal('expenseModal');
-  showToast('保存成功');
-  loadExpenses(); loadDashboard();
-}
-
-/* ========== 财务汇总 ========== */
-async function loadFinance() {
-  document.getElementById('financeBreakdown').innerHTML = '<p>功能完善中...</p>';
-}
-
-/* ========== 配置 ========== */
-function applyConfig() {
-  showToast('参数已保存');
-}
-
-/* ========== 修改密码 ========== */
-async function changePassword() {
-  const oldPwd = document.getElementById('oldPwd').value;
-  const newPwd = document.getElementById('newPwd').value;
-  const newPwd2 = document.getElementById('newPwd2').value;
-  const msg = document.getElementById('pwdMsg');
-  if (newPwd !== newPwd2) {
-    msg.textContent = '两次密码不一致';
-    msg.style.color = '#ff4d4f';
-    return;
-  }
-  const { error } = await supabase.auth.updateUser({ password: newPwd });
-  if (error) {
-    msg.textContent = '修改失败：' + error.message;
-    msg.style.color = '#ff4d4f';
-  } else {
-    msg.textContent = '✅ 密码修改成功';
-    msg.style.color = '#52c41a';
-  }
-}
-
-/* ========== 导出CSV ========== */
-function exportCSV(table) {
-  showToast('导出功能开发中');
-}
-
-/* ========== 弹窗关闭 ========== */
-function closeModal(id) {
-  document.getElementById(id).classList.remove('active');
-}
-
-/* ========== 初始化 ========== */
-document.addEventListener('DOMContentLoaded', async () => {
-  const { data } = await supabase.auth.getSession();
-  if (data.session) {
-    showApp(data.session.user);
-  } else {
-    applyLang(currentLang);
-  }
-});
-</script>
-</body>
-</html>
+          <option value="咨询接洽" data-i18n="legal_st_consult">咨询接洽</option>
+          <option value="方案拟定" data-i18n="legal_st_draft">方案拟定</option>
+          <option value="尽职调查" data-i18n="legal_st_dd">尽职调查</option>
+          <option value="文书起草" data-i18n="legal_st_doc">文书起草</option>
+          <option value="审批递交" data-i18n="legal_st_submit">审批递交</option>
+          <option value="完成归档" data-i18n="legal_st_archive">完成归档
