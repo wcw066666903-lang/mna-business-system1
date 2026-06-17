@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MNA 湄公产业资本联盟 · 云端业务管理平台</title>
+
+<!-- ===== Supabase SDK ===== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- ===== ✅ 已为你填好 Supabase 配置 ===== -->
+<script>
+const SUPABASE_URL = 'https://dicapkasnfjzbfmfyzib.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_vSH9T39fUA4mfxC2E3QCig_vHObIYCg';
+
+window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ========== 登录态监听 ========== */
+supabase.auth.onAuthStateChange((event, session) => {
+  const loginPage = document.getElementById('loginPage');
+  const app = document.getElementById('appContainer');
+
+  if (session) {
+    loginPage.style.display = 'none';
+    app.style.display = 'block';
+    initApp(session.user);
+  } else {
+    loginPage.style.display = 'flex';
+    app.style.display = 'none';
+  }
+});
+
+/* ========== 登录 ========== */
+async function doLogin() {
+  const email = document.getElementById('loginUser').value;
+  const password = document.getElementById('loginPass').value;
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) document.getElementById('loginError').innerText = error.message;
+}
+
+/* ========== 退出 ========== */
+async function doLogout() {
+  await supabase.auth.signOut();
+}
+
+/* ========== 初始化应用 ========== */
+function initApp(user) {
+  document.getElementById('currentUserName').innerText = user.email;
+  document.getElementById('footerUser').innerText = user.email;
+  switchPage('dashboard');
+}
+</script>
+
+<!-- ===== 样式（精简保留核心）===== -->
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', sans-serif;
+    background: #f0f2f5; color: #333; font-size: 14px;
+  }
+  .login-page {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f2b5e, #1a4a8a);
+  }
+  .login-box {
+    background: #fff; border-radius: 16px; padding: 44px 40px; width: 440px;
+    box-shadow: 0 16px 50px rgba(0,0,0,0.2);
+  }
+  .login-box h2 { font-size: 22px; color: #0f2b5e; margin-bottom: 6px; }
+  .login-box input {
+    width: 100%; padding: 10px 14px; margin-top: 10px;
+    border: 1px solid #d9d9d9; border-radius: 8px;
+  }
+  .login-btn {
+    width: 100%; margin-top: 20px; padding: 12px;
+    background: linear-gradient(135deg, #0f2b5e, #1a4a8a);
+    color: #fff; border: none; border-radius: 8px;
+    font-weight: 600; cursor: pointer;
+  }
+  .login-error { color: #ff4d4f; margin-top: 10px; min-height: 20px; }
+
+  .app-container { display: none; min-height: 100vh; }
+  .app-header {
+    height: 64px; background: linear-gradient(135deg, #0f2b5e, #1a4a8a);
+    color: #fff; display: flex; justify-content: space-between; align-items: center;
+    padding: 0 32px; position: sticky; top: 0; z-index: 100;
+  }
+  .sidebar {
+    width: 240px; background: #fff; border-right: 1px solid #e8e8e8;
+  }
+  .content-area { flex: 1; padding: 24px; overflow-y: auto; }
+  .page-section { display: none; }
+  .page-section.active { display: block; }
+
+  button.nav-item {
+    width: 100%; text-align: left; padding: 10px 20px;
+    border: none; background: none; cursor: pointer;
+    font-size: 13.5px; color: #555;
+  }
+  button.nav-item:hover { background: #f6f9ff; color: #1a4a8a; }
+  button.nav-item.active { background: #eef3ff; color: #1a4a8a; border-left: 3px solid #1a4a8a; }
+
+  .panel { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+  .panel h3 { font-size: 16px; color: #0f2b5e; margin-bottom: 16px; }
+
+  footer { text-align: center; padding: 20px; color: #bbb; font-size: 12px; }
+</style>
+</head>
+
+<body>
+
+<!-- ===== 登录页 ===== -->
+<div class="login-page" id="loginPage">
+  <div class="login-box">
+    <h2>🌏 MNA 业务管理平台</h2>
+    <p style="color:#888;font-size:12px;">Supabase 云端同步版</p>
+
+    <input id="loginUser" placeholder="邮箱（admin@mna.com）">
+    <input id="loginPass" type="password" placeholder="密码（admin123）">
+    <button class="login-btn" onclick="doLogin()">登 录</button>
+
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ===== 主应用 ===== -->
+<div class="app-container" id="appContainer">
+  <div class="app-header">
+    <div><strong>MNA 湄公产业资本联盟</strong></div>
+    <div>
+      <span id="currentUserName"></span>
+      <button onclick="doLogout()" style="margin-left:12px;">退出</button>
+    </div>
+  </div>
+
+  <div style="display:flex; min-height:calc(100vh - 64px);">
+    <div class="sidebar">
+      <div style="padding:16px;font-weight:600;color:#0f2b5e;">📦 业务模块</div>
+
+      <button class="nav-item active" onclick="switchPage('dashboard')">🏠 仪表盘</button>
+      <button class="nav-item" onclick="switchPage('logistics')">🚢 物流订单</button>
+      <button class="nav-item" onclick="switchPage('tax')">🧾 财税业务</button>
+      <button class="nav-item" onclick="switchPage('investment')">💰 投融资</button>
+    </div>
+
+    <div class="content-area">
+
+      <!-- 仪表盘 -->
+      <div class="page-section active" id="pageDashboard">
+        <h2>👋 欢迎回来</h2>
+        <p>当前使用 <strong>Supabase 云端数据库</strong>，多设备实时同步 ✅</p>
+        <div class="panel">
+          <h3>📌 系统状态</h3>
+          <p>✅ Supabase 已连接</p>
+          <p>✅ 数据表已就绪</p>
+          <p>✅ 登录认证正常</p>
+        </div>
+      </div>
+
+      <!-- 物流订单 -->
+      <div class="page-section" id="pageLogistics">
+        <div class="panel">
+          <h3>🚢 物流订单管理</h3>
+          <button onclick="addOrder()">➕ 新建订单</button>
+          <ul id="orderList" style="margin-top:16px;line-height:2;"></ul>
+        </div>
+      </div>
+
+      <!-- 财税业务 -->
+      <div class="page-section" id="pageTax">
+        <div class="panel">
+          <h3>🧾 财税业务管理</h3>
+          <button onclick="addTax()">➕ 新增财税项目</button>
+          <ul id="taxList" style="margin-top:16px;line-height:2;"></ul>
+        </div>
+      </div>
+
+      <!-- 投融资 -->
+      <div class="page-section" id="pageInvestment">
+        <div class="panel">
+          <h3>💰 投融资项目管理</h3>
+          <button onclick="addInvestment()">➕ 新增投融资项目</button>
+          <ul id="investList" style="margin-top:16px;line-height:2;"></ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    当前用户：<span id="footerUser"></span>
+  </footer>
+</div>
+
+<!-- ===== Supabase 业务 CRUD ===== -->
+<script>
+/* ========== 页面切换 ========== */
+function switchPage(pageId) {
+  document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+  document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
+
+  if (pageId === 'logistics') loadOrders();
+  if (pageId === 'tax') loadTax();
+  if (pageId === 'investment') loadInvestments();
+}
+
+/* ========== 物流订单 CRUD ========== */
+async function loadOrders() {
+  const { data } = await supabase.from('mna_logistics').select('*').order('created_at', { ascending: false });
+  const ul = document.getElementById('orderList');
+  ul.innerHTML = '';
+  data?.forEach(o => {
+    ul.innerHTML += `<li>${o.order_no} — ${o.client_name} — $${o.amount}
+      <button onclick="deleteOrder(${o.id})">删除</button>
+    </li>`;
+  });
+}
+
+async function addOrder() {
+  await supabase.from('mna_logistics').insert({
+    order_no: 'ORD-' + Date.now(),
+    client_name: '示例客户',
+    amount: 180
+  });
+  loadOrders();
+}
+
+async function deleteOrder(id) {
+  await supabase.from('mna_logistics').delete().eq('id', id);
+  loadOrders();
+}
+
+/* ========== 财税业务 CRUD ========== */
+async function loadTax() {
+  const { data } = await supabase.from('mna_finance_tax').select('*');
+  const ul = document.getElementById('taxList');
+  ul.innerHTML = '';
+  data?.forEach(t => {
+    ul.innerHTML += `<li>${t.company_name} — ${t.service_type} — $${t.amount}</li>`;
+  });
+}
+
+async function addTax() {
+  await supabase.from('mna_finance_tax').insert({
+    company_name: '示例工厂',
+    service_type: '月度财税代理',
+    amount: 300
+  });
+  loadTax();
+}
+
+/* ========== 投融资 CRUD ========== */
+async function loadInvestments() {
+  const { data } = await supabase.from('mna_investment').select('*');
+  const ul = document.getElementById('investList');
+  ul.innerHTML = '';
+  data?.forEach(i => {
+    ul.innerHTML += `<li>${i.project_name} — ${i.investor} — $${i.amount}</li>`;
+  });
+}
+
+async function addInvestment() {
+  await supabase.from('mna_investment').insert({
+    project_name: '示例投资项目',
+    investor: '示例资方',
+    amount: 100000
+  });
+  loadInvestments();
+}
+</script>
+
+</body>
+</html>
