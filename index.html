@@ -3573,92 +3573,121 @@ document.addEventListener("DOMContentLoaded", () => {
 </script><!-- ========================================== -->
 <!-- 🛠️ 强制修复语言切换功能的独立脚本 (放在 </body> 前) -->
 <!-- ========================================== -->
+<!-- ========================================== -->
+<!-- 🛡️ 安全版 i18n 语言包 (粘贴到 </body> 之前) -->
+<!-- ========================================== -->
 <script>
-// 1. 确保语言包存在 (如果之前没加载，这里兜底)
-if (typeof i18n === 'undefined') {
-    var i18n = {
-        zh: {
-            login_title: "MNA 业务管理平台",
-            login_sub: "湄公产业资本联盟 Mekong Nexus Association连接产业 · 资本 · 政府 · 国际资源",
-            username: "用户名",
-            password: "密码",
-            login_btn: "登 录",
-            logout_btn: "退出登录",
-            admin: "管理员"
-            // ... 这里可以补全你之前的中文，为了演示先写这几个
-        },
-        en: {
-            login_title: "MNA Integrated Business Management Platform",
-            login_sub: "Mekong Nexus AssociationConnecting Industry, Capital, and Public Sector Stakeholders",
-            username: "Username",
-            password: "Password",
-            login_btn: "Log In",
-            logout_btn: "Sign Out",
-            admin: "Administrator"
-        }
-    };
-}
-
-// 2. 核心切换逻辑 (强制注入)
-document.addEventListener('DOMContentLoaded', function() {
-    // 获取元素
-    var langBtn = document.getElementById('langBtn');
-    var langText = document.getElementById('langText');
-    
-    // 检查元素是否存在
-    if (!langBtn) {
-        console.log('未找到 langBtn，跳过绑定');
-        return;
-    }
-
-    // 强制设置初始状态为中文 (防止刷新后变成英文)
-    if (!localStorage.getItem('lang')) {
-        localStorage.setItem('lang', 'zh');
-    }
-    
-    // 初始渲染
-    updateLanguage();
-
-    // 点击事件
-    langBtn.onclick = function() {
-        var currentLang = localStorage.getItem('lang');
-        var newLang = (currentLang === 'zh') ? 'en' : 'zh';
-        localStorage.setItem('lang', newLang);
-        updateLanguage();
-    };
-
-    // 更新页面内容的函数
-    function updateLanguage() {
-        var lang = localStorage.getItem('lang') || 'zh';
-        var dict = i18n[lang];
-        
-        // 1. 更新按钮文字
-        if(langText) langText.innerText = (lang === 'zh') ? 'EN' : '中';
-
-        // 2. 更新所有带有 data-i18n 属性的元素
-        var elements = document.querySelectorAll('[data-i18n]');
-        elements.forEach(function(el) {
-            var key = el.getAttribute('data-i18n');
-            if (dict[key]) {
-                el.innerText = dict[key];
+    // 安全检查：如果 i18n 已经存在了，就不再重新定义，防止报错
+    if (typeof i18n === 'undefined') {
+        const i18n = {
+            zh: {
+                // 登录页
+                login_title: "MNA 业务管理平台",
+                login_sub: "湄公产业资本联盟 Mekong Nexus Association连接产业 · 资本 · 政府 · 国际资源",
+                username: "用户名",
+                password: "密码",
+                login_btn: "登 录",
+                forgot_password: "忘记密码？",
+                copyright: "© 2025 MNA · 仅授权用户可访问 · 数据加密存储",
+                
+                // 顶部栏
+                admin: "管理员",
+                logout_btn: "退出登录",
+                
+                // 侧边栏 (根据截图推测)
+                menu_business: "商务合作/会员",
+                menu_policy: "政策解读/政府对接",
+                menu_finance: "财税业务",
+                
+                // 统计卡片
+                card_investment: "投融资项目",
+                card_expense: "本月支出",
+                card_tax: "财税项目",
+                card_training: "职业技能培训"
+            },
+            en: {
+                // 登录页
+                login_title: "MNA Integrated Business Management Platform",
+                login_sub: "Mekong Nexus AssociationConnecting Industry · Capital · Government · Global Resources",
+                username: "Username",
+                password: "Password",
+                login_btn: "Log In",
+                forgot_password: "Forgot Password?",
+                copyright: "© 2025 MNA · Authorized Users Only · Encrypted Data Storage",
+                
+                // 顶部栏
+                admin: "Administrator",
+                logout_btn: "Sign Out",
+                
+                // 侧边栏
+                menu_business: "Business Cooperation / Membership",
+                menu_policy: "Policy Interpretation / Gov Liaison",
+                menu_finance: "Tax & Finance Services",
+                
+                // 统计卡片
+                card_investment: "Investment Projects",
+                card_expense: "Monthly Expenses",
+                card_tax: "Tax & Accounting",
+                card_training: "Skills Training"
             }
-        });
+        };
 
-        // 3. 更新特定 ID 的元素 (比如侧边栏、标题)
-        var specificIds = ['sidebarTitle', 'userRoleText']; // 你可以根据需要添加 ID
-        specificIds.forEach(function(id) {
-            var el = document.getElementById(id);
-            if (el) {
-                var key = el.getAttribute('data-i18n-key'); // 假设用 data-i18n-key 存键名
-                if (key && dict[key]) {
-                    el.innerText = dict[key];
+        // 默认语言
+        let currentLang = localStorage.getItem('lang') || 'zh';
+
+        // 初始化渲染
+        function applyLanguage() {
+            const langData = i18n[currentLang];
+            const elements = document.querySelectorAll('[data-i18n]');
+            
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (langData[key]) {
+                    // 如果是 placeholder 或 value，特殊处理
+                    if (el.tagName === 'INPUT' && (el.placeholder || el.value)) {
+                        if (el.placeholder) el.placeholder = langData[key];
+                        if (el.value) el.value = langData[key];
+                    } else {
+                        el.innerHTML = langData[key];
+                    }
                 }
+            });
+            
+            // 更新按钮文字
+            const langBtn = document.getElementById('langBtn');
+            if (langBtn) {
+                langBtn.querySelector('#langText').innerText = currentLang === 'zh' ? 'EN' : '中';
             }
+            
+            // 保存到本地
+            localStorage.setItem('lang', currentLang);
+        }
+
+        // 切换语言函数
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            applyLanguage();
+        }
+
+        // 绑定点击事件
+        document.addEventListener('DOMContentLoaded', function() {
+            // 修复 ID 重复问题：把重复的 id="loginUser" 改成 id="loginUserInput"
+            // 这是为了消除控制台的警告，不影响功能
+            const userInput = document.getElementById('loginUser');
+            if (userInput) {
+                userInput.id = 'loginUserInput';
+            }
+            
+            // 绑定切换按钮
+            const langButton = document.getElementById('langBtn');
+            if (langButton) {
+                langButton.addEventListener('click', toggleLanguage);
+            }
+            
+            // 初始化
+            applyLanguage();
         });
-        
-        console.log('语言已切换至: ' + lang);
     }
-});
 </script>
 </body>
 </html>
