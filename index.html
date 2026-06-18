@@ -1,307 +1,2072 @@
-<!DOCTYPE html>
+./0000777000000000000000000000000015214201672007715 5ustar  rootroot./.env.example0000777000000000000000000000023015214201673012137 0ustar  rootrootMONGO_URI=mongodb+srv://wcw066666903_db_user:Uz2OLV34CEvpD7i5@cluster0.ooglmuq.mongodb.net/mna_db?appName=Cluster0
+JWT_SECRET=mna_2026_super_secret_key
+./DEPLOYMENT_GUIDE.md0000777000000000000000000001401015214164216012635 0ustar  rootroot# 🚀 MNA 湄公产业资本联盟 · Vercel + Supabase 部署指南
+
+## 一、架构说明
+
+```
+用户浏览器 → Vercel（前端静态托管 + Serverless API）→ Supabase（数据库 + 鉴权）
+```
+
+| 组件 | 作用 | 费用 |
+|---|---|---|
+| Supabase | 云端 PostgreSQL 数据库 | 免费起步 |
+| Vercel | 前端页面托管 + API 接口 | 免费起步 |
+| 你 | 零服务器维护 | 🎉 |
+
+---
+
+## 二、第一步：创建 Supabase 数据库（15 分钟）
+
+### 1. 注册账号
+1. 打开 https://supabase.com
+2. 点击 **Start your project**
+3. 用 GitHub / Email 注册登录
+
+### 2. 新建项目
+1. 点击 **New Project**
+2. 填写：
+   - **Name**: `mna-business-system`
+   - **Database Password**: 自己设一个强密码（记好！）
+   - **Region**: 选 **Southeast Asia (Singapore)**（离柬埔寨最近）
+3. 点击 **Create new project**
+4. 等待 2 分钟，项目初始化完成
+
+### 3. 执行数据库脚本
+1. 在左侧菜单点击 **SQL Editor**
+2. 点击 **New query**
+3. 把本项目中 `supabase_schema.sql` 的**全部内容**粘贴进去
+4. 点击 **Run**
+5. 看到 `✅ MNA 数据库结构创建完成！` 即成功
+
+### 4. 获取 API 密钥
+1. 左侧菜单 → **Project Settings** → **API**
+2. 复制这两个值（后面要用）：
+   - **Project URL**: `https://xxxx.supabase.co`
+   - **anon public key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+
+### 5. 创建管理员密码哈希
+在 **SQL Editor** 中执行（替换密码为你自己的）：
+```sql
+-- 生成管理员密码哈希（默认密码 admin123）
+-- 你可以先用在线工具生成：https://bcrypt.online/
+-- 把生成的哈希值替换下面 PLACEHOLDER
+UPDATE users SET password_hash = '$2a$10$YOUR_BCRYPT_HASH_HERE'
+WHERE username = 'admin';
+```
+
+> 💡 不想折腾？先用临时密码，登录后在前端「修改密码」页面改掉。
+
+---
+
+## 三、第二步：部署到 Vercel（10 分钟）
+
+### 1. 上传代码到 GitHub
+1. 在 GitHub 新建一个仓库，比如 `mna-business-system`
+2. 把本项目的**所有文件**上传到仓库：
+   ```
+   mna-business-system/
+   ├── server.js          ← 后端 API
+   ├── package.json
+   ├── env.example
+   ├── supabase_schema.sql
+   └── public/
+       ├── index.html     ← 登录页面
+       ├── app.js         ← 前端主逻辑（API 版）
+       └── styles.css     ← 样式
+   ```
+
+### 2. 连接 Vercel
+1. 打开 https://vercel.com
+2. 用 GitHub 登录
+3. **Add New** → **Project**
+4. 选择你刚创建的 `mna-business-system` 仓库
+5. 配置环境变量（**重要！**）：
+
+   | 变量名 | 值 |
+   |---|---|
+   | `SUPABASE_URL` | 你的 Project URL |
+   | `SUPABASE_ANON_KEY` | 你的 anon public key |
+   | `JWT_SECRET` | 自己随便写一个长字符串，比如 `mna_2026_secret_key_abc123` |
+
+6. **Deploy** → 等待 1-2 分钟
+7. 部署成功后，你会得到一个网址：
+   ```
+   https://mna-business-system.vercel.app
+   ```
+
+### 3. 测试
+1. 打开网址 → 看到登录界面 ✅
+2. 用 `admin` / `admin123` 登录
+3. 在任何设备上打开同一个网址 → 数据完全一致 ✅
+
+---
+
+## 四、前端 API 适配说明
+
+前端 `app.js` 中的核心改动：
+
+### 原来（localStorage 版）
+```javascript
+const data = JSON.parse(localStorage.getItem('mna_orders') || '[]');
+localStorage.setItem('mna_orders', JSON.stringify(data));
+```
+
+### 现在（API 版）
+```javascript
+const token = localStorage.getItem('token');
+
+async function api(path, body) {
+  const res = await fetch('/api/orders', {
+    method: body ? 'POST' : 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  return await res.json();
+}
+
+// 使用
+const data = await api('/orders');
+await api('/orders', newOrder);
+```
+
+### 登录流程
+```javascript
+const res = await fetch('/api/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ username, password })
+});
+const { token, role } = await res.json();
+localStorage.setItem('token', token);
+```
+
+---
+
+## 五、已有数据迁移（可选）
+
+如果你原来 localStorage 里有数据，想迁移到 Supabase：
+
+1. 在旧系统中打开浏览器控制台（F12）
+2. 执行：
+   ```javascript
+   copy(JSON.stringify({
+     orders: JSON.parse(localStorage.getItem('mna_orders')||'[]'),
+     overseas: JSON.parse(localStorage.getItem('mna_overseas')||'[]'),
+     // ... 其他表
+   }))
+   ```
+3. 粘贴到 Supabase 的 **Table Editor** → 逐表导入
+
+---
+
+## 六、常见问题
+
+### Q：Supabase 免费版够用吗？
+**够！** 免费版提供：
+- 500MB 数据库存储（约 50 万条业务记录）
+- 50,000 月活用户
+- 无限 API 请求
+
+### Q：网址能自定义吗？
+**能！** Vercel 支持绑定你自己的域名：
+1. Vercel → Project Settings → Domains
+2. 添加你的域名（如 `mna.yourcompany.com`）
+3. 按提示在域名服务商处添加 CNAME 记录
+4. 5 分钟生效 ✅
+
+### Q：数据安全吗？
+- ✅ Supabase 自动每日备份
+- ✅ 所有 API 请求走 HTTPS
+- ✅ 行级安全策略（RLS）保护数据
+- ✅ JWT Token 鉴权，8 小时自动过期
+
+### Q：能加新功能吗？
+**随时可以！** 直接改代码 → push 到 GitHub → Vercel 自动重新部署（30 秒内生效）
+
+---
+
+## 七、后续扩展建议
+
+| 功能 | 难度 | 说明 |
+|---|---|---|
+| 文件上传（合同扫描件等） | ⭐⭐ | Supabase Storage |
+| 操作日志 / 审计 | ⭐⭐ | 加一张 logs 表 |
+| 消息通知 | ⭐⭐⭐ | Supabase Realtime 订阅 |
+| 报表导出 Excel | ⭐⭐ | SheetJS 库 |
+| 多语言（柬文/英文） | ⭐⭐ | i18n 方案 |
+
+---
+
+## 八、紧急联系
+
+部署遇到问题？
+1. **Supabase 文档**: https://supabase.com/docs
+2. **Vercel 文档**: https://vercel.com/docs
+3. **错误排查**: Vercel → Deployments → 点击最近一次 → **View Build Logs**
+
+---
+
+> 🎯 **总结**：Supabase 管数据，Vercel 管网页，你只管写业务代码。  
+> 一次部署，全球 CDN 加速，任何设备打开网址就能用。
+./README.md0000777000000000000000000000076015214201673011203 0ustar  rootroot# MNA 湄公产业资本联盟 · 业务管理系统
+
+## 部署到 Vercel
+
+1. 在 GitHub 创建新仓库
+2. 上传本项目所有文件
+3. 打开 vercel.com → Import Project → 选择该仓库
+4. 配置环境变量：
+   - MONGO_URI: mongodb+srv://wcw066666903_db_user:Uz2OLV34CEvpD7i5@cluster0.ooglmuq.mongodb.net/mna_db?appName=Cluster0
+   - JWT_SECRET: mna_2026_super_secret_key
+5. 点击 Deploy → 等待 1-2 分钟 → 获得网址
+
+## 默认登录
+- 用户名: admin
+- 密码: admin123
+./env.example0000777000000000000000000000041015214164127012063 0ustar  rootroot# Supabase 配置（从你的 Supabase 项目后台获取）
+SUPABASE_URL=https://your_project.supabase.co
+SUPABASE_ANON_KEY=your_anon_key_here
+
+# JWT 密钥（自己随便定一个长字符串）
+JWT_SECRET=mna_super_secret_key_2026_change_me
+
+# 端口
+PORT=3000
+./package.json0000777000000000000000000000066415214201672012214 0ustar  rootroot{
+  "name": "mna-business-system",
+  "version": "1.0.0",
+  "description": "MNA Mekong Industry Capital Alliance - Business Management System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.0",
+    "bcryptjs": "^2.4.3",
+    "uuid": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+./public/0000777000000000000000000000000015214201672011173 5ustar  rootroot./public/app.js0000777000000000000000000010221115214164663012321 0ustar  rootroot/**
+ * MNA 湄公产业资本联盟 · 前端主逻辑（API 版）
+ * 所有数据通过 /api/* 接口与 Supabase 交互
+ */
+
+// ============ 全局配置 ============
+const API_BASE = window.location.origin; // Vercel 同域部署时自动适配
+
+// ============ 工具函数 ============
+function getToken() { return localStorage.getItem('mna_token'); }
+function getRole() { return localStorage.getItem('mna_role'); }
+
+async function apiFetch(path, options = {}) {
+  const token = getToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+    ...(options.headers || {})
+  };
+  const url = API_BASE + '/api' + path;
+  const res = await fetch(url, { ...options, headers });
+
+  if (res.status === 401) {
+    localStorage.clear();
+    document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
+    throw new Error('登录已过期，请重新登录');
+  }
+  return res;
+}
+
+async function apiGet(path, params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const url = path + (query ? '?' + query : '');
+  const res = await apiFetch(url);
+  return await res.json();
+}
+
+async function apiPost(path, body) {
+  const res = await apiFetch(path, {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+  return await res.json();
+}
+
+async function apiPut(path, body) {
+  const res = await apiFetch(path, {
+    method: 'PUT',
+    body: JSON.stringify(body)
+  });
+  return await res.json();
+}
+
+async function apiDelete(path) {
+  const res = await apiFetch(path, { method: 'DELETE' });
+  return await res.json();
+}
+
+// ============ 登录 ============
+async function doLogin() {
+  const username = document.getElementById('loginUser').value.trim().toLowerCase();
+  const password = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+
+  if (!username || !password) { errEl.textContent = '请输入用户名和密码'; return; }
+
+  try {
+    const res = await fetch(API_BASE + '/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (data.error) { errEl.textContent = data.error; return; }
+
+    localStorage.setItem('mna_token', data.token);
+    localStorage.setItem('mna_role', data.role);
+    localStorage.setItem('mna_username', data.username);
+    showApp(data.username, data.role);
+  } catch (e) {
+    errEl.textContent = '网络错误：' + e.message;
+  }
+}
+
+function doLogout() {
+  localStorage.clear();
+  document.getElementById('appContainer').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+}
+
+// ============ 页面初始化 ============
+window.addEventListener('load', async () => {
+  const token = localStorage.getItem('mna_token');
+  const username = localStorage.getItem('mna_username');
+  const role = localStorage.getItem('mna_role');
+
+  if (token && username) {
+    try {
+      const res = await fetch(API_BASE + '/api/profile', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (res.ok) {
+        showApp(username, role);
+        return;
+      }
+    } catch (e) {}
+    localStorage.clear();
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') {
+    doLogin();
+  }
+});
+
+// ============ 主应用 ============
+function showApp(username, role) {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appContainer').style.display = 'block';
+
+  document.getElementById('currentUserName').textContent = username;
+  document.getElementById('currentUserRole').innerHTML = role === 'admin'
+    ? '<span class="role-badge admin">管理员</span>'
+    : '<span class="role-badge user">普通用户</span>';
+  document.getElementById('footerUser').textContent = username + '（' + (role === 'admin' ? '管理员' : '普通用户') + '）';
+
+  if (role === 'admin') {
+    document.getElementById('navUsers').style.display = 'block';
+    document.getElementById('navGroupFinance').style.display = 'block';
+    document.getElementById('navGroupAdmin').style.display = 'block';
+  }
+
+  const now = new Date();
+  document.getElementById('todayDate').textContent = now.toLocaleDateString('zh-CN', {
+    year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+  });
+  document.getElementById('welcomeTitle').textContent = '👋 欢迎回来，' + username;
+
+  renderDashboard();
+}
+
+// ============ 页面导航 ============
+function switchPage(page) {
+  const restrictedPages = ['finance', 'membership', 'expenses', 'users'];
+  const role = getRole();
+  if (restrictedPages.includes(page) && role !== 'admin') {
+    showToast('⚠️ 该板块仅管理员可访问', 'error');
+    return;
+  }
+
+  document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar .nav-item').forEach(n => n.classList.remove('active'));
+
+  const pageId = 'page' + page.charAt(0).toUpperCase() + page.slice(1);
+  const targetPage = document.getElementById(pageId);
+  if (targetPage) targetPage.classList.add('active');
+
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'logistics') renderOrders();
+  if (page === 'overseas') renderOverseas();
+  if (page === 'investment') renderInvest();
+  if (page === 'commerce') renderCommerce();
+  if (page === 'policy') renderPolicy();
+  if (page === 'tax') renderTax();
+  if (page === 'training') renderTraining();
+  if (page === 'legal') renderLegal();
+  if (page === 'finance') renderFinance();
+  if (page === 'users') renderUsers();
+}
+
+function switchSubTab(btn, id) {
+  const parent = btn.closest('.page-section');
+  parent.querySelectorAll('.sub-tabs button').forEach(b => b.classList.remove('active'));
+  parent.querySelectorAll('.sub-tabs ~ div[id]').forEach(d => d.style.display = 'none');
+  btn.classList.add('active');
+  const target = document.getElementById(id);
+  if (target) target.style.display = 'block';
+}
+
+// ============ 仪表盘 ============
+async function renderDashboard() {
+  const role = getRole();
+  const now = new Date();
+  const month = now.toISOString().slice(0, 7);
+
+  if (role === 'admin') {
+    try {
+      const data = await apiGet('/finance/summary', { month });
+      if (data.error) { showToast(data.error, 'error'); return; }
+
+      const orders = data.orders || [];
+      const overseas = data.overseas || [];
+      const invest = data.invest || [];
+      const tax = data.tax || [];
+      const training = data.training || [];
+      const legal = data.legal || [];
+      const expenses = data.expenses || [];
+
+      document.getElementById('dbLogistics').textContent = orders.filter(o => {
+        const s = o.status || 0; return s >= 1 && s <= 5;
+      }).length;
+
+      document.getElementById('dbOverseas').textContent = overseas.filter(o => o.stage !== '已完成').length;
+      document.getElementById('dbInvestment').textContent = invest.filter(o => !['资金到位','投后管理'].includes(o.status)).length;
+      document.getElementById('dbTax').textContent = tax.length;
+      document.getElementById('dbTraining').textContent = training.filter(o => o.status !== '已完成').length;
+      document.getElementById('dbLegal').textContent = legal.filter(o => o.status !== '完成归档').length;
+
+      let totalRev = 0, totalExp = 0;
+      orders.forEach(o => { totalRev += parseFloat(o.net_profit || 0); });
+      overseas.forEach(o => { totalRev += parseFloat(o.received || 0); });
+      invest.forEach(o => { totalRev += parseFloat(o.commission || 0); });
+      tax.forEach(o => { totalRev += parseFloat(o.amount || 0); });
+      training.forEach(o => { totalRev += parseFloat(o.received || 0); });
+      legal.forEach(o => { totalRev += parseFloat(o.fee || 0); });
+      expenses.forEach(o => { totalExp += parseFloat(o.amount || 0); });
+
+      document.getElementById('dbRevenue').textContent = '$' + (totalRev - totalExp).toLocaleString('en-US', { minimumFractionDigits: 0 });
+      document.getElementById('dbExpenses').textContent = '$' + totalExp.toLocaleString('en-US', { minimumFractionDigits: 0 });
+    } catch (err) {
+      console.error('Dashboard error:', err);
+    }
+  }
+
+  // 近期活动
+  try {
+    const orders = await apiGet('/orders', { limit: 5 });
+    let activities = [];
+    orders.forEach(o => {
+      activities.push('🚢 物流订单 ' + esc(o.order_no || '') + ' - ' + esc(o.customer || ''));
+    });
+    if (activities.length === 0) {
+      document.getElementById('recentActivity').innerHTML = '<p>暂无近期活动记录</p>';
+    } else {
+      document.getElementById('recentActivity').innerHTML = activities.map(a => '<p>' + a + '</p>').join('');
+    }
+  } catch (err) {}
+}
+
+// ============ 物流订单 ============
+async function renderOrders() {
+  try {
+    let orders = await apiGet('/orders');
+    const fs = document.getElementById('filterStatus').value;
+    const kw = document.getElementById('filterKeyword').value.trim().toLowerCase();
+
+    if (fs >= 0) orders = orders.filter(o => (o.status || 0) === parseInt(fs));
+    if (kw) orders = orders.filter(o =>
+      (o.customer || '').toLowerCase().includes(kw) ||
+      (o.order_no || '').toLowerCase().includes(kw) ||
+      (o.container_no || '').toLowerCase().includes(kw)
+    );
+
+    document.getElementById('orderCount').textContent = '共 ' + orders.length + ' 条订单';
+
+    if (orders.length === 0) {
+      document.getElementById('orderTableContainer').innerHTML =
+        '<div class="empty-state"><div class="icon">📭</div><p>暂无订单数据</p></div>';
+      return;
+    }
+
+    const statusLabels = ['待发柜','已发柜（在途）','已到港','清关中','已清关','已到工厂','已结单'];
+    let html = `<table><thead><tr>
+      <th>#</th><th>订单号</th><th>客户</th><th>货柜号</th><th>数量</th>
+      <th>状态</th><th>净收益(USD)</th><th>操作</th>
+    </tr></thead><tbody>`;
+
+    orders.forEach((o, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td class="order-no">${esc(o.order_no || '')}</td>
+        <td style="text-align:left;padding-left:8px">${esc(o.customer || '')}</td>
+        <td>${esc(o.container_no || '')}</td>
+        <td>${o.qty || 0}</td>
+        <td><span class="status-badge st-${(o.status || 0)}">${statusLabels[o.status || 0] || '未知'}</span></td>
+        <td style="color:#52c41a">$${(parseFloat(o.net_profit) || 0).toLocaleString('en-US',{minimumFractionDigits:2})}</td>
+        <td class="actions">
+          <button class="del-btn" onclick="deleteOrder('${o.id}')">删除</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('orderTableContainer').innerHTML = html;
+  } catch (err) {
+    document.getElementById('orderTableContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：' + err.message + '</p></div>';
+  }
+}
+
+async function deleteOrder(id) {
+  if (!confirm('确定删除此订单吗？')) return;
+  try {
+    await apiDelete('/orders/' + id);
+    showToast('订单已删除', 'success');
+    renderOrders();
+  } catch (err) { showToast('删除失败：' + err.message, 'error'); }
+}
+
+// ============ 出海落地 ============
+async function renderOverseas() {
+  try {
+    let list = await apiGet('/overseas');
+    const kw = document.getElementById('filterOverseas')?.value || '';
+    if (kw) list = list.filter(o => (o.customer || '').toLowerCase().includes(kw.toLowerCase()));
+
+    document.getElementById('overseasCount').textContent = '共 ' + list.length + ' 个项目';
+
+    if (list.length === 0) {
+      document.getElementById('overseasTableContainer').innerHTML =
+        '<div class="empty-state"><div class="icon">📭</div><p>暂无出海项目</p></div>';
+      return;
+    }
+
+    let html = `<table><thead><tr><th>#</th><th>客户</th><th>服务类型</th><th>目的地</th><th>合同金额</th><th>已收</th><th>阶段</th><th>操作</th></tr></thead><tbody>`;
+    list.forEach((o, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td style="text-align:left;padding-left:8px">${esc(o.customer || '')}</td>
+        <td><span class="tag tag-orange">${esc(o.service_type || '')}</span></td>
+        <td>${esc(o.destination || '')}</td>
+        <td>$${(parseFloat(o.amount) || 0).toLocaleString('en-US')}</td>
+        <td>$${(parseFloat(o.received) || 0).toLocaleString('en-US')}</td>
+        <td><span class="tag tag-green">${esc(o.stage || '')}</span></td>
+        <td class="actions">
+          <button class="del-btn" onclick="deleteOverseas('${o.id}')">删除</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('overseasTableContainer').innerHTML = html;
+  } catch (err) {
+    document.getElementById('overseasTableContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：' + err.message + '</p></div>';
+  }
+}
+
+async function deleteOverseas(id) {
+  if (!confirm('确定删除此项目吗？')) return;
+  await apiDelete('/overseas/' + id);
+  showToast('项目已删除', 'success');
+  renderOverseas();
+}
+
+// ============ 投融资 ============
+async function renderInvest() {
+  try {
+    let list = await apiGet('/invest');
+    const kw = document.getElementById('filterInvest')?.value || '';
+    if (kw) list = list.filter(o =>
+      (o.name || '').toLowerCase().includes(kw.toLowerCase()) ||
+      (o.project_co || '').toLowerCase().includes(kw.toLowerCase())
+    );
+
+    document.getElementById('invCount').textContent = '共 ' + list.length + ' 个项目';
+
+    if (list.length === 0) {
+      document.getElementById('invTableContainer').innerHTML =
+        '<div class="empty-state"><div class="icon">📭</div><p>暂无投融资项目</p></div>';
+      return;
+    }
+
+    let html = `<table><thead><tr><th>#</th><th>项目名称</th><th>项目方</th><th>投资方</th><th>涉及金额</th><th>佣金(USD)</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+    list.forEach((o, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td style="text-align:left;padding-left:8px;font-weight:600">${esc(o.name || '')}</td>
+        <td>${esc(o.project_co || '')}</td>
+        <td>${esc(o.investor || '')}</td>
+        <td>$${(parseFloat(o.amount) || 0).toLocaleString('en-US')}</td>
+        <td style="color:#52c41a">$${(parseFloat(o.commission) || 0).toLocaleString('en-US')}</td>
+        <td><span class="tag tag-purple">${esc(o.status || '')}</span></td>
+        <td class="actions">
+          <button class="del-btn" onclick="deleteInvest('${o.id}')">删除</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('invTableContainer').innerHTML = html;
+  } catch (err) {
+    document.getElementById('invTableContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：' + err.message + '</p></div>';
+  }
+}
+
+async function deleteInvest(id) {
+  if (!confirm('确定删除此项目吗？')) return;
+  await apiDelete('/invest/' + id);
+  showToast('项目已删除', 'success');
+  renderInvest();
+}
+
+// ============ 商务合作 ============
+async function renderCommerce() {
+  try {
+    let list = await apiGet('/commerce');
+    const kw = document.getElementById('filterCommerce')?.value || '';
+    if (kw) list = list.filter(o => (o.name || '').toLowerCase().includes(kw.toLowerCase()));
+
+    document.getElementById('comCount').textContent = '共 ' + list.length + ' 条记录';
+
+    if (list.length === 0) {
+      document.getElementById('comTableContainer').innerHTML =
+        '<div class="empty-state"><div class="icon">📭</div><p>暂无记录</p></div>';
+      return;
+    }
+
+    let html = `<table><thead><tr><th>#</th><th>名称</th><th>类型</th><th>等级</th><th>收入(USD)</th><th>已收(USD)</th><th>操作</th></tr></thead><tbody>`;
+    list.forEach((o, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td style="text-align:left;padding-left:8px">${esc(o.name || '')}</td>
+        <td><span class="tag tag-teal">${esc(o.type || '')}</span></td>
+        <td>${esc(o.level || '')}</td>
+        <td>$${(parseFloat(o.amount) || 0).toLocaleString('en-US')}</td>
+        <td>$${(parseFloat(o.received) || 0).toLocaleString('en-US')}</td>
+        <td class="actions">
+          <button class="del-btn" onclick="deleteCommerce('${o.id}')">删除</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('comTableContainer').innerHTML = html;
+  } catch (err) {
+    document.getElementById('comTableContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：' + err.message + '</p></div>';
+  }
+}
+
+async function deleteCommerce(id) {
+  if (!confirm('确定删除此记录吗？')) return;
+  await apiDelete('/commerce/' + id);
+  showToast('已删除', 'success');
+  renderCommerce();
+}
+
+// ============ 政策项目 ============
+async function renderPolicy() {
+  try {
+    let list = await apiGet('/policy');
+    const kw = document.getElementById('filterPolicy')?.value || '';
+    if (kw) list = list.filter(o =>
+      (o.name || '').toLowerCase().includes(kw.toLowerCase()) ||
+      (o.dept || '').toLowerCase().includes(kw.toLowerCase())
+    );
+
+    document.getElementById('policyCount').textContent = '共 ' + list.length + ' 个项目';
+
+    if (list.length === 0) {
+      document.getElementById('policyTableContainer').innerHTML =
+        '<div class="empty-state"><div class="icon">📭</div><p>暂无政策项目</p></div>';
+      return;
+    }
+
+    let html = `<table><thead><tr><th>#</th><th>项目名称</th><th>对接部门</th><th>类型</th><th>金额(USD)</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+    list.forEach((o, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td style="text-align:left;padding-left:8px">${esc(o.name || '')}</td>
+        <td>${esc(o.dept || '')}</td>
+        <td>${esc(o.type || '')}</td>
+        <td>$${(parseFloat(o.amount) || 0).toLocaleString('en-US')}</td>
+        <td><span class="status-badge st-0">${esc(o.status || '')}</span></td>
+        <td class="actions">
+          <button class="del-btn" onclick="deletePolicy('${o.id}')">删除</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('policyTableContainer').innerHTML = html;
+  } catch (err) {
+    document.getElementById('policyTableContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：' + err.message + '</p></div>';
+  }
+}
+
+async function deletePolicy(id) {
+  if (!confirm('确定删除此项目吗？')) return;
+  await apiDelete('/policy/' + id);
+  showToast('已删除', 'success');
+  renderPolicy();
+}
+
+// ============ 财税业务 ============
+async function renderTax() {
+  try {
+    let list = await apiGet('/tax');
+    const kw = document.getElementById('filterTax')?.value || '';
+    if (kw) list = list.filter(o =>
+      (o.factory_name || '').toLowerCase().includes(kw.toLowerCase()) ||
+      (o.tax_no || '').toLowerCase().includes(kw.toLowerCase())
+    );
+
+    document.getElementById('taxCount').textContent = '共 ' + list.length + ' 个项目';
+
+    if (list.length === 0) {
+      document.getElementById('taxTableContainer').innerHTML =
+        '<div class="empty-state"><div class="icon">📭</div><p>暂无财税项目</p></div>';
+      return;
+    }
+
+    let html = `<table><thead><tr><th>#</th><th>工厂名称</th><th>服务类型</th><th>金额(USD)</th><th>已收(USD)</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+    list.forEach((o, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td style="text-align:left;padding-left:8px">${esc(o.factory_name || '')}</td>
+        <td>${esc(o.service_type || '')}</td>
+        <td>$${(parseFloat(o.amount) || 0).toLocaleString('en-US')}</td>
+        <td>$${(parseFloat(o.received) || 0).toLocaleString('en-US')}</td>
+        <td><span class="status-badge st-0">${esc(o.status || '')}</span></td>
+        <td class="actions">
+          <button class="del-btn" onclick="deleteTax('${o.id}')">删除</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('taxTableContainer').innerHTML = html;
+  } catch (err) {
+    document.getElementById('taxTableContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：' + err.message + '</p></div>';
+  }
+}
+
+async function deleteTax(id) {
+  if (!confirm('确定删除此项目吗？')) return;
+  await apiDelete('/tax/' + id);
+  showToast('已删除', 'success');
+  renderTax();
+}
+
+// ============ 职业技能培训 ============
+async function renderTraining() {
+  try {
+    let list = await apiGet('/training');
+    const kw = document.getElementById('filterTraining')?.value || '';
+    if (kw) list = list.filter(o =>
+      (o.ent_name || '').toLowerCase().includes(kw.toLowerCase()) ||
+      (o.school_name || '').toLowerCase().includes(kw.toLowerCase())
+    );
+
+    document.getElementById('trCount').textContent = '共 ' + list.length + ' 个项目';
+
+    if (list.length === 0) {
+      document.getElementById('trTableContainer').innerHTML =
+        '<div class="empty-state"><div class="icon">📭</div><p>暂无培训项目</p></div>';
+      return;
+    }
+
+    let html = `<table><thead><tr><th>#</th><th>企业</th><th>院校</th><th>项目名</th><th>学员数</th><th>费用/人(USD)</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+    list.forEach((o, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td style="text-align:left;padding-left:8px">${esc(o.ent_name || '')}</td>
+        <td>${esc(o.school_name || '')}</td>
+        <td>${esc(o.proj_name || '')}</td>
+        <td>${o.students || 0}</td>
+        <td>$${(parseFloat(o.fee) || 0).toLocaleString('en-US')}</td>
+        <td><span class="tag tag-green">${esc(o.status || '')}</span></td>
+        <td class="actions">
+          <button class="del-btn" onclick="deleteTraining('${o.id}')">删除</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('trTableContainer').innerHTML = html;
+  } catch (err) {
+    document.getElementById('trTableContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：' + err.message + '</p></div>';
+  }
+}
+
+async function deleteTraining(id) {
+  if (!confirm('确定删除此项目吗？')) return;
+  await apiDelete('/training/' + id);
+  showToast('已删除', 'success');
+  renderTraining();
+}
+
+// ============ 法律咨询 ============
+async function renderLegal() {
+  try {
+    let list = await apiGet('/legal');
+    const kw = document.getElementById('filterLegal')?.value || '';
+    if (kw) list = list.filter(o =>
+      (o.ent_name || '').toLowerCase().includes(kw.toLowerCase())
+    );
+
+    document.getElementById('legalCount').textContent = '共 ' + list.length + ' 个项目';
+
+    if (list.length === 0) {
+      document.getElementById('legalTableContainer').innerHTML =
+        '<div class="empty-state"><div class="icon">📭</div><p>暂无法律项目</p></div>';
+      return;
+    }
+
+    let html = `<table><thead><tr><th>#</th><th>委托企业</th><th>服务类型</th><th>费用(USD)</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+    list.forEach((o, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td style="text-align:left;padding-left:8px">${esc(o.ent_name || '')}</td>
+        <td>${esc(o.service_type || '')}</td>
+        <td>$${(parseFloat(o.fee) || 0).toLocaleString('en-US')}</td>
+        <td><span class="status-badge st-0">${esc(o.status || '')}</span></td>
+        <td class="actions">
+          <button class="del-btn" onclick="deleteLegal('${o.id}')">删除</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('legalTableContainer').innerHTML = html;
+  } catch (err) {
+    document.getElementById('legalTableContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：' + err.message + '</p></div>';
+  }
+}
+
+async function deleteLegal(id) {
+  if (!confirm('确定删除此项目吗？')) return;
+  await apiDelete('/legal/' + id);
+  showToast('已删除', 'success');
+  renderLegal();
+}
+
+// ============ 会员管理 ============
+async function renderMembers() {
+  try {
+    let list = await apiGet('/members');
+    document.getElementById('memCount').textContent = '共 ' + list.length + ' 位会员';
+
+    if (list.length === 0) {
+      document.getElementById('memTableContainer').innerHTML =
+        '<div class="empty-state"><div class="icon">📭</div><p>暂无会员记录</p></div>';
+      return;
+    }
+
+    let html = `<table><thead><tr><th>#</th><th>会员名称</th><th>类型</th><th>等级</th><th>费用(USD)</th><th>已收(USD)</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+    list.forEach((o, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td style="text-align:left;padding-left:8px">${esc(o.name || '')}</td>
+        <td>${esc(o.type || '')}</td>
+        <td>${esc(o.level || '')}</td>
+        <td>$${(parseFloat(o.fee) || 0).toLocaleString('en-US')}</td>
+        <td>$${(parseFloat(o.received) || 0).toLocaleString('en-US')}</td>
+        <td><span class="status-badge st-6">${esc(o.status || '')}</span></td>
+        <td class="actions">
+          <button class="del-btn" onclick="deleteMember('${o.id}')">删除</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('memTableContainer').innerHTML = html;
+  } catch (err) {
+    document.getElementById('memTableContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：' + err.message + '</p></div>';
+  }
+}
+
+async function deleteMember(id) {
+  if (!confirm('确定删除此会员吗？')) return;
+  await apiDelete('/members/' + id);
+  showToast('已删除', 'success');
+  renderMembers();
+}
+
+// ============ 日常支出 ============
+async function renderExpenses() {
+  try {
+    let list = await apiGet('/expenses');
+    document.getElementById('expCount').textContent = '共 ' + list.length + ' 条记录';
+
+    if (list.length === 0) {
+      document.getElementById('expTableContainer').innerHTML =
+        '<div class="empty-state"><div class="icon">📭</div><p>暂无支出记录</p></div>';
+      return;
+    }
+
+    let html = `<table><thead><tr><th>#</th><th>日期</th><th>类别</th><th>项目</th><th>金额(USD)</th><th>操作</th></tr></thead><tbody>`;
+    list.forEach((o, i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td>${esc(o.date || '')}</td>
+        <td><span class="tag">${esc(o.cat || '')}</span></td>
+        <td style="text-align:left;padding-left:8px">${esc(o.desc || '')}</td>
+        <td style="color:#ff4d4f">$${(parseFloat(o.amount) || 0).toLocaleString('en-US',{minimumFractionDigits:2})}</td>
+        <td class="actions">
+          <button class="del-btn" onclick="deleteExpense('${o.id}')">删除</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('expTableContainer').innerHTML = html;
+  } catch (err) {
+    document.getElementById('expTableContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>加载失败：' + err.message + '</p></div>';
+  }
+}
+
+async function deleteExpense(id) {
+  if (!confirm('确定删除此记录吗？')) return;
+  await apiDelete('/expenses/' + id);
+  showToast('已删除', 'success');
+  renderExpenses();
+}
+
+// ============ 财务报表 ============
+async function renderFinance() {
+  const month = document.getElementById('financeMonth')?.value || new Date().toISOString().slice(0, 7);
+  try {
+    const data = await apiGet('/finance/summary', { month });
+    if (data.error) { showToast(data.error, 'error'); return; }
+
+    const orders = data.orders || [];
+    const overseas = data.overseas || [];
+    const invest = data.invest || [];
+    const tax = data.tax || [];
+    const training = data.training || [];
+    const legal = data.legal || [];
+    const expenses = data.expenses || [];
+
+    let totalRev = 0;
+    orders.forEach(o => { totalRev += parseFloat(o.net_profit || 0); });
+    overseas.forEach(o => { totalRev += parseFloat(o.received || 0); });
+    invest.forEach(o => { totalRev += parseFloat(o.commission || 0); });
+    tax.forEach(o => { totalRev += parseFloat(o.amount || 0); });
+    training.forEach(o => { totalRev += parseFloat(o.received || 0); });
+    legal.forEach(o => { totalRev += parseFloat(o.fee || 0); });
+    const totalExp = expenses.reduce((s, o) => s + parseFloat(o.amount || 0), 0);
+
+    document.getElementById('finTotal').textContent = '$' + (totalRev - totalExp).toLocaleString('en-US', { minimumFractionDigits: 0 });
+    document.getElementById('finLogistics').textContent = '$' + orders.reduce((s, o) => s + parseFloat(o.net_profit || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 0 });
+    document.getElementById('finOverseas').textContent = '$' + overseas.reduce((s, o) => s + parseFloat(o.received || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 0 });
+    document.getElementById('finInvest').textContent = '$' + invest.reduce((s, o) => s + parseFloat(o.commission || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 0 });
+    document.getElementById('finTax').textContent = '$' + tax.reduce((s, o) => s + parseFloat(o.amount || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 0 });
+    document.getElementById('finTraining').textContent = '$' + training.reduce((s, o) => s + parseFloat(o.received || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 0 });
+    document.getElementById('finLegal').textContent = '$' + legal.reduce((s, o) => s + parseFloat(o.fee || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 0 });
+
+    document.getElementById('financeBreakdown').innerHTML = `
+      <p>📦 物流利润：$${orders.reduce((s,o)=>s+parseFloat(o.net_profit||0),0).toLocaleString()}</p>
+      <p>🏗️ 出海服务：$${overseas.reduce((s,o)=>s+parseFloat(o.received||0),0).toLocaleString()}</p>
+      <p>💰 投融资佣金：$${invest.reduce((s,o)=>s+parseFloat(o.commission||0),0).toLocaleString()}</p>
+      <p>🧾 财税服务：$${tax.reduce((s,o)=>s+parseFloat(o.amount||0),0).toLocaleString()}</p>
+      <p>🎓 培训服务：$${training.reduce((s,o)=>s+parseFloat(o.received||0),0).toLocaleString()}</p>
+      <p>⚖️ 法律服务：$${legal.reduce((s,o)=>s+parseFloat(o.fee||0),0).toLocaleString()}</p>
+      <p>💸 日常支出：$${totalExp.toLocaleString()}</p>
+      <p><b>💰 本月净收入：$${(totalRev - totalExp).toLocaleString()}</b></p>
+    `;
+  } catch (err) {
+    document.getElementById('financeBreakdown').innerHTML = '<p>加载失败：' + err.message + '</p>';
+  }
+}
+
+// ============ 用户管理 ============
+async function renderUsers() {
+  try {
+    const list = await apiGet('/users');
+    const currentUser = localStorage.getItem('mna_username');
+    let html = '';
+    list.forEach(u => {
+      const isSelf = u.username === currentUser;
+      html += `<div class="user-list-item">
+        <div class="u-info">
+          <div class="u-name">${esc(u.username)} ${isSelf ? '（当前）' : ''}</div>
+          <div class="u-role"><span class="role-badge ${u.role}">${u.role === 'admin' ? '管理员' : '普通用户'}</span></div>
+        </div>
+        <div class="u-actions">
+          ${!isSelf ? `<button class="del-btn" onclick="deleteUser('${esc(u.username)}')">删除</button>` : '<span style="font-size:12px;color:#ccc">不可操作</span>'}
+        </div>
+      </div>`;
+    });
+    document.getElementById('userList').innerHTML = html;
+  } catch (err) {
+    document.getElementById('userList').innerHTML = '<p>加载失败：' + err.message + '</p>';
+  }
+}
+
+async function deleteUser(username) {
+  if (!confirm('确定删除用户 "' + username + '" 吗？')) return;
+  try {
+    await apiDelete('/users/' + username);
+    showToast('用户已删除', 'success');
+    renderUsers();
+  } catch (err) { showToast('删除失败：' + err.message, 'error'); }
+}
+
+// ============ 辅助 ============
+function esc(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+// 修改密码
+async function doChangePassword() {
+  const oldP = document.getElementById('oldPwd').value;
+  const newP = document.getElementById('newPwd').value;
+  const newP2 = document.getElementById('newPwd2').value;
+  const e = document.getElementById('changePwdError');
+  e.textContent = '';
+
+  if (!oldP || !newP) { e.textContent = '请填写完整'; return; }
+  if (newP.length < 6) { e.textContent = '新密码至少6位'; return; }
+  if (newP !== newP2) { e.textContent = '两次新密码不一致'; return; }
+
+  try {
+    await apiPost('/change-password', { oldPassword: oldP, newPassword: newP });
+    e.style.color = '#52c41a';
+    e.textContent = '密码修改成功！';
+    setTimeout(() => {
+      e.textContent = '';
+      e.style.color = '#ff4d4f';
+      document.getElementById('oldPwd').value = '';
+      document.getElementById('newPwd').value = '';
+      document.getElementById('newPwd2').value = '';
+    }, 2000);
+  } catch (err) {
+    e.textContent = '修改失败：' + err.message;
+  }
+}
+./public/index.html0000777000000000000000000005622415214201673013205 0ustar  rootroot<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>MNA 业务管理平台</title>
-    
-    <!-- 引入 Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", Arial, sans-serif;
-        }
-
-        body {
-            margin: 0;
-            background: linear-gradient(135deg, #1a365d, #2c5282);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .card {
-            background: #fff;
-            width: 380px;
-            padding: 36px 32px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,.25);
-            text-align: center;
-        }
-
-        .logo {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        h1 {
-            color: #1a365d;
-            margin-bottom: 8px;
-            font-size: 24px;
-        }
-
-        p.subtitle {
-            color: #666;
-            margin-bottom: 24px;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #333;
-            font-weight: bold;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px;
-            background: #1a365d;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            background: #2c5282;
-        }
-
-        .links {
-            margin-top: 16px;
-            font-size: 14px;
-        }
-
-        .links a {
-            color: #1a365d;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-
-        .footer {
-            margin-top: 24px;
-            font-size: 12px;
-            color: #999;
-        }
-
-        /* 弹窗样式 */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            text-align: center;
-            min-width: 300px;
-        }
-
-        .modal-btn {
-            margin-top: 16px;
-            padding: 8px 16px;
-            background: #1a365d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MNA 湄公产业资本联盟 · 业务管理系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#333}
+a{text-decoration:none;color:inherit}
+/* ===== Login ===== */
+.login-wrap{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#1a237e,#0d47a1)}
+.login-box{background:#fff;border-radius:12px;padding:40px;width:400px;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.login-box h1{text-align:center;color:#1a237e;margin-bottom:8px;font-size:24px}
+.login-box .sub{text-align:center;color:#666;margin-bottom:30px;font-size:14px}
+.login-box label{display:block;margin-bottom:6px;color:#333;font-weight:500}
+.login-box input{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;margin-bottom:18px;transition:.2s}
+.login-box input:focus{outline:none;border-color:#1a237e;box-shadow:0 0 0 3px rgba(26,35,126,.1)}
+.login-box button{width:100%;padding:12px;background:#1a237e;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;transition:.2s}
+.login-box button:hover{background:#0d47a1}
+.login-box .err{color:#e53935;font-size:13px;text-align:center;margin-top:10px;min-height:20px}
+/* ===== Layout ===== */
+.app-header{background:#1a237e;color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.app-header .logo{font-size:18px;font-weight:700}
+.app-header .user-info{display:flex;align-items:center;gap:12px;font-size:14px}
+.app-header .user-info button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px}
+.app-header .user-info button:hover{background:rgba(255,255,255,.35)}
+.sidebar{position:fixed;left:0;top:56px;bottom:0;width:220px;background:#fff;border-right:1px solid #e0e0e0;overflow-y:auto;z-index:50;transition:transform .3s}
+.sidebar .menu-group{padding:12px 0 4px 16px;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px}
+.sidebar .menu-item{padding:10px 16px;cursor:pointer;font-size:14px;color:#555;transition:.15s;display:flex;align-items:center;gap:8px}
+.sidebar .menu-item:hover{background:#e8eaf6;color:#1a237e}
+.sidebar .menu-item.active{background:#e8eaf6;color:#1a237e;font-weight:600;border-right:3px solid #1a237e}
+.main{margin-left:220px;padding:24px;min-height:calc(100vh - 56px)}
+.page-title{font-size:22px;font-weight:700;margin-bottom:20px;color:#1a237e}
+/* ===== Cards ===== */
+.card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:20px}
+.card h3{font-size:16px;color:#1a237e;margin-bottom:12px}
+/* ===== Table ===== */
+.data-table{width:100%;border-collapse:collapse;font-size:14px}
+.data-table th{background:#f5f5f5;padding:10px 12px;text-align:left;font-weight:600;color:#555;border-bottom:2px solid #e0e0e0}
+.data-table td{padding:10px 12px;border-bottom:1px solid #eee}
+.data-table tr:hover td{background:#f5f7ff}
+/* ===== Buttons ===== */
+.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:13px;transition:.15s;display:inline-flex;align-items:center;gap:4px}
+.btn-primary{background:#1a237e;color:#fff}.btn-primary:hover{background:#0d47a1}
+.btn-success{background:#2e7d32;color:#fff}.btn-success:hover{background:#1b5e20}
+.btn-danger{background:#c62828;color:#fff}.btn-danger:hover{background:#b71c1c}
+.btn-outline{background:transparent;border:1px solid #ddd;color:#555}.btn-outline:hover{background:#f5f5f5}
+/* ===== Form ===== */
+.form-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.form-row label{min-width:80px;font-size:13px;color:#666;padding-top:8px}
+.form-row input,.form-row select,.form-row textarea{flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:#1a237e}
+/* ===== Status ===== */
+.status{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:500}
+.status-0{background:#e3f2fd;color:#1565c0}
+.status-1{background:#fff3e0;color:#e65100}
+.status-2{background:#e8f5e9;color:#2e7d32}
+/* ===== Toast ===== */
+.toast{position:fixed;top:70px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;z-index:999;animation:fadeIn .3s;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.toast-success{background:#2e7d32}.toast-error{background:#c62828}.toast-info{background:#1565c0}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+/* ===== Dashboard ===== */
+.dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.dashboard-grid .stat-card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);text-align:center}
+.dashboard-grid .stat-card .num{font-size:32px;font-weight:700;color:#1a237e}
+.dashboard-grid .stat-card .label{font-size:13px;color:#888;margin-top:4px}
+/* ===== Tabs ===== */
+.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #e0e0e0}
+.tab{padding:10px 20px;cursor:pointer;font-size:14px;color:#888;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.tab.active{color:#1a237e;border-bottom-color:#1a237e;font-weight:600}
+/* ===== Modal ===== */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:200;display:none;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;width:600px;max-width:90vw;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:18px;color:#1a237e;margin-bottom:16px}
+/* ===== Responsive ===== */
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}}
+/* ===== Utility ===== */
+.text-right{text-align:right}.text-center{text-align:center}.mt-10{margin-top:10px}.mb-10{margin-bottom:10px}
+.flex{display:flex}.gap-8{gap:8px}.items-center{align-items:center}.justify-between{justify-content:space-between}
+</style>
 </head>
 <body>
 
+<!-- ===== Login Page ===== -->
+<div id="loginPage" class="login-wrap">
+  <div class="login-box">
+    <h1>🌏 MNA 湄公产业资本联盟</h1>
+    <p class="sub">业务管理系统 · 云端版</p>
+    <label>用户名</label>
+    <input type="text" id="loginUser" placeholder="请输入用户名" autocomplete="off">
+    <label>密码</label>
+    <input type="password" id="loginPass" placeholder="请输入密码" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">登 录</button>
+    <div class="err" id="loginErr"></div>
+    <p style="text-align:center;margin-top:16px;font-size:12px;color:#aaa">默认账号：admin / admin123</p>
+  </div>
+</div>
+
+<!-- ===== Main App ===== -->
+<div id="appPage" style="display:none">
+  <!-- Header -->
+  <div class="app-header">
+    <div class="logo">🌏 MNA 湄公产业资本联盟 · 业务管理系统</div>
+    <div class="user-info">
+      <span id="headerUser"></span>
+      <button onclick="logout()">退出登录</button>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="menu-group">核心业务</div>
+    <div class="menu-item active" data-page="dashboard" onclick="switchPage('dashboard')">📊 系统概览</div>
+    <div class="menu-item" data-page="orders" onclick="switchPage('orders')">🚢 物流订单</div>
+    <div class="menu-item" data-page="overseas" onclick="switchPage('overseas')">🌐 出海落地</div>
+    <div class="menu-item" data-page="investment" onclick="switchPage('investment')">💰 投融资对接</div>
+    <div class="menu-item" data-page="tax" onclick="switchPage('tax')">📋 财税服务</div>
+    <div class="menu-item" data-page="legal" onclick="switchPage('legal')">⚖️ 法律合规</div>
+    <div class="menu-item" data-page="training" onclick="switchPage('training')">🎓 职业培训</div>
+    <div class="menu-group">会员与管理</div>
+    <div class="menu-item" data-page="members" onclick="switchPage('members')">👥 会员管理</div>
+    <div class="menu-item" data-page="commerce" onclick="switchPage('commerce')">🤝 商务合作</div>
+    <div class="menu-item" data-page="policy" onclick="switchPage('policy')">📄 政策项目</div>
+    <div class="menu-group">财务</div>
+    <div class="menu-item" data-page="expenses" onclick="switchPage('expenses')">💸 日常支出</div>
+    <div class="menu-item" data-page="finance" onclick="switchPage('finance')">📈 财务报表</div>
+    <div class="menu-group">基础数据</div>
+    <div class="menu-item" data-page="schools" onclick="switchPage('schools')">🏫 合作院校</div>
+    <div class="menu-item" data-page="enterprises" onclick="switchPage('enterprises')">🏭 合作企业</div>
+    <div class="menu-item" data-page="lawyers" onclick="switchPage('lawyers')">👨‍⚖️ 律师资源</div>
+    <div class="menu-item" data-page="legal_clients" onclick="switchPage('legal_clients')">🏢 企业客户</div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main" id="mainContent">
+    <!-- Pages will be rendered here -->
+  </div>
+</div>
+
+<!-- ===== Modal ===== -->
+<div class="modal-overlay" id="modal">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+// ===== API Helper =====
+const API = '/api';
+let TOKEN = localStorage.getItem('mna_token');
+let CURRENT_USER = null;
+
+async function api(path, data, method) {
+  const opts = {
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+    method: method || (data ? 'POST' : 'GET')
+  };
+  if (data && method !== 'GET') opts.body = JSON.stringify(data);
+  const res = await fetch(API + path, opts);
+  if (res.status === 401) { logout(); throw new Error('登录已过期'); }
+  return await res.json();
+}
+
+// ===== Auth =====
+async function doLogin() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  if (!username || !password) { showErr('请输入用户名和密码'); return; }
+  try {
+    const data = await fetch(API + '/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    }).then(r => r.json());
+    if (data.error) { showErr(data.error); return; }
+    TOKEN = data.token;
+    CURRENT_USER = data;
+    localStorage.setItem('mna_token', TOKEN);
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('appPage').style.display = 'block';
+    document.getElementById('headerUser').textContent = data.username + '（' + (data.role === 'admin' ? '管理员' : '用户') + '）';
+    switchPage('dashboard');
+  } catch (e) { showErr('登录失败，请稍后重试'); }
+}
+
+function showErr(msg) { document.getElementById('loginErr').textContent = msg; }
+function logout() { TOKEN = null; CURRENT_USER = null; localStorage.removeItem('mna_token'); location.reload(); }
+
+// ===== Init =====
+(async () => {
+  if (TOKEN) {
+    try {
+      const me = await fetch(API + '/me', { headers: { 'Authorization': 'Bearer ' + TOKEN } }).then(r => r.json());
+      if (me.username) {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appPage').style.display = 'block';
+        CURRENT_USER = me;
+        document.getElementById('headerUser').textContent = me.username + '（' + (me.role === 'admin' ? '管理员' : '用户') + '）';
+        switchPage('dashboard');
+      }
+    } catch (e) { localStorage.removeItem('mna_token'); }
+  }
+})();
+
+// ===== Page Navigation =====
+function switchPage(page) {
+  document.querySelectorAll('.menu-item').forEach(el => el.classList.toggle('active', el.dataset.page === page));
+  renderPage(page);
+}
+
+async function renderPage(page) {
+  const mc = document.getElementById('mainContent');
+  const pages = {
+    'dashboard': renderDashboard,
+    'orders': () => renderCrudPage('orders', '🚢 物流订单管理', [
+      {key:'order_no',label:'订单号'},{key:'customer',label:'客户名称'},{key:'container_no',label:'柜号'},
+      {key:'container_type',label:'柜型'},{key:'qty',label:'数量',type:'number'},{key:'profit_per',label:'单柜利润',type:'number'},
+      {key:'rebate_pct',label:'返点比例(%)',type:'number'},{key:'profit',label:'总利润',type:'number'},
+      {key:'rebate',label:'返点',type:'number'},{key:'net_profit',label:'净收益',type:'number'}
+    ]),
+    'overseas': () => renderCrudPage('overseas', '🌐 出海落地服务', [
+      {key:'customer',label:'客户名称'},{key:'service_type',label:'服务类型'},{key:'destination',label:'目的地'},
+      {key:'amount',label:'合同金额',type:'number'},{key:'received',label:'已收金额',type:'number'},
+      {key:'stage',label:'阶段'},{key:'progress',label:'进度(%)',type:'number'},{key:'remark',label:'备注'}
+    ]),
+    'investment': () => renderCrudPage('investment', '💰 投融资对接', [
+      {key:'project_name',label:'项目名称'},{key:'project_company',label:'项目公司'},{key:'investor',label:'投资方'},
+      {key:'amount',label:'涉及金额',type:'number'},{key:'commission_pct',label:'佣金比例(%)',type:'number'},
+      {key:'commission',label:'佣金',type:'number'},{key:'status',label:'状态'},{key:'remark',label:'备注'}
+    ]),
+    'tax': () => renderCrudPage('tax', '📋 财税服务', [
+      {key:'factory_name',label:'工厂名称'},{key:'tax_no',label:'税号'},{key:'service_type',label:'服务类型'},
+      {key:'period',label:'服务周期'},{key:'amount',label:'服务费',type:'number'},{key:'received',label:'已收金额',type:'number'},
+      {key:'status',label:'状态'},{key:'remark',label:'备注'}
+    ]),
+    'legal': () => renderCrudPage('legal', '⚖️ 法律合规', [
+      {key:'case_no',label:'案件编号'},{key:'client',label:'客户'},{key:'service_type',label:'服务类型'},
+      {key:'lawyer',label:'律师'},{key:'billing',label:'计费方式'},{key:'fee',label:'费用',type:'number'},
+      {key:'received',label:'已收金额',type:'number'},{key:'urgency',label:'紧急程度'},{key:'status',label:'状态'},
+      {key:'description',label:'案件描述'}
+    ]),
+    'training': () => renderCrudPage('training', '🎓 职业培训', [
+      {key:'enterprise',label:'合作企业'},{key:'school',label:'合作院校'},{key:'project_name',label:'培训项目'},
+      {key:'category',label:'培训类别'},{key:'students',label:'学员数',type:'number'},{key:'fee_per',label:'单价',type:'number'},
+      {key:'received',label:'已收金额',type:'number'},{key:'mode',label:'培训方式'},{key:'status',label:'状态'}
+    ]),
+    'members': () => renderCrudPage('members', '👥 会员管理', [
+      {key:'member_name',label:'会员名称'},{key:'type',label:'会员类型'},{key:'level',label:'会员等级'},
+      {key:'fee',label:'会费',type:'number'},{key:'received',label:'已收金额',type:'number'},
+      {key:'expire',label:'到期日',type:'date'},{key:'status',label:'状态'}
+    ]),
+    'commerce': () => renderCrudPage('commerce', '🤝 商务合作', [
+      {key:'name',label:'合作方名称'},{key:'type',label:'合作类型'},{key:'level',label:'合作级别'},
+      {key:'amount',label:'合作金额',type:'number'},{key:'received',label:'已收金额',type:'number'},{key:'remark',label:'备注'}
+    ]),
+    'policy': () => renderCrudPage('policy', '📄 政策项目', [
+      {key:'name',label:'项目名称'},{key:'dept',label:'主管部门'},{key:'type',label:'项目类型'},
+      {key:'amount',label:'项目金额',type:'number'},{key:'status',label:'状态'},{key:'remark',label:'备注'}
+    ]),
+    'expenses': () => renderCrudPage('expenses', '💸 日常支出', [
+      {key:'date',label:'日期',type:'date'},{key:'category',label:'分类'},{key:'description',label:'描述'},
+      {key:'amount',label:'金额',type:'number'},{key:'method',label:'支付方式'},{key:'person',label:'经办人'}
+    ]),
+    'finance': renderFinance,
+    'schools': () => renderCrudPage('schools', '🏫 合作院校', [
+      {key:'name',label:'院校名称'},{key:'type',label:'院校类型'},{key:'major',label:'专业方向'},
+      {key:'contact',label:'联系人'},{key:'phone',label:'联系电话'}
+    ]),
+    'enterprises': () => renderCrudPage('enterprises', '🏭 合作企业', [
+      {key:'name',label:'企业名称'},{key:'position',label:'需求岗位'},{key:'headcount',label:'需求人数',type:'number'},
+      {key:'salary',label:'薪资范围'},{key:'skill',label:'技能要求'},{key:'contact',label:'联系人'}
+    ]),
+    'lawyers': () => renderCrudPage('lawyers', '👨‍⚖️ 律师资源', [
+      {key:'name',label:'律师姓名'},{key:'lang',label:'语言'},{key:'expertise',label:'专业领域'},
+      {key:'qual',label:'资质'},{key:'rate',label:'费率/小时',type:'number'},{key:'status',label:'状态'}
+    ]),
+    'legal_clients': () => renderCrudPage('legal_clients', '🏢 企业客户', [
+      {key:'name',label:'客户名称'},{key:'contact',label:'联系人'},{key:'phone',label:'电话'},
+      {key:'service',label:'服务需求'},{key:'status',label:'状态'}
+    ])
+  };
+  if (pages[page]) {
+    mc.innerHTML = typeof pages[page] === 'function' ? await pages[page]() : '';
+  }
+}
+
+// ===== Dashboard =====
+async function renderDashboard() {
+  const d = await api('/dashboard');
+  return `
+    <h2 class="page-title">📊 系统概览</h2>
+    <div class="dashboard-grid">
+      <div class="stat-card"><div class="num">${d.orderCount}</div><div class="label">物流订单</div></div>
+      <div class="stat-card"><div class="num">${d.overseasCount}</div><div class="label">出海项目</div></div>
+      <div class="stat-card"><div class="num">${d.memberCount}</div><div class="label">会员总数</div></div>
+      <div class="stat-card"><div class="num" style="color:#c62828">¥${(d.expenseTotal||0).toLocaleString()}</div><div class="label">总支出</div></div>
+    </div>
+    <div class="card"><h3>📋 快速入口</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn btn-primary" onclick="switchPage('orders')">+ 新建物流订单</button>
+        <button class="btn btn-success" onclick="switchPage('members')">+ 新增会员</button>
+        <button class="btn btn-outline" onclick="switchPage('finance')">查看财务报表</button>
+      </div>
+    </div>
+    <div class="card"><h3>📌 系统说明</h3>
+      <ul style="font-size:14px;color:#666;line-height:2;padding-left:20px">
+        <li>所有数据实时同步，多设备共享</li>
+        <li>默认管理员账号：admin / admin123，请登录后修改密码</li>
+        <li>左侧菜单按业务板块分组，点击即可切换</li>
+      </ul>
+    </div>`;
+}
+
+// ===== Generic CRUD Page =====
+async function renderCrudPage(path, title, fields) {
+  const data = await api('/' + path);
+  let rows = data.map((item, i) => '<tr>' +
+    fields.map(f => {
+      let v = item[f.key] ?? '';
+      if (f.type === 'date' && v) v = new Date(v).toLocaleDateString('zh-CN');
+      return `<td>${v}</td>`;
+    }).join('') +
+    `<td>
+      <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="editItem('${path}',${i},${JSON.stringify(fields).replace(/"/g,'&quot;')})">编辑</button>
+      <button class="btn btn-danger" style="padding:4px 8px;font-size:12px" onclick="deleteItem('${path}','${item._id}')">删除</button>
+    </td></tr>`
+  ).join('');
+
+  const fieldInputs = fields.map(f => {
+    const type = f.type || 'text';
+    return `<div class="form-row"><label>${f.label}</label><input name="${f.key}" type="${type}" placeholder="${f.label}"></div>`;
+  }).join('');
+
+  return `
+    <h2 class="page-title">${title}</h2>
     <div class="card">
-        <div class="logo">🏛️</div>
-        <h1>MNA 业务管理平台</h1>
-        <p class="subtitle">湄公产业资本联盟 Mekong Nexus Association
-        <p class="subtitle">连接产业 · 资本 · 政府 · 国际资源
+      <div class="flex justify-between items-center mb-10">
+        <span style="font-size:14px;color:#888">共 ${data.length} 条记录</span>
+        <button class="btn btn-primary" onclick="showAddModal('${path}',${JSON.stringify(fields).replace(/"/g,'&quot;')})">+ 新增</button>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>#</th>${fields.map(f=>`<th>${f.label}</th>`).join('')}<th>操作</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="'+(fields.length+2)+'" class="text-center" style="color:#aaa;padding:20px">暂无数据，点击上方"新增"按钮创建</td></tr>'}</tbody>
+      </table>
+    </div>`;
+}
 
-        <!-- 登录表单 -->
-        <div id="login-form">
-            <div class="form-group">
-                <label for="username">👤 用户名</label>
-                <input type="text" id="username" placeholder="请输入用户名" />
-            </div>
-            <div class="form-group">
-                <label for="password">🔑 密码</label>
-                <input type="password" id="password" placeholder="请输入密码" />
-            </div>
-            <button class="btn" onclick="doLogin()">→ 登录</button>
-            <div class="links">
-                <a href="#" onclick="showModal('register-modal')">注册新用户</a>
-                <a href="#">忘记密码？</a>
-            </div>
-        </div>
+// ===== Add / Edit Modal =====
+function showAddModal(path, fields) {
+  const form = fields.map(f => {
+    const type = f.type || 'text';
+    return `<div class="form-row"><label>${f.label}</label><input name="${f.key}" type="${type}" placeholder="${f.label}"></div>`;
+  }).join('');
+  document.getElementById('modalContent').innerHTML = `
+    <h3>新增 ${path}</h3>
+    <div id="modalForm">${form}</div>
+    <div class="flex gap-8 mt-10">
+      <button class="btn btn-primary" onclick="submitAdd('${path}')">保存</button>
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+    </div>`;
+  document.getElementById('modal').classList.add('show');
+}
 
-        <!-- 注册表单 (默认隐藏) -->
-        <div id="register-form" style="display:none;">
-            <div class="form-group">
-                <label for="reg-username">👤 用户名</label>
-                <input type="text" id="reg-username" placeholder="请设置用户名" />
-            </div>
-            <div class="form-group">
-                <label for="reg-password">🔑 密码</label>
-                <input type="password" id="reg-password" placeholder="请设置密码" />
-            </div>
-            <button class="btn" onclick="doRegister()">✓ 注册</button>
-            <div class="links">
-                <a href="#" onclick="showLogin()">已有账号？去登录</a>
-            </div>
-        </div>
+async function submitAdd(path) {
+  const form = document.querySelectorAll('#modalForm input, #modalForm select, #modalForm textarea');
+  const data = {};
+  form.forEach(el => {
+    if (el.value !== '') {
+      data[el.name] = el.type === 'number' ? parseFloat(el.value) : el.value;
+    }
+  });
+  await api('/' + path, data);
+  closeModal();
+  switchPage(path);
+  showToast('创建成功', 'success');
+}
 
-        <div class="footer">
-            © 2025 MNA · 仅授权用户可访问 · 数据加密存储
-        </div>
-    </div>
+async function editItem(path, index, fields) {
+  // Simplified edit - reload page for now
+  showToast('编辑功能加载中...', 'info');
+}
 
-    <!-- 弹窗 -->
-    <div id="success-modal" class="modal">
-        <div class="modal-content">
-            <p id="modal-message">登录成功！正在跳转...
-            <button class="modal-btn" onclick="closeModal()">确定</button>
-        </div>
-    </div>
+async function deleteItem(path, id) {
+  if (!confirm('确定删除吗？')) return;
+  await api('/' + path + '/' + id, null, 'DELETE');
+  switchPage(path);
+  showToast('删除成功', 'success');
+}
 
-    <script>
-        // ==========================================
-        // ⚠️ 重要：在这里填入你的 Supabase 信息
-        // ==========================================
-        const SUPABASE_URL = https://dicapkasnfjzbfmfyzib.supabase.co/rest/v1/
-        const SUPABASE_ANON_KEY = 'sb_publishable_vSH9T39fUA4mfxC2E3QC1g_vH0bI...'; // 替换为你的公开密钥
-        
-        // 初始化 Supabase 客户端
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
 
-        // 显示弹窗
-        function showModal(message) {
-            document.getElementById('modal-message').innerText = message;
-            document.getElementById('success-modal').style.display = 'flex';
-        }
+// ===== Finance =====
+async function renderFinance() {
+  const d = await api('/finance');
+  const items = [
+    ['物流利润', d.logistics], ['出海服务', d.overseas], ['投融资佣金', d.investment],
+    ['财税服务', d.tax], ['法律服务', d.legal], ['培训收入', d.training],
+    ['会员费', d.members], ['商务合作', d.commerce], ['政策项目', d.policy]
+  ];
+  const incomeRows = items.map(([name, val]) => `<tr><td>${name}</td><td class="text-right">¥${(val||0).toLocaleString()}</td></tr>`).join('');
+  return `
+    <h2 class="page-title">📈 统一财务报表</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card"><h3>收入明细</h3><table class="data-table">${incomeRows}</table></div>
+      <div class="card"><h3>支出与净收入</h3>
+        <table class="data-table">
+          <tr><td>总支出</td><td class="text-right" style="color:#c62828">¥${(d.total_expense||0).toLocaleString()}</td></tr>
+          <tr><td><strong>净收入</strong></td><td class="text-right" style="color:#2e7d32;font-size:18px;font-weight:700">¥${(d.net_income||0).toLocaleString()}</td></tr>
+        </table>
+      </div>
+    </div>`;
+}
 
-        // 关闭弹窗
-        function closeModal() {
-            document.getElementById('success-modal').style.display = 'none';
-        }
-
-        // 切换登录/注册表单
-        function showLogin() {
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('register-form').style.display = 'none';
-        }
-
-        function showRegister() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'block';
-        }
-
-        // 登录功能
-        async function doLogin() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-
-            if (!username || !password) {
-                showModal('请输入用户名和密码');
-                return;
-            }
-
-            try {
-                // 1. 在 Supabase 中查找用户
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('username', username)
-                    .single();
-
-                if (error) throw error;
-
-                // 2. 验证密码 (⚠️ 注意：生产环境必须用加密比对，这里为了演示直接比对明文)
-                if (data && data.password === password) {
-                    // 登录成功
-                    localStorage.setItem('isLogin', 'true');
-                    localStorage.setItem('currentUser', username);
-                    showModal('登录成功！正在跳转...');
-                    
-                    // 模拟跳转（你可以改成你真正的后台页面）
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html'; // 如果没有这个页面，可以先注释掉
-                    }, 1500);
-                } else {
-                    showModal('用户名或密码错误');
-                }
-            } catch (err) {
-                console.error('登录失败:', err);
-                showModal('登录失败，请重试');
-            }
-        }
-
-        // 注册功能
-        async function doRegister() {
-            const username = document.getElementById('reg-username').value.trim();
-            const password = document.getElementById('reg-password').value.trim();
-
-            if (!username || !password) {
-                showModal('请输入用户名和密码');
-                return;
-            }
-
-            try {
-                // 1. 检查用户名是否已存在
-                const { data: existing, error: checkError } = await supabase
-                    .from('users')
-                    .select('username')
-                    .eq('username', username)
-                    .single();
-
-                if (existing) {
-                    showModal('用户名已存在，请更换');
-                    return;
-                }
-
-                // 2. 插入新用户 (⚠️ 注意：生产环境密码必须加密存储！)
-                const { data, error } = await supabase
-                    .from('users')
-                    .insert([
-                        { username: username, password: password }
-                    ])
-                    .select();
-
-                if (error) throw error;
-
-                showModal('注册成功！请登录');
-                showLogin(); // 跳回登录页
-            } catch (err) {
-                console.error('注册失败:', err);
-                showModal('注册失败：' + err.message);
-            }
-        }
-    </script>
-
+// ===== Toast =====
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + (type || 'info');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+</script>
 </body>
 </html>
+./server.js0000777000000000000000000002404615214201672011572 0ustar  rootrootconst express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// MongoDB Connection
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://wcw066666903_db_user:Uz2OLV34CEvpD7i5@cluster0.ooglmuq.mongodb.net/mna_db?appName=Cluster0';
+mongoose.connect(MONGO_URI);
+mongoose.connection.on('connected', () => console.log('MongoDB Connected'));
+mongoose.connection.on('error', err => console.log('MongoDB Error:', err));
+
+// JWT Secret
+const JWT_SECRET = process.env.JWT_SECRET || 'mna_2026_super_secret_key';
+
+// ==================== Schemas ====================
+const userSchema = new mongoose.Schema({
+  username: { type: String, unique: true, required: true },
+  password_hash: { type: String, required: true },
+  role: { type: String, default: 'admin' },
+  created_at: { type: Date, default: Date.now }
+});
+
+const orderSchema = new mongoose.Schema({
+  order_no: String, customer: String, container_no: String, container_type: String,
+  qty: Number, profit_per: Number, rebate_pct: Number,
+  profit: Number, rebate: Number, net_profit: Number,
+  status: { type: Number, default: 0 },
+  created_by: mongoose.Schema.Types.ObjectId,
+  created_at: { type: Date, default: Date.now }
+});
+
+const overseasSchema = new mongoose.Schema({
+  customer: String, service_type: String, destination: String,
+  amount: Number, received: Number, stage: String, progress: Number,
+  remark: String, date: Date, created_at: { type: Date, default: Date.now }
+});
+
+const investmentSchema = new mongoose.Schema({
+  project_name: String, project_company: String, investor: String,
+  amount: Number, commission_pct: Number, commission: Number,
+  status: String, remark: String, date: Date, created_at: { type: Date, default: Date.now }
+});
+
+const taxSchema = new mongoose.Schema({
+  factory_name: String, tax_no: String, service_type: String, period: String,
+  amount: Number, received: Number, status: String, remark: String,
+  date: Date, created_at: { type: Date, default: Date.now }
+});
+
+const legalSchema = new mongoose.Schema({
+  case_no: String, client: String, service_type: String, lawyer: String,
+  billing: String, fee: Number, received: Number, urgency: String,
+  status: String, description: String, date: Date,
+  created_at: { type: Date, default: Date.now }
+});
+
+const trainingSchema = new mongoose.Schema({
+  enterprise: String, school: String, project_name: String, category: String,
+  students: Number, fee_per: Number, received: Number, mode: String,
+  status: String, start_date: Date, end_date: Date, remark: String, date: Date,
+  created_at: { type: Date, default: Date.now }
+});
+
+const memberSchema = new mongoose.Schema({
+  member_name: String, type: String, level: String, fee: Number,
+  received: Number, expire: Date, status: String, remark: String, date: Date,
+  created_at: { type: Date, default: Date.now }
+});
+
+const expenseSchema = new mongoose.Schema({
+  date: Date, category: String, description: String, amount: Number,
+  method: String, person: String, remark: String,
+  created_at: { type: Date, default: Date.now }
+});
+
+const commerceSchema = new mongoose.Schema({
+  name: String, type: String, level: String, amount: Number,
+  received: Number, remark: String, date: Date,
+  created_at: { type: Date, default: Date.now }
+});
+
+const policySchema = new mongoose.Schema({
+  name: String, dept: String, type: String, amount: Number,
+  status: String, remark: String, date: Date,
+  created_at: { type: Date, default: Date.now }
+});
+
+const schoolSchema = new mongoose.Schema({
+  name: String, type: String, major: String, contact: String,
+  phone: String, remark: String, created_at: { type: Date, default: Date.now }
+});
+
+const enterpriseSchema = new mongoose.Schema({
+  name: String, position: String, headcount: Number, salary: String,
+  skill: String, contact: String, remark: String,
+  created_at: { type: Date, default: Date.now }
+});
+
+const lawyerSchema = new mongoose.Schema({
+  name: String, lang: String, expertise: String, qual: String,
+  rate: Number, status: String, created_at: { type: Date, default: Date.now }
+});
+
+const legalClientSchema = new mongoose.Schema({
+  name: String, contact: String, phone: String, service: String,
+  remark: String, status: String, date: Date,
+  created_at: { type: Date, default: Date.now }
+});
+
+// Models
+const User = mongoose.model('User', userSchema);
+const Order = mongoose.model('Order', orderSchema);
+const Overseas = mongoose.model('Overseas', overseasSchema);
+const Investment = mongoose.model('Investment', investmentSchema);
+const Tax = mongoose.model('Tax', taxSchema);
+const Legal = mongoose.model('Legal', legalSchema);
+const Training = mongoose.model('Training', trainingSchema);
+const Member = mongoose.model('Member', memberSchema);
+const Expense = mongoose.model('Expense', expenseSchema);
+const Commerce = mongoose.model('Commerce', commerceSchema);
+const Policy = mongoose.model('Policy', policySchema);
+const School = mongoose.model('School', schoolSchema);
+const Enterprise = mongoose.model('Enterprise', enterpriseSchema);
+const Lawyer = mongoose.model('Lawyer', lawyerSchema);
+const LegalClient = mongoose.model('LegalClient', legalClientSchema);
+
+// ==================== Auth Middleware ====================
+async function auth(req, res, next) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: '未登录' });
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.id;
+    req.userRole = decoded.role;
+    next();
+  } catch (e) {
+    res.status(401).json({ error: '登录已过期' });
+  }
+}
+
+// ==================== Init Admin ====================
+async function initAdmin() {
+  const exists = await User.findOne({ username: 'admin' });
+  if (!exists) {
+    const hash = await bcrypt.hash('admin123', 10);
+    await User.create({ username: 'admin', password_hash: hash, role: 'admin' });
+    console.log('Admin user created: admin / admin123');
+  }
+}
+initAdmin();
+
+// ==================== Auth Routes ====================
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = await User.findOne({ username });
+  if (!user) return res.json({ error: '用户名或密码错误' });
+  const ok = await bcrypt.compare(password, user.password_hash);
+  if (!ok) return res.json({ error: '用户名或密码错误' });
+  const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+  res.json({ token, role: user.role, username: user.username });
+});
+
+app.get('/api/me', auth, async (req, res) => {
+  const user = await User.findById(req.userId);
+  res.json({ username: user.username, role: user.role });
+});
+
+// ==================== Generic CRUD ====================
+function makeCrud(model, pathName) {
+  // List
+  app.get(`/api/${pathName}`, auth, async (req, res) => {
+    const data = await model.find().sort({ created_at: -1 });
+    res.json(data);
+  });
+  // Create
+  app.post(`/api/${pathName}`, auth, async (req, res) => {
+    const item = await model.create(req.body);
+    res.json(item);
+  });
+  // Update
+  app.put(`/api/${pathName}/:id`, auth, async (req, res) => {
+    const item = await model.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(item);
+  });
+  // Delete
+  app.delete(`/api/${pathName}/:id`, auth, async (req, res) => {
+    await model.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  });
+}
+
+makeCrud(Order, 'orders');
+makeCrud(Overseas, 'overseas');
+makeCrud(Investment, 'investment');
+makeCrud(Tax, 'tax');
+makeCrud(Legal, 'legal');
+makeCrud(Training, 'training');
+makeCrud(Member, 'members');
+makeCrud(Expense, 'expenses');
+makeCrud(Commerce, 'commerce');
+makeCrud(Policy, 'policy');
+makeCrud(School, 'schools');
+makeCrud(Enterprise, 'enterprises');
+makeCrud(Lawyer, 'lawyers');
+makeCrud(LegalClient, 'legal_clients');
+
+// ==================== Dashboard / Finance Summary ====================
+app.get('/api/dashboard', auth, async (req, res) => {
+  const [orderCount, overseasCount, memberCount, expenseTotal] = await Promise.all([
+    Order.countDocuments(),
+    Overseas.countDocuments(),
+    Member.countDocuments(),
+    Expense.aggregate([{ $group: { _id: null, total: { $sum: '$amount' } } }])
+  ]);
+  res.json({
+    orderCount, overseasCount, memberCount,
+    expenseTotal: expenseTotal[0]?.total || 0
+  });
+});
+
+app.get('/api/finance', auth, async (req, res) => {
+  const [orders, overseas, investment, tax, legal, training, members, commerce, policy, expenses] = await Promise.all([
+    Order.find(),
+    Overseas.find(),
+    Investment.find(),
+    Tax.find(),
+    Legal.find(),
+    Training.find(),
+    Member.find(),
+    Commerce.find(),
+    Policy.find(),
+    Expense.find()
+  ]);
+
+  const income = {
+    logistics: orders.reduce((s, o) => s + (o.net_profit || 0), 0),
+    overseas: overseas.reduce((s, o) => s + (o.amount || 0), 0),
+    investment: investment.reduce((s, i) => s + (i.commission || 0), 0),
+    tax: tax.reduce((s, t) => s + (t.amount || 0), 0),
+    legal: legal.reduce((s, l) => s + (l.fee || 0), 0),
+    training: training.reduce((s, t) => s + ((t.students || 0) * (t.fee_per || 0)), 0),
+    members: members.reduce((s, m) => s + (m.fee || 0), 0),
+    commerce: commerce.reduce((s, c) => s + (c.amount || 0), 0),
+    policy: policy.reduce((s, p) => s + (p.amount || 0), 0),
+    expenses: expenses.reduce((s, e) => s + (e.amount || 0), 0)
+  };
+
+  income.total_income = Object.entries(income)
+    .filter(([k]) => k !== 'expenses')
+    .reduce((s, [, v]) => s + v, 0);
+  income.total_expense = income.expenses;
+  income.net_income = income.total_income - income.total_expense;
+
+  res.json(income);
+});
+
+// ==================== Serve Frontend ====================
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ==================== Start ====================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`MNA Server running on port ${PORT}`));
+./start.sh0000777000000000000000000000007615214164116011415 0ustar  rootroot#!/bin/bash
+echo "🚀 Starting MNA Server..."
+node server.js
+./supabase_schema.sql0000777000000000000000000001740415214164161013573 0ustar  rootroot-- ============================================
+-- MNA 湄公产业资本联盟 · Supabase 数据库结构
+-- 在 Supabase → SQL Editor 中执行本文件
+-- ============================================
+
+-- ============ 1. 用户表 ============
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT DEFAULT 'user' CHECK (role IN ('user','admin')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 默认管理员（密码：admin123）
+-- 部署后请立即修改密码
+INSERT INTO users (username, password_hash, role)
+VALUES ('admin', '$2a$10$PLACEHOLDER_HASH', 'admin')
+ON CONFLICT (username) DO NOTHING;
+
+-- ============ 2. 物流订单 ============
+CREATE TABLE IF NOT EXISTS orders (
+  id SERIAL PRIMARY KEY,
+  order_no TEXT UNIQUE,
+  customer TEXT,
+  order_date DATE,
+  container_no TEXT,
+  container_type TEXT DEFAULT '40HQ',
+  qty INTEGER DEFAULT 1,
+  profit_per DECIMAL(10,2),
+  from_port TEXT,
+  to_port TEXT,
+  factory_addr TEXT,
+  vessel TEXT,
+  remark TEXT,
+  ship_date DATE,
+  arrive_port DATE,
+  clearance_start DATE,
+  clearance_done DATE,
+  arrive_factory DATE,
+  close_date DATE,
+  freight_fee DECIMAL(10,2) DEFAULT 0,
+  clearance_fee DECIMAL(10,2) DEFAULT 0,
+  truck_fee DECIMAL(10,2) DEFAULT 0,
+  other_fee DECIMAL(10,2) DEFAULT 0,
+  rebate_pct DECIMAL(5,2),
+  status INTEGER DEFAULT 0,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 3. 出海落地 ============
+CREATE TABLE IF NOT EXISTS overseas (
+  id SERIAL PRIMARY KEY,
+  customer TEXT,
+  date DATE,
+  service_type TEXT,
+  destination TEXT,
+  amount DECIMAL(12,2) DEFAULT 0,
+  received DECIMAL(12,2) DEFAULT 0,
+  stage TEXT DEFAULT '需求沟通',
+  progress INTEGER DEFAULT 0,
+  remark TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 4. 投融资 ============
+CREATE TABLE IF NOT EXISTS invest (
+  id SERIAL PRIMARY KEY,
+  name TEXT,
+  date DATE,
+  project_co TEXT,
+  investor TEXT,
+  amount DECIMAL(14,2) DEFAULT 0,
+  comm_pct DECIMAL(5,2) DEFAULT 3,
+  commission DECIMAL(14,2) DEFAULT 0,
+  status TEXT DEFAULT '项目入库',
+  remark TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 5. 商务合作/会员 ============
+CREATE TABLE IF NOT EXISTS commerce (
+  id SERIAL PRIMARY KEY,
+  name TEXT,
+  date DATE,
+  type TEXT,
+  level TEXT,
+  amount DECIMAL(12,2) DEFAULT 0,
+  received DECIMAL(12,2) DEFAULT 0,
+  remark TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 6. 政策项目 ============
+CREATE TABLE IF NOT EXISTS policy (
+  id SERIAL PRIMARY KEY,
+  name TEXT,
+  date DATE,
+  dept TEXT,
+  type TEXT,
+  amount DECIMAL(12,2) DEFAULT 0,
+  status TEXT DEFAULT '需求登记',
+  remark TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 7. 财税项目 ============
+CREATE TABLE IF NOT EXISTS tax (
+  id SERIAL PRIMARY KEY,
+  factory_name TEXT,
+  tax_no TEXT,
+  date DATE,
+  service_type TEXT,
+  period TEXT,
+  turnover DECIMAL(14,2),
+  amount DECIMAL(12,2) DEFAULT 0,
+  received DECIMAL(12,2) DEFAULT 0,
+  status TEXT DEFAULT '待收资料',
+  remark TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 8. 职业技能培训 ============
+CREATE TABLE IF NOT EXISTS training (
+  id SERIAL PRIMARY KEY,
+  ent_name TEXT,
+  school_name TEXT,
+  proj_name TEXT,
+  category TEXT,
+  students INTEGER DEFAULT 1,
+  days INTEGER DEFAULT 30,
+  fee DECIMAL(10,2) DEFAULT 0,
+  received DECIMAL(10,2) DEFAULT 0,
+  mode TEXT,
+  status TEXT DEFAULT '企业需求对接',
+  start_date DATE,
+  end_date DATE,
+  remark TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 9. 法律项目 ============
+CREATE TABLE IF NOT EXISTS legal (
+  id SERIAL PRIMARY KEY,
+  ent_name TEXT,
+  service_type TEXT,
+  lawyer TEXT,
+  billing TEXT,
+  fee DECIMAL(12,2) DEFAULT 0,
+  received DECIMAL(12,2) DEFAULT 0,
+  urgency TEXT DEFAULT '普通',
+  status TEXT DEFAULT '咨询接洽',
+  desc TEXT,
+  date DATE,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 10. 企业客户 ============
+CREATE TABLE IF NOT EXISTS legal_clients (
+  id SERIAL PRIMARY KEY,
+  name TEXT,
+  contact TEXT,
+  phone TEXT,
+  service TEXT,
+  remark TEXT,
+  status TEXT DEFAULT '活跃',
+  date DATE,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 11. 律师 ============
+CREATE TABLE IF NOT EXISTS lawyers (
+  id SERIAL PRIMARY KEY,
+  name TEXT,
+  lang TEXT,
+  expertise TEXT,
+  qual TEXT,
+  rate DECIMAL(10,2) DEFAULT 0,
+  status TEXT DEFAULT '在职',
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 12. 会员 ============
+CREATE TABLE IF NOT EXISTS members (
+  id SERIAL PRIMARY KEY,
+  name TEXT,
+  date DATE,
+  type TEXT,
+  level TEXT,
+  fee DECIMAL(10,2) DEFAULT 0,
+  received DECIMAL(10,2) DEFAULT 0,
+  expire DATE,
+  status TEXT DEFAULT '正常',
+  remark TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 13. 日常支出 ============
+CREATE TABLE IF NOT EXISTS expenses (
+  id SERIAL PRIMARY KEY,
+  date DATE,
+  cat TEXT,
+  desc TEXT,
+  amount DECIMAL(10,2) DEFAULT 0,
+  method TEXT,
+  person TEXT,
+  remark TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 14. 财税定价规则 ============
+CREATE TABLE IF NOT EXISTS tax_pricing (
+  id SERIAL PRIMARY KEY,
+  max_turnover DECIMAL(14,2),
+  service_type TEXT,
+  period TEXT,
+  fee DECIMAL(10,2),
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============ 行级安全策略（RLS）============
+-- 启用 RLS（用户只能访问自己的数据，管理员可访问全部）
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE overseas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE invest ENABLE ROW LEVEL SECURITY;
+ALTER TABLE commerce ENABLE ROW LEVEL SECURITY;
+ALTER TABLE policy ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tax ENABLE ROW LEVEL SECURITY;
+ALTER TABLE training ENABLE ROW LEVEL SECURITY;
+ALTER TABLE legal ENABLE ROW LEVEL SECURITY;
+ALTER TABLE legal_clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lawyers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+
+-- 管理员可访问所有数据
+CREATE POLICY admin_all ON orders FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid()::integer AND users.role = 'admin')
+) WITH CHECK (true);
+
+-- 普通用户只能访问自己的数据
+CREATE POLICY user_own ON orders FOR ALL TO authenticated USING (
+  created_by = (SELECT id FROM users WHERE users.id = auth.uid()::integer LIMIT 1)
+) WITH CHECK (true);
+
+-- ============ 索引 ============
+CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_overseas_created ON overseas(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_invest_created ON invest(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tax_created ON tax(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_legal_created ON legal(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_training_created ON training(created_at DESC);
+
+-- ============ 完成提示 ============
+DO $$
+BEGIN
+  RAISE NOTICE '✅ MNA 数据库结构创建完成！';
+  RAISE NOTICE '👉 请先在 Authentication → Settings 中禁用 "Enable email confirmations"';
+  RAISE NOTICE '👉 请在 API Settings 中获取 URL 和 anon key';
+END $$;
+./vercel.json0000777000000000000000000000037715214201672012102 0ustar  rootroot{
+  "version": 2,
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" },
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/server.js" },
+    { "src": "/(.*)", "dest": "/server.js" }
+  ]
+}
