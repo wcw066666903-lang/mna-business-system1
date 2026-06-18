@@ -260,8 +260,13 @@
   <div class="login-box">
     <div class="login-logo">
       <div class="icon">🏛️</div>
-      <h2>MNA 业务管理平台</h2>
-      <p>湄公产业资本联盟 Mekong Nexus Association<br>连接产业 · 资本 · 政府 · 国际资源</p>
+     <h2 data-i18n="login_title">MNA 业务管理平台</h2>
+<p data-i18n="login_sub">湄公产业资本联盟...</p>
+
+<input type="text" id="loginUser" data-i18n-placeholder="username" placeholder="请输入用户名">
+<input type="password" id="loginPass" data-i18n-placeholder="password" placeholder="请输入密码">
+
+<button class="login-btn" onclick="doLogin()" data-i18n="login_btn">登 录</button>
     </div>
     <div class="login-form">
       <div class="form-group"><label>👤 用户名</label><input type="text" id="loginUser" placeholder="请输入用户名" autocomplete="username" autofocus></div>
@@ -329,7 +334,19 @@
         <div class="uname" id="currentUserName"></div>
         <div class="urole" id="currentUserRole"></div>
       </div>
-      <button onclick="doLogout()">退出登录</button>
+    <button id="langSwitch" onclick="toggleLanguage()" style="
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 6px;
+  margin-right: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+">EN</button>
+
+<button onclick="doLogout()">退出登录</button>
     </div>
   </div>
 
@@ -3304,5 +3321,254 @@ function deleteEnterprise(id){if(!confirm('确定删除此企业吗？'))return;
 // ============ 初始化 ============
 (function(){const s=getSession();if(s.username){_origInit(s);showApp(s.username,s.role)}else document.getElementById('loginPage').style.display='flex'})();
 </script>
-</body>
+<!-- ==================== 中英双语语言包（最终版） ==================== -->
+<script>
+/* ==================== i18n Data ==================== */
+const i18n = {
+  zh: {
+    /* ---------- 登录 / 注册 / 重置 ---------- */
+    login_title: "MNA 业务管理平台",
+    login_sub: "湄公产业资本联盟 Mekong Nexus Association<br>连接产业 · 资本 · 政府 · 国际资源",
+    username: "用户名",
+    password: "密码",
+    login_btn: "登 录",
+    forgot_pwd: "忘记密码？",
+    register: "注册新用户",
+    copyright: "© 2025 MNA · 仅授权用户可访问 · 数据加密存储",
+
+    reg_title: "注册新账户",
+    reg_sub: "创建您的 MNA 系统账户",
+    role: "角色",
+    role_user: "普通用户",
+    role_admin: "管理员",
+    reg_btn: "注 册",
+    reset_title: "重置密码",
+    reset_sub: "请设置新密码",
+    new_password: "新密码",
+    confirm_password: "确认密码",
+    reset_btn: "重置密码",
+    back_login: "← 返回登录",
+
+    /* ---------- 顶部 / 侧边栏 ---------- */
+    logout: "退出登录",
+    nav_overview: "概览",
+    nav_dashboard: "仪表盘",
+    nav_business: "业务板块",
+    nav_logistics: "物流订单跟踪",
+    nav_overseas: "出海落地服务",
+    nav_invest: "投融资对接",
+    nav_commerce: "商务合作/会员",
+    nav_policy: "政策解读/政府对接",
+    nav_tax: "财税业务",
+    nav_training: "职业技能培训",
+    nav_legal: "法律咨询合规",
+    nav_finance: "财务中心",
+    nav_unified_finance: "统一财务报表",
+    nav_membership: "会员管理",
+    nav_expenses: "日常费用支出",
+    nav_admin: "管理后台",
+    nav_tax_price: "财税计费模板",
+    nav_tax_ref: "财税联盟参考价",
+    nav_legal_price: "法律计费参数",
+    nav_legal_risk: "法律风险预警",
+    nav_system: "系统",
+    nav_config: "参数设置",
+    nav_users: "用户管理",
+    nav_pwd: "修改密码",
+
+    /* ---------- 仪表盘 ---------- */
+    welcome: "欢迎回来",
+    today: "今天是",
+    logistics: "物流在途订单",
+    members: "协会会员",
+    revenue: "本月净收入",
+    overseas: "出海项目",
+    investment: "投融资项目",
+    expenses: "本月支出",
+    tax: "财税项目",
+    training: "职业技能培训",
+    legal: "法律咨询合规",
+    policy: "政策解读/政府对接",
+    recent_activity: "近期活动",
+    no_activity: "暂无近期活动记录",
+
+    /* ---------- 通用按钮 ---------- */
+    add: "新建",
+    export: "导出CSV",
+    edit: "编辑",
+    delete: "删除",
+    view: "查看",
+    save: "保存",
+    cancel: "取消",
+    apply: "应用参数",
+
+    /* ---------- 动态状态 ---------- */
+    status_0: "待发柜",
+    status_1: "已发柜（在途）",
+    status_2: "已到港",
+    status_3: "清关中",
+    status_4: "已清关",
+    status_5: "已到工厂",
+    status_6: "已结单",
+
+    /* ---------- Toast / 提示 ---------- */
+    save_success: "保存成功",
+    delete_success: "删除成功",
+    update_success: "更新成功",
+    operation_success: "操作成功",
+    confirm_delete: "确认要删除吗？",
+    input_invalid: "请输入完整信息",
+    password_mismatch: "两次密码不一致",
+    login_fail: "用户名或密码错误",
+    register_fail: "注册失败",
+    reset_fail: "重置密码失败"
+  },
+
+  en: {
+    /* ---------- Sign-In / Register / Reset ---------- */
+    login_title: "MNA Integrated Business Management Platform",
+    login_sub: "Mekong Nexus Association<br>Connecting Industry, Capital, and Public Sector Stakeholders",
+    username: "Username",
+    password: "Password",
+    login_btn: "Sign In",
+    forgot_pwd: "Forgot password?",
+    register: "Register New Account",
+    copyright: "© 2025 MNA · Authorized Access Only · Encrypted Storage",
+
+    reg_title: "Create Account",
+    reg_sub: "Create Your MNA System Account",
+    role: "Role",
+    role_user: "User",
+    role_admin: "Administrator",
+    reg_btn: "Register",
+    reset_title: "Reset Password",
+    reset_sub: "Set a New Password",
+    new_password: "New Password",
+    confirm_password: "Confirm Password",
+    reset_btn: "Reset Password",
+    back_login: "← Back to Sign-In",
+
+    /* ---------- Header / Sidebar ---------- */
+    logout: "Terminate Session",
+    nav_overview: "Overview",
+    nav_dashboard: "Dashboard",
+    nav_business: "Business Modules",
+    nav_logistics: "Logistics Orders",
+    nav_overseas: "Cross-Border Market Entry",
+    nav_invest: "Capital Introduction & Deal Flow",
+    nav_commerce: "Commerce & Membership",
+    nav_policy: "Public Policy & Government Liaison",
+    nav_tax: "Tax & Regulatory Compliance",
+    nav_training: "Workforce Capability Development",
+    nav_legal: "Legal & Regulatory Advisory",
+    nav_finance: "Finance & Performance Insights",
+    nav_unified_finance: "Integrated Financial Reporting",
+    nav_membership: "Membership Governance",
+    nav_expenses: "Operating Expenditure",
+    nav_admin: "Governance & Administration",
+    nav_tax_price: "Tax Service Fee Framework",
+    nav_tax_ref: "Market Reference Pricing – Tax Services",
+    nav_legal_price: "Legal Service Fee Framework",
+    nav_legal_risk: "Regulatory Risk Monitoring",
+    nav_system: "System & Governance",
+    nav_config: "Configuration & Control Framework",
+    nav_users: "Identity & Access Governance",
+    nav_pwd: "Credential Management",
+
+    /* ---------- Dashboard ---------- */
+    welcome: "Welcome Back",
+    today: "Today is",
+    logistics: "Active Logistics Engagements",
+    members: "Association Members",
+    revenue: "Net Operating Surplus – Current Month",
+    overseas: "Cross-Border Market Entry Engagements",
+    investment: "Capital Introduction Mandates",
+    expenses: "Monthly Operating Expenditure",
+    tax: "Open Tax Compliance Engagements",
+    training: "Active Capability Programs",
+    legal: "Active Legal Advisory Mandates",
+    policy: "Public Policy & Government Liaison Engagements",
+    recent_activity: "Recent Activities",
+    no_activity: "No Recent Activity to Display",
+
+    /* ---------- Common Actions ---------- */
+    add: "Create",
+    export: "Extract Dataset",
+    edit: "Revise",
+    delete: "Retire Record",
+    view: "Review",
+    save: "Commit",
+    cancel: "Discard Changes",
+    apply: "Apply Configuration",
+
+    /* ---------- Dynamic Status ---------- */
+    status_0: "Pending Shipment",
+    status_1: "In Transit",
+    status_2: "Arrived at Port",
+    status_3: "Customs Clearance",
+    status_4: "Cleared",
+    status_5: "Delivered to Factory",
+    status_6: "Completed",
+
+    /* ---------- Toast / Messages ---------- */
+    save_success: "Changes committed successfully",
+    delete_success: "Record retired successfully",
+    update_success: "Configuration updated",
+    operation_success: "Operation completed successfully",
+    confirm_delete: "Are you sure you wish to retire this record?",
+    input_invalid: "Validation failed – please review required fields",
+    password_mismatch: "Credential mismatch – please re-enter",
+    login_fail: "Authentication failed – invalid credentials",
+    register_fail: "Registration failed – please try again",
+    reset_fail: "Password reset failed – please try again"
+  }
+};
+
+/* ==================== 核心函数（不改动你任何原有逻辑） ==================== */
+let currentLang = localStorage.getItem("mna_lang") || "zh";
+
+function t(key) {
+  return i18n[currentLang] && i18n[currentLang][key]
+    ? i18n[currentLang][key]
+    : key;
+}
+
+function tf(key, ...args) {
+  let str = t(key);
+  args.forEach((arg, i) => {
+    str = str.replace("{" + i + "}", arg);
+  });
+  return str;
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === "zh" ? "en" : "zh";
+  localStorage.setItem("mna_lang", currentLang);
+  applyI18n();
+  const btn = document.getElementById("langSwitch");
+  if (btn) btn.innerText = currentLang === "zh" ? "EN" : "中";
+}
+
+function applyI18n() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (i18n[currentLang][key]) {
+      el.innerHTML = i18n[currentLang][key];
+    }
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    if (i18n[currentLang][key]) {
+      el.placeholder = i18n[currentLang][key];
+    }
+  });
+  document.querySelectorAll("select").forEach(s => s.blur());
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  applyI18n();
+  const btn = document.getElementById("langSwitch");
+  if (btn) btn.innerText = currentLang === "zh" ? "EN" : "中";
+});
+</script></body>
 </html>
