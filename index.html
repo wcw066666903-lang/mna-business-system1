@@ -1,2270 +1,307 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>MNA 业务管理平台</title>
+    
+    <!-- 引入 Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
         }
 
-        /* 登录页面 */
-        .login-page {
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #1a365d, #2c5282);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
         }
 
-        .login-card {
-            background: white;
-            padding: 40px;
+        .card {
+            background: #fff;
+            width: 380px;
+            padding: 36px 32px;
             border-radius: 12px;
-            width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,.25);
             text-align: center;
         }
 
-        .login-icon { font-size: 48px; margin-bottom: 16px; }
-
-        .login-title {
-            color: #1a365d;
-            font-size: 22px;
-            margin-bottom: 8px;
+        .logo {
+            font-size: 48px;
+            margin-bottom: 16px;
         }
 
-        .login-subtitle {
+        h1 {
+            color: #1a365d;
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+
+        p.subtitle {
             color: #666;
-            font-size: 13px;
-            margin-bottom: 30px;
-            line-height: 1.6;
+            margin-bottom: 24px;
+            font-size: 14px;
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             text-align: left;
         }
 
-        .form-group label {
+        label {
             display: block;
             margin-bottom: 6px;
             color: #333;
             font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
             font-size: 14px;
         }
 
-        .form-group input {
+        .btn {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 15px;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #1a365d;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
             background: #1a365d;
             color: white;
             border: none;
             border-radius: 6px;
-            font-size: 16px;
             cursor: pointer;
+            font-size: 16px;
             margin-top: 10px;
         }
 
-        .login-btn:hover { background: #2c5282; }
+        .btn:hover {
+            background: #2c5282;
+        }
 
-        .login-footer {
-            margin-top: 20px;
+        .links {
+            margin-top: 16px;
+            font-size: 14px;
+        }
+
+        .links a {
+            color: #1a365d;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .footer {
+            margin-top: 24px;
             font-size: 12px;
             color: #999;
         }
 
-        .login-links {
-            margin-top: 14px;
-            font-size: 13px;
-        }
-
-        .login-links a {
-            color: #1a365d;
-            text-decoration: none;
-            margin: 0 8px;
-        }
-
-        /* 后台界面 */
-        .app-container {
-            display: none;
-            min-height: 100vh;
-        }
-
-        .app-header {
-            background: #1a365d;
-            color: white;
-            padding: 0 30px;
-            height: 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-brand h1 {
-            font-size: 18px;
-            margin: 0;
-        }
-
-        .header-brand p {
-            font-size: 11px;
-            opacity: 0.7;
-            margin: 0;
-        }
-
-        .header-user {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header-user button {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-
-        .main-body {
-            display: flex;
-            min-height: calc(100vh - 60px);
-        }
-
-        .sidebar {
-            width: 220px;
-            background: white;
-            border-right: 1px solid #eee;
-            padding: 16px 0;
-        }
-
-        .nav-group-title {
-            padding: 8px 20px 4px;
-            font-size: 11px;
-            color: #999;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 20px;
-            cursor: pointer;
-            color: #555;
-            font-size: 14px;
-            border-left: 3px solid transparent;
-            background: none;
-            border-top: none;
-            border-right: none;
-            border-bottom: none;
-            width: 100%;
-            text-align: left;
-            font-family: inherit;
-        }
-
-        .nav-item:hover { background: #f0f4ff; color: #1a365d; }
-        .nav-item.active { background: #e8eeff; color: #1a365d; border-left-color: #1a365d; font-weight: bold; }
-
-        .content-area {
-            flex: 1;
-            padding: 24px;
-            background: #f5f5f5;
-        }
-
-        .page-section { display: none; }
-        .page-section.active { display: block; }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 24px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-            margin-bottom: 20px;
-        }
-
-        .card h3 { font-size: 16px; color: #1a365d; margin-bottom: 16px; }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-            text-align: center;
-        }
-
-        .stat-label { font-size: 12px; color: #888; margin-bottom: 8px; }
-        .stat-value { font-size: 28px; font-weight: bold; color: #1a365d; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { background: #fafafa; padding: 10px 8px; text-align: center; border-bottom: 1px solid #eee; }
-        td { padding: 10px 8px; text-align: center; border-bottom: 1px solid #f5f5f5; }
-        tr:hover { background: #f8f9ff; }
-
-        .status-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
-        .btn-primary { background: #1a365d; color: white; }
-        .btn-primary:hover { background: #2c5282; }
-        .btn-danger { background: #e53e3e; color: white; }
-        .btn-success { background: #38a169; color: white; }
-
-        .modal-overlay {
+        /* 弹窗样式 */
+        .modal {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
             z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
             justify-content: center;
             align-items: center;
         }
 
-        .modal-overlay.active { display: flex; }
-
-        .modal {
+        .modal-content {
             background: white;
-            border-radius: 12px;
             padding: 24px;
-            width: 500px;
-            max-width: 95vw;
-            max-height: 90vh;
-            overflow-y: auto;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 300px;
         }
 
-        .modal h3 { margin-bottom: 16px; color: #1a365d; }
-
-        .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
-        .form-group { flex: 1; }
-        .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 12px; color: #555; }
-        .form-group input, .form-group select {
-            width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;
+        .modal-btn {
+            margin-top: 16px;
+            padding: 8px 16px;
+            background: #1a365d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
-
-        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
-        .btn-cancel { background: #f0f0f0; color: #666; padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-submit { background: #1a365d; color: white; padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; }
-
-        .empty-state { text-align: center; padding: 40px; color: #bbb; }
-        .empty-state .icon { font-size: 40px; margin-bottom: 10px; }
-
-        .toast {
-            position: fixed; bottom: 20px; right: 20px;
-            padding: 12px 20px; border-radius: 8px;
-            background: #333; color: white; font-size: 14px;
-            display: none; z-index: 2000;
-        }
-
-        .toast.show { display: block; }
-        .toast.success { background: #38a169; }
-        .toast.error { background: #e53e3e; }
-
-        .controls { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
-        .controls select, .controls input {
-            padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;
-        }
-
-        .sub-tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 1px solid #eee; }
-        .sub-tabs button {
-            padding: 10px 20px; cursor: pointer; font-weight: 500;
-            color: #888; border: none; border-bottom: 2px solid transparent;
-            background: none; font-size: 13px; font-family: inherit;
-        }
-        .sub-tabs button.active { color: #1a365d; border-bottom-color: #1a365d; }
     </style>
 </head>
 <body>
 
-<!-- ==================== 登录页面 ==================== -->
-<div class="login-page" id="loginPage">
-    <div class="login-card">
-        <div class="login-icon">🏛️</div>
-        <h2 class="login-title">MNA 业务管理平台</h2>
-        <p class="login-subtitle">
-            湄公产业资本联盟 Mekong Nexus Association<br>
-            连接产业 · 资本 · 政府 · 国际资源
-        </p>
-        <div class="form-group">
-            <label>👤 用户名</label>
-            <input type="text" id="loginUser" placeholder="请输入用户名" value="admin">
-        </div>
-        <div class="form-group">
-            <label>🔑 密码</label>
-            <input type="password" id="loginPass" placeholder="请输入密码" value="admin123">
-        </div>
-        <button class="login-btn" onclick="doLogin()">登 录</button>
-        <div class="login-links">
-            <a href="#" onclick="showReset()">忘记密码？</a>
-        </div>
-        <div class="login-footer">© 2025 MNA · 仅授权用户可访问 · 数据加密存储</div>
-    </div>
-</div>
+    <div class="card">
+        <div class="logo">🏛️</div>
+        <h1>MNA 业务管理平台</h1>
+        <p class="subtitle">湄公产业资本联盟 Mekong Nexus Association
+        <p class="subtitle">连接产业 · 资本 · 政府 · 国际资源
 
-<!-- ==================== 后台主应用 ==================== -->
-<div class="app-container" id="appContainer">
-    <div class="app-header">
-        <div class="header-brand">
-            <h1>🏛️ MNA 湄公产业资本联盟</h1>
-            <p>Mekong Nexus Association · 业务管理平台</p>
-        </div>
-        <div class="header-user">
-            <span id="currentUserName"></span>
-            <button onclick="doLogout()">退出登录</button>
-        </div>
-    </div>
-
-    <div class="main-body">
-        <!-- 侧边栏 -->
-        <div class="sidebar">
-            <div class="nav-group-title">📊 概览</div>
-            <button class="nav-item active" onclick="switchPage('dashboard')">🏠 仪表盘</button>
-
-            <div class="nav-group-title">🚢 业务板块</div>
-            <button class="nav-item" onclick="switchPage('logistics')">🚢 物流订单跟踪</button>
-            <button class="nav-item" onclick="switchPage('overseas')">🏗️ 出海落地服务</button>
-            <button class="nav-item" onclick="switchPage('investment')">💰 投融资对接</button>
-            <button class="nav-item" onclick="switchPage('commerce')">🤝 商务合作/会员</button>
-            <button class="nav-item" onclick="switchPage('policy')">📋 政策解读</button>
-            <button class="nav-item" onclick="switchPage('tax')">🧾 财税业务</button>
-            <button class="nav-item" onclick="switchPage('training')">🎓 职业技能培训</button>
-            <button class="nav-item" onclick="switchPage('legal')">⚖️ 法律咨询合规</button>
-
-            <div class="nav-group-title">💰 财务中心</div>
-            <button class="nav-item" onclick="switchPage('finance')">📊 统一财务报表</button>
-            <button class="nav-item" onclick="switchPage('membership')">🏅 会员管理</button>
-            <button class="nav-item" onclick="switchPage('expenses')">💸 日常费用支出</button>
-
-            <div class="nav-group-title">🔒 管理后台</div>
-            <button class="nav-item" onclick="switchPage('taxPricing')">🧾 财税计费模板</button>
-            <button class="nav-item" onclick="switchPage('taxAlliance')">📑 财税联盟参考价</button>
-            <button class="nav-item" onclick="switchPage('legalPricing')">⚖️ 法律计费参数</button>
-            <button class="nav-item" onclick="switchPage('legalRisk')">🔔 法律风险预警</button>
-
-            <div class="nav-group-title">⚙️ 系统</div>
-            <button class="nav-item" onclick="switchPage('config')">⚙️ 参数设置</button>
-            <button class="nav-item" onclick="switchPage('users')">👥 用户管理</button>
-            <button class="nav-item" onclick="switchPage('pwd')">🔑 修改密码</button>
-        </div>
-
-        <!-- 内容区 -->
-        <div class="content-area">
-
-            <!-- ==================== 仪表盘 ==================== -->
-            <div class="page-section active" id="pageDashboard">
-                <div class="card" style="background: linear-gradient(135deg, #1a365d, #2c5282); color: white; border: none;">
-                    <h2 id="welcomeTitle" style="margin-bottom: 8px;">👋 欢迎回来</h2>
-                    <p id="welcomeSub" style="opacity: 0.8;"></p>
-                </div>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">🚢 物流在途订单</div>
-                        <div class="stat-value" id="dbLogistics">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">🏅 协会会员</div>
-                        <div class="stat-value" id="dbMembers">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">💰 本月净收入</div>
-                        <div class="stat-value" id="dbRevenue">$0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">🏗️ 出海项目</div>
-                        <div class="stat-value" id="dbOverseas">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">💰 投融资项目</div>
-                        <div class="stat-value" id="dbInvestment">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">💸 本月支出</div>
-                        <div class="stat-value" id="dbExpenses">$0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">🧾 财税项目</div>
-                        <div class="stat-value" id="dbTax">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">🎓 培训项目</div>
-                        <div class="stat-value" id="dbTraining">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">⚖️ 法律项目</div>
-                        <div class="stat-value" id="dbLegal">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📋 政策项目</div>
-                        <div class="stat-value" id="dbPolicy">0</div>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>📌 近期活动</h3>
-                    <div id="recentActivity" style="font-size: 13px; color: #888; line-height: 2;">
-                        <p>暂无近期活动记录</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 物流订单 ==================== -->
-            <div class="page-section" id="pageLogistics">
-                <div class="controls">
-                    <button class="btn btn-success" onclick="openOrderModal()">➕ 新建物流订单</button>
-                    <div style="flex: 1;"></div>
-                    <select id="filterStatus" onchange="renderOrders()">
-                        <option value="-1">全部状态</option>
-                        <option value="0">待发柜</option>
-                        <option value="1">已发柜（在途）</option>
-                        <option value="2">已到港</option>
-                        <option value="3">清关中</option>
-                        <option value="4">已清关</option>
-                        <option value="5">已到工厂</option>
-                        <option value="6">已结单</option>
-                    </select>
-                    <input type="text" id="filterKeyword" placeholder="搜索客户/订单号/货柜号" style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;" oninput="renderOrders()">
-                </div>
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3>📋 物流订单列表</h3>
-                        <span style="font-size: 12px; color: #aaa;" id="orderCount">共 0 条订单</span>
-                    </div>
-                    <div id="orderTableContainer">
-                        <div class="empty-state"><div class="icon">📭</div><p>暂无订单，请点击「新建物流订单」开始录入</p></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 出海落地服务 ==================== -->
-            <div class="page-section" id="pageOverseas">
-                <div class="sub-tabs">
-                    <button class="active" onclick="switchSubTab(this, 'overseasList')">📋 项目列表</button>
-                    <button onclick="switchSubTab(this, 'overseasLedger')">📊 月度台账</button>
-                </div>
-                <div id="overseasList">
-                    <div class="controls">
-                        <button class="btn btn-success" onclick="openOverseasModal()">➕ 新建出海项目</button>
-                        <div style="flex: 1;"></div>
-                        <input type="text" placeholder="搜索客户/项目名称..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;" oninput="renderOverseas(this.value)">
-                    </div>
-                    <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <h3>🏗️ 出海落地项目</h3>
-                            <span style="font-size: 12px; color: #aaa;" id="overseasCount">共 0 个项目</span>
-                        </div>
-                        <div id="overseasTableContainer">
-                            <div class="empty-state"><div class="icon">📭</div><p>暂无出海项目</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="overseasLedger" style="display: none;">
-                    <div class="controls">
-                        <label>📅 月份：</label>
-                        <input type="month" id="overseasMonth" onchange="renderOverseasLedger()">
-                        <button onclick="prevOverseasMonth()">◀</button>
-                        <button onclick="nextOverseasMonth()">▶</button>
-                    </div>
-                    <div class="stats-grid" id="overseasSummary">
-                        <div class="stat-card"><div class="stat-label">项目数</div><div class="stat-value" id="osProjects">0</div></div>
-                        <div class="stat-card"><div class="stat-label">总收入</div><div class="stat-value" id="osRevenue" style="color: #38a169;">$0</div></div>
-                        <div class="stat-card"><div class="stat-label">总成本</div><div class="stat-value" id="osCost" style="color: #e53e3e;">$0</div></div>
-                        <div class="stat-card"><div class="stat-label">净利润</div><div class="stat-value" id="osNet">$0</div></div>
-                    </div>
-                    <div class="card">
-                        <h3>📊 月度明细</h3>
-                        <div id="overseasLedgerTable"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 投融资对接 ==================== -->
-            <div class="page-section" id="pageInvestment">
-                <div class="sub-tabs">
-                    <button class="active" onclick="switchSubTab(this, 'invList')">📋 项目列表</button>
-                    <button onclick="switchSubTab(this, 'invLedger')">📊 月度台账</button>
-                </div>
-                <div id="invList">
-                    <div class="controls">
-                        <button class="btn" style="background: #722ed1; color: white;" onclick="openInvestModal()">➕ 新建投融资项目</button>
-                        <div style="flex: 1;"></div>
-                        <input type="text" placeholder="搜索项目名称/投资方..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;" oninput="renderInvest(this.value)">
-                    </div>
-                    <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <h3>💰 投融资项目列表</h3>
-                            <span style="font-size: 12px; color: #aaa;" id="invCount">共 0 个项目</span>
-                        </div>
-                        <div id="invTableContainer">
-                            <div class="empty-state"><div class="icon">📭</div><p>暂无投融资项目</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="invLedger" style="display: none;">
-                    <div class="controls">
-                        <label>📅 月份：</label>
-                        <input type="month" id="invMonth" onchange="renderInvLedger()">
-                        <button onclick="prevInvMonth()">◀</button>
-                        <button onclick="nextInvMonth()">▶</button>
-                    </div>
-                    <div class="stats-grid" id="invSummary">
-                        <div class="stat-card"><div class="stat-label">项目数</div><div class="stat-value" id="ivProjects">0</div></div>
-                        <div class="stat-card"><div class="stat-label">涉及金额</div><div class="stat-value" id="ivAmount">$0</div></div>
-                        <div class="stat-card"><div class="stat-label">佣金收入</div><div class="stat-value" id="ivCommission" style="color: #38a169;">$0</div></div>
-                    </div>
-                    <div class="card">
-                        <h3>📊 月度明细</h3>
-                        <div id="invLedgerTable"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 商务合作 ==================== -->
-            <div class="page-section" id="pageCommerce">
-                <div class="sub-tabs">
-                    <button class="active" onclick="switchSubTab(this, 'comList')">📋 会员/活动列表</button>
-                    <button onclick="switchSubTab(this, 'comLedger')">📊 月度台账</button>
-                </div>
-                <div id="comList">
-                    <div class="controls">
-                        <button class="btn" style="background: #13c2c2; color: white;" onclick="openCommerceModal()">➕ 新建商务项目</button>
-                        <div style="flex: 1;"></div>
-                        <input type="text" placeholder="搜索会员/活动名称..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;" oninput="renderCommerce(this.value)">
-                    </div>
-                    <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <h3>🤝 商务合作/会员</h3>
-                            <span style="font-size: 12px; color: #aaa;" id="comCount">共 0 条记录</span>
-                        </div>
-                        <div id="comTableContainer">
-                            <div class="empty-state"><div class="icon">📭</div><p>暂无商务合作/会员记录</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="comLedger" style="display: none;">
-                    <div class="controls">
-                        <label>📅 月份：</label>
-                        <input type="month" id="comMonth" onchange="renderComLedger()">
-                        <button onclick="prevComMonth()">◀</button>
-                        <button onclick="nextComMonth()">▶</button>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-label">会员/活动数</div><div class="stat-value" id="cmItems">0</div></div>
-                        <div class="stat-card"><div class="stat-label">总收入</div><div class="stat-value" id="cmRevenue" style="color: #38a169;">$0</div></div>
-                    </div>
-                    <div class="card">
-                        <h3>📊 月度明细</h3>
-                        <div id="comLedgerTable"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 政策解读 ==================== -->
-            <div class="page-section" id="pagePolicy">
-                <div class="controls">
-                    <button class="btn btn-danger" onclick="openPolicyModal()">➕ 新建政策项目</button>
-                    <div style="flex: 1;"></div>
-                    <input type="text" placeholder="搜索项目名称/对接部门..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;" oninput="renderPolicy(this.value)">
-                </div>
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3>📋 政策解读/政府对接项目</h3>
-                        <span style="font-size: 12px; color: #aaa;" id="policyCount">共 0 个项目</span>
-                    </div>
-                    <div id="policyTableContainer">
-                        <div class="empty-state"><div class="icon">📭</div><p>暂无政策项目</p></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 财税业务 ==================== -->
-            <div class="page-section" id="pageTax">
-                <div class="sub-tabs">
-                    <button class="active" onclick="switchSubTab(this, 'taxList')">📋 财税项目列表</button>
-                    <button onclick="switchSubTab(this, 'taxLedger')">📊 月度台账</button>
-                </div>
-                <div id="taxList">
-                    <div class="controls">
-                        <button class="btn" style="background: #d48806; color: white;" onclick="openTaxModal()">➕ 新增财税项目</button>
-                        <div style="flex: 1;"></div>
-                        <select id="filterTaxStatus" onchange="renderTax()">
-                            <option value="">全部状态</option>
-                            <option value="待收资料">待收资料</option>
-                            <option value="资料审核中">资料审核中</option>
-                            <option value="报税申报中">报税申报中</option>
-                            <option value="税务核查">税务核查</option>
-                            <option value="已完成">已完成</option>
-                        </select>
-                        <input type="text" placeholder="搜索工厂名称/税号..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;" oninput="renderTax(this.value)">
-                    </div>
-                    <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <h3>🧾 工厂财税项目</h3>
-                            <span style="font-size: 12px; color: #aaa;" id="taxCount">共 0 个项目</span>
-                        </div>
-                        <div id="taxTableContainer">
-                            <div class="empty-state"><div class="icon">📭</div><p>暂无财税项目</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="taxLedger" style="display: none;">
-                    <div class="controls">
-                        <label>📅 月份：</label>
-                        <input type="month" id="taxMonth" onchange="renderTaxLedger()">
-                        <button onclick="prevTaxMonth()">◀</button>
-                        <button onclick="nextTaxMonth()">▶</button>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-label">本月项目数</div><div class="stat-value" id="tlCount">0</div></div>
-                        <div class="stat-card"><div class="stat-label">本月服务收入</div><div class="stat-value" id="tlRevenue" style="color: #38a169;">$0</div></div>
-                    </div>
-                    <div class="card">
-                        <h3>📊 月度明细</h3>
-                        <div id="taxLedgerTable"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 职业技能培训 ==================== -->
-            <div class="page-section" id="pageTraining">
-                <div class="sub-tabs">
-                    <button class="active" onclick="switchSubTab(this, 'trList')">📋 培训项目列表</button>
-                    <button onclick="switchSubTab(this, 'trLedger')">📊 月度台账</button>
-                    <button onclick="switchSubTab(this, 'trSchools')">🏫 合作院校</button>
-                    <button onclick="switchSubTab(this, 'trEnterprises')">🏢 合作企业</button>
-                </div>
-                <div id="trList">
-                    <div class="controls">
-                        <button class="btn" style="background: #13c2c2; color: white;" onclick="openTrainingModal()">➕ 新增培训项目</button>
-                        <div style="flex: 1;"></div>
-                        <select id="filterTrStatus" onchange="renderTraining()">
-                            <option value="">全部状态</option>
-                            <option value="企业需求对接">企业需求对接</option>
-                            <option value="院校联合选拔">院校联合选拔</option>
-                            <option value="定制化教学">定制化教学</option>
-                            <option value="技能考核认证">技能考核认证</option>
-                            <option value="上岗就业">上岗就业</option>
-                            <option value="已完成">已完成</option>
-                        </select>
-                        <input type="text" placeholder="搜索企业/院校/学员..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;" oninput="renderTraining(this.value)">
-                    </div>
-                    <div class="stats-grid" id="trSummaryCards">
-                        <div class="stat-card"><div class="stat-label">培训项目数</div><div class="stat-value" id="trTotal">0</div></div>
-                        <div class="stat-card"><div class="stat-label">培训收入</div><div class="stat-value" id="trRevenue" style="color: #38a169;">$0</div></div>
-                        <div class="stat-card"><div class="stat-label">进行中</div><div class="stat-value" id="trActive">0</div></div>
-                        <div class="stat-card"><div class="stat-label">合作院校</div><div class="stat-value" id="trSchools">0</div></div>
-                        <div class="stat-card"><div class="stat-label">合作企业</div><div class="stat-value" id="trEnterprises">0</div></div>
-                    </div>
-                    <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <h3>🎓 培训项目</h3>
-                            <span style="font-size: 12px; color: #aaa;" id="trCount">共 0 个项目</span>
-                        </div>
-                        <div id="trTableContainer">
-                            <div class="empty-state"><div class="icon">📭</div><p>暂无培训项目</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="trLedger" style="display: none;">
-                    <div class="controls">
-                        <label>📅 月份：</label>
-                        <input type="month" id="trMonth" onchange="renderTrLedger()">
-                        <button onclick="prevTrMonth()">◀</button>
-                        <button onclick="nextTrMonth()">▶</button>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-label">本月项目数</div><div class="stat-value" id="trlCount">0</div></div>
-                        <div class="stat-card"><div class="stat-label">本月培训收入</div><div class="stat-value" id="trlRevenue" style="color: #38a169;">$0</div></div>
-                        <div class="stat-card"><div class="stat-label">本月学员数</div><div class="stat-value" id="trlStudents">0</div></div>
-                    </div>
-                    <div class="card">
-                        <h3>📊 月度明细</h3>
-                        <div id="trLedgerTable"></div>
-                    </div>
-                </div>
-                <div id="trSchools" style="display: none;">
-                    <div class="controls">
-                        <button class="btn" style="background: #722ed1; color: white;" onclick="openSchoolModal()">➕ 新增合作院校</button>
-                        <div style="flex: 1;"></div>
-                        <input type="text" placeholder="搜索院校名称..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;" oninput="renderSchools(this.value)">
-                    </div>
-                    <div id="schoolTableContainer">
-                        <div class="empty-state"><div class="icon">📭</div><p>暂无合作院校</p></div>
-                    </div>
-                </div>
-                <div id="trEnterprises" style="display: none;">
-                    <div class="controls">
-                        <button class="btn" style="background: #d48806; color: white;" onclick="openEnterpriseModal()">➕ 新增合作企业</button>
-                        <div style="flex: 1;"></div>
-                        <input type="text" placeholder="搜索企业名称..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;" oninput="renderEnterprises(this.value)">
-                    </div>
-                    <div id="enterpriseTableContainer">
-                        <div class="empty-state"><div class="icon">📭</div><p>暂无合作企业</p></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 法律咨询合规 ==================== -->
-            <div class="page-section" id="pageLegal">
-                <div class="sub-tabs">
-                    <button class="active" onclick="switchSubTab(this, 'legalList')">📋 法律项目列表</button>
-                    <button onclick="switchSubTab(this, 'legalLedger')">📊 月度台账</button>
-                    <button onclick="switchSubTab(this, 'legalClients')">🏢 企业客户</button>
-                    <button onclick="switchSubTab(this, 'legalLawyers')">👨‍⚖️ 律师团队</button>
-                </div>
-                <div id="legalList">
-                    <div class="controls">
-                        <button class="btn" style="background: #722ed1; color: white;" onclick="openLegalModal()">➕ 新增法律项目</button>
-                        <div style="flex: 1;"></div>
-                        <select id="filterLegalStatus" onchange="renderLegal()">
-                            <option value="">全部状态</option>
-                            <option value="0">咨询接洽</option>
-                            <option value="1">方案拟定</option>
-                            <option value="2">尽职调查</option>
-                            <option value="3">文书起草</option>
-                            <option value="4">审批递交</option>
-                            <option value="5">完成归档</option>
-                        </select>
-                        <input type="text" id="filterLegalKeyword" placeholder="搜索企业/案件编号..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px;" oninput="renderLegal()">
-                        <span style="font-size: 12px; color: #aaa;" id="legalCount">共 0 个项目</span>
-                    </div>
-                    <div class="card">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>案件编号</th><th>委托企业</th><th>服务类型</th>
-                                    <th>负责律师</th><th>计费方式</th><th>费用(USD)</th>
-                                    <th>已收(USD)</th><th>状态</th><th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="legalTableBody"></tbody>
-                        </table>
-                        <div class="empty-state" id="legalEmpty" style="display: none;"><div class="icon">⚖️</div><p>暂无法律项目</p></div>
-                    </div>
-                </div>
-                <div id="legalLedger" style="display: none;">
-                    <div class="controls">
-                        <label>📅 月份：</label>
-                        <input type="month" id="legalMonth" onchange="renderLegalLedger()">
-                        <div style="flex: 1;"></div>
-                        <button class="btn" style="background: #722ed1; color: white;" onclick="exportLegalLedger()">📥 导出 CSV</button>
-                    </div>
-                    <div class="stats-grid" id="legalSummary">
-                        <div class="stat-card"><div class="stat-label">项目数</div><div class="stat-value" id="lgProjects">0</div></div>
-                        <div class="stat-card"><div class="stat-label">服务费收入</div><div class="stat-value" id="lgRevenue" style="color: #38a169;">$0</div></div>
-                        <div class="stat-card"><div class="stat-label">已收金额</div><div class="stat-value" id="lgReceived">$0</div></div>
-                        <div class="stat-card"><div class="stat-label">待收金额</div><div class="stat-value" id="lgPending" style="color: #e53e3e;">$0</div></div>
-                    </div>
-                    <div class="card" id="legalLedgerTable"></div>
-                </div>
-                <div id="legalClients" style="display: none;">
-                    <div class="controls">
-                        <button class="btn" style="background: #722ed1; color: white;" onclick="openLegalClientModal()">➕ 新增企业客户</button>
-                        <div style="flex: 1;"></div>
-                        <input type="text" id="filterLegalClient" placeholder="搜索企业名称..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px;" oninput="renderLegalClients()">
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-label">企业客户总数</div><div class="stat-value" id="lgClientCount">0</div></div>
-                        <div class="stat-card"><div class="stat-label">活跃客户</div><div class="stat-value" id="lgClientActive" style="color: #38a169;">0</div></div>
-                    </div>
-                    <div class="card">
-                        <table>
-                            <thead>
-                                <tr><th>企业名称</th><th>联系人</th><th>电话</th><th>服务类型</th><th>累计消费(USD)</th><th>状态</th><th>操作</th></tr>
-                            </thead>
-                            <tbody id="legalClientTable"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div id="legalLawyers" style="display: none;">
-                    <div class="controls">
-                        <button class="btn" style="background: #722ed1; color: white;" onclick="openLawyerModal()">➕ 新增律师</button>
-                        <div style="flex: 1;"></div>
-                        <input type="text" id="filterLawyer" placeholder="搜索律师姓名..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px;" oninput="renderLawyers()">
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-label">律师总数</div><div class="stat-value" id="lgLawyerCount">0</div></div>
-                        <div class="stat-card"><div class="stat-label">中方律师</div><div class="stat-value" id="lgLawyerCN">0</div></div>
-                        <div class="stat-card"><div class="stat-label">柬方律师</div><div class="stat-value" id="lgLawyerKH" style="color: #38a169;">0</div></div>
-                        <div class="stat-card"><div class="stat-label">英方律师</div><div class="stat-value" id="lgLawyerEN">0</div></div>
-                    </div>
-                    <div class="card">
-                        <table>
-                            <thead>
-                                <tr><th>律师姓名</th><th>语言</th><th>专长领域</th><th>资质</th><th>负责案件数</th><th>费率(USD/h)</th><th>状态</th><th>操作</th></tr>
-                            </thead>
-                            <tbody id="lawyerTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 会员管理 ==================== -->
-            <div class="page-section" id="pageMembership">
-                <div class="sub-tabs">
-                    <button class="active" onclick="switchSubTab(this, 'memList')">👥 会员列表</button>
-                    <button onclick="switchSubTab(this, 'memLedger')">📊 月度台账</button>
-                </div>
-                <div id="memList">
-                    <div class="controls">
-                        <button class="btn" style="background: #d48806; color: white;" onclick="openMemberModal()">➕ 新增会员</button>
-                        <div style="flex: 1;"></div>
-                        <input type="text" placeholder="搜索会员名称..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;" oninput="renderMembers(this.value)">
-                    </div>
-                    <div class="stats-grid" id="memberSummaryCards">
-                        <div class="stat-card"><div class="stat-label">会员总数</div><div class="stat-value" id="memTotal">0</div></div>
-                        <div class="stat-card"><div class="stat-label">普通会员</div><div class="stat-value" id="memNormal">0</div></div>
-                        <div class="stat-card"><div class="stat-label">理事会员</div><div class="stat-value" id="memDirector">0</div></div>
-                        <div class="stat-card"><div class="stat-label">战略会员</div><div class="stat-value" id="memStrategic">0</div></div>
-                    </div>
-                    <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <h3>🏅 协会会员列表</h3>
-                            <span style="font-size: 12px; color: #aaa;" id="memCount">共 0 位会员</span>
-                        </div>
-                        <div id="memTableContainer">
-                            <div class="empty-state"><div class="icon">📭</div><p>暂无会员记录</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="memLedger" style="display: none;">
-                    <div class="controls">
-                        <label>📅 月份：</label>
-                        <input type="month" id="memMonth" onchange="renderMemLedger()">
-                        <button onclick="prevMemMonth()">◀</button>
-                        <button onclick="nextMemMonth()">▶</button>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-label">本月新增会员</div><div class="stat-value" id="mlNew">0</div></div>
-                        <div class="stat-card"><div class="stat-label">本月会员费收入</div><div class="stat-value" id="mlRevenue" style="color: #38a169;">$0</div></div>
-                        <div class="stat-card"><div class="stat-label">累计会员数</div><div class="stat-value" id="mlTotal">0</div></div>
-                    </div>
-                    <div class="card">
-                        <h3>📊 月度明细</h3>
-                        <div id="memLedgerTable"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 日常费用支出 ==================== -->
-            <div class="page-section" id="pageExpenses">
-                <div class="sub-tabs">
-                    <button class="active" onclick="switchSubTab(this, 'expList')">📋 支出记录</button>
-                    <button onclick="switchSubTab(this, 'expLedger')">📊 月度台账</button>
-                </div>
-                <div id="expList">
-                    <div class="controls">
-                        <button class="btn btn-danger" onclick="openExpenseModal()">➕ 新增支出</button>
-                        <div style="flex: 1;"></div>
-                        <select id="filterExpCat" onchange="renderExpenses()">
-                            <option value="">全部类别</option>
-                            <option value="rent">房租/水电</option>
-                            <option value="salary">人员工资</option>
-                            <option value="utility">通讯/网络</option>
-                            <option value="travel">差旅费</option>
-                            <option value="marketing">市场推广</option>
-                            <option value="office">办公用品</option>
-                            <option value="other">其他</option>
-                        </select>
-                        <input type="text" placeholder="搜索..." style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 180px;" oninput="renderExpenses(this.value)">
-                    </div>
-                    <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <h3>💸 日常费用支出</h3>
-                            <span style="font-size: 12px; color: #aaa;" id="expCount">共 0 条记录</span>
-                        </div>
-                        <div id="expTableContainer">
-                            <div class="empty-state"><div class="icon">📭</div><p>暂无支出记录</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="expLedger" style="display: none;">
-                    <div class="controls">
-                        <label>📅 月份：</label>
-                        <input type="month" id="expMonth" onchange="renderExpLedger()">
-                        <button onclick="prevExpMonth()">◀</button>
-                        <button onclick="nextExpMonth()">▶</button>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-label">支出笔数</div><div class="stat-value" id="elCount">0</div></div>
-                        <div class="stat-card"><div class="stat-label">支出总额</div><div class="stat-value" id="elTotal" style="color: #e53e3e;">$0</div></div>
-                        <div class="stat-card"><div class="stat-label">最大单笔</div><div class="stat-value" id="elMax">$0</div></div>
-                    </div>
-                    <div class="card">
-                        <h3>📊 月度明细</h3>
-                        <div id="expLedgerTable"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 统一财务报表 ==================== -->
-            <div class="page-section" id="pageFinance">
-                <div class="card">
-                    <h3>📊 全业务营收概览</h3>
-                    <div class="controls">
-                        <label>📅 选择月份：</label>
-                        <input type="month" id="financeMonth" onchange="renderFinance()">
-                    </div>
-                    <div class="stats-grid" id="financeSummary">
-                        <div class="stat-card"><div class="stat-label">物流利润</div><div class="stat-value" id="finLogistics">$0</div><div class="stat-label">货柜运输</div></div>
-                        <div class="stat-card"><div class="stat-label">出海服务收入</div><div class="stat-value" id="finOverseas">$0</div><div class="stat-label">企业落地</div></div>
-                        <div class="stat-card"><div class="stat-label">投融资佣金</div><div class="stat-value" id="finInvest">$0</div><div class="stat-label">资本对接</div></div>
-                        <div class="stat-card"><div class="stat-label">商务/会员收入</div><div class="stat-value" id="finCommerce">$0</div><div class="stat-label">合作·活动</div></div>
-                        <div class="stat-card"><div class="stat-label">🧾 财税服务收入</div><div class="stat-value" id="finTax">$0</div><div class="stat-label">报税·财税</div></div>
-                        <div class="stat-card"><div class="stat-label">🎓 培训服务收入</div><div class="stat-value" id="finTraining">$0</div><div class="stat-label">职业技能</div></div>
-                        <div class="stat-card"><div class="stat-label">⚖️ 法律服务收入</div><div class="stat-value" id="finLegal">$0</div><div class="stat-label">法律咨询</div></div>
-                        <div class="stat-card"><div class="stat-label">政策项目收入</div><div class="stat-value" id="finPolicy">$0</div><div class="stat-label">政府对接</div></div>
-                        <div class="stat-card" style="border-top: 3px solid #e53e3e;"><div class="stat-label">💰 本月总收入</div><div class="stat-value" id="finTotal" style="font-size: 36px; color: #38a169;">$0</div><div class="stat-label">所有板块合计</div></div>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>📈 收入构成</h3>
-                    <div id="financeBreakdown" style="font-size: 13px; color: #666; line-height: 2;">
-                        <p>暂无数据</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 财税计费模板 ==================== -->
-            <div class="page-section" id="pageTaxPricing">
-                <div class="card">
-                    <h3>🧾 财税服务计费模板 <span style="font-size: 12px; color: #999; font-weight: normal;">（自定义服务费阶梯定价）</span></h3>
-                    <div id="taxPricingRules">
-                        <div class="pricing-rule" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
-                            <label style="font-size: 12px;">月营业额 ≤</label>
-                            <input type="number" class="pr-max" value="100000" style="width: 100px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"> USD
-                            <label style="font-size: 12px;">服务类型：</label>
-                            <select class="pr-type" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="小规模纳税人">小规模纳税人</option>
-                                <option value="一般纳税人">一般纳税人</option>
-                                <option value="全套财税代理">全套财税代理</option>
-                                <option value="增值税申报">增值税申报</option>
-                                <option value="企业所得税">企业所得税</option>
-                                <option value="个税代扣代缴">个税代扣代缴</option>
-                                <option value="年度汇算清缴">年度汇算清缴</option>
-                                <option value="税务登记">税务登记</option>
-                                <option value="其他">其他</option>
-                            </select>
-                            <label style="font-size: 12px;">周期：</label>
-                            <select class="pr-period" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="月度">月度</option>
-                                <option value="季度">季度</option>
-                                <option value="年度">年度</option>
-                            </select>
-                            <label style="font-size: 12px;">服务费（USD）：</label>
-                            <input type="number" class="pr-fee" value="99" style="width: 90px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                            <button style="padding: 4px 10px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="removePricingRule(this)">删除</button>
-                        </div>
-                        <div class="pricing-rule" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
-                            <label style="font-size: 12px;">月营业额 ≤</label>
-                            <input type="number" class="pr-max" value="500000" style="width: 100px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"> USD
-                            <label style="font-size: 12px;">服务类型：</label>
-                            <select class="pr-type" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="一般纳税人">一般纳税人</option>
-                                <option value="小规模纳税人">小规模纳税人</option>
-                                <option value="全套财税代理">全套财税代理</option>
-                                <option value="增值税申报">增值税申报</option>
-                                <option value="企业所得税">企业所得税</option>
-                                <option value="个税代扣代缴">个税代扣代缴</option>
-                                <option value="年度汇算清缴">年度汇算清缴</option>
-                                <option value="税务登记">税务登记</option>
-                                <option value="其他">其他</option>
-                            </select>
-                            <label style="font-size: 12px;">周期：</label>
-                            <select class="pr-period" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="月度">月度</option>
-                                <option value="季度">季度</option>
-                                <option value="年度">年度</option>
-                            </select>
-                            <label style="font-size: 12px;">服务费（USD）：</label>
-                            <input type="number" class="pr-fee" value="199" style="width: 90px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                            <button style="padding: 4px 10px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="removePricingRule(this)">删除</button>
-                        </div>
-                        <div class="pricing-rule" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
-                            <label style="font-size: 12px;">月营业额 ≤</label>
-                            <input type="number" class="pr-max" value="2000000" style="width: 100px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"> USD
-                            <label style="font-size: 12px;">服务类型：</label>
-                            <select class="pr-type" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="全套财税代理">全套财税代理</option>
-                                <option value="一般纳税人">一般纳税人</option>
-                                <option value="小规模纳税人">小规模纳税人</option>
-                                <option value="增值税申报">增值税申报</option>
-                                <option value="企业所得税">企业所得税</option>
-                                <option value="个税代扣代缴">个税代扣代缴</option>
-                                <option value="年度汇算清缴">年度汇算清缴</option>
-                                <option value="税务登记">税务登记</option>
-                                <option value="其他">其他</option>
-                            </select>
-                            <label style="font-size: 12px;">周期：</label>
-                            <select class="pr-period" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="月度">月度</option>
-                                <option value="季度">季度</option>
-                                <option value="年度">年度</option>
-                            </select>
-                            <label style="font-size: 12px;">服务费（USD）：</label>
-                            <input type="number" class="pr-fee" value="399" style="width: 90px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                            <button style="padding: 4px 10px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="removePricingRule(this)">删除</button>
-                        </div>
-                        <div class="pricing-rule" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
-                            <label style="font-size: 12px;">月营业额 ></label>
-                            <input type="number" class="pr-max" value="2000000" style="width: 100px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"> USD
-                            <label style="font-size: 12px;">服务类型：</label>
-                            <select class="pr-type" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="VIP 定制财税">VIP 定制财税</option>
-                                <option value="全套财税代理">全套财税代理</option>
-                                <option value="一般纳税人">一般纳税人</option>
-                                <option value="增值税申报">增值税申报</option>
-                                <option value="企业所得税">企业所得税</option>
-                                <option value="个税代扣代缴">个税代扣代缴</option>
-                                <option value="年度汇算清缴">年度汇算清缴</option>
-                                <option value="税务登记">税务登记</option>
-                                <option value="其他">其他</option>
-                            </select>
-                            <label style="font-size: 12px;">周期：</label>
-                            <select class="pr-period" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="月度">月度</option>
-                                <option value="季度">季度</option>
-                                <option value="年度">年度</option>
-                            </select>
-                            <label style="font-size: 12px;">服务费（USD）：</label>
-                            <input type="number" class="pr-fee" value="899" style="width: 90px; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                            <button style="padding: 4px 10px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="removePricingRule(this)">删除</button>
-                        </div>
-                    </div>
-                    <div style="margin: 12px 0;">
-                        <button class="btn btn-success" onclick="addPricingRule()" style="padding: 6px 16px; border: none; border-radius: 6px; cursor: pointer;">➕ 添加定价规则</button>
-                        <button class="btn btn-success" onclick="applyTaxPricing()" style="padding: 6px 16px; border: none; border-radius: 6px; cursor: pointer; margin-left: 8px;">💾 保存全部定价规则</button>
-                    </div>
-                    <div class="controls" style="margin-top: 12px;">
-                        <label>默认单次财税服务费（USD）：</label>
-                        <input type="number" id="cfgTaxDefaultFee" value="180" min="0" step="10">
-                        <label>记账类返点比例（%）：</label>
-                        <input type="number" id="cfgTaxRebatePct" value="20" min="0" max="50" step="1">
-                        <label>风险预警阈值（天）：</label>
-                        <input type="number" id="cfgTaxWarnDays" value="3" min="1" max="30" step="1">
-                        <label>逾期红线（天）：</label>
-                        <input type="number" id="cfgTaxDangerDays" value="7" min="1" max="30" step="1">
-                        <button class="btn btn-success" onclick="applyTaxRiskConfig()">保存预警设置</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 财税联盟参考价 ==================== -->
-            <div class="page-section" id="pageTaxAlliance">
-                <div class="card">
-                    <h3>📑 财税联盟合作参考价 <span style="font-size: 12px; color: #999; font-weight: normal;">（Local & CDC 公司服务代理价）</span></h3>
-                    <div style="overflow-x: auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>类型</th><th>服务</th><th>小型(Small)</th>
-                                    <th>中型(Medium)</th><th>大型(Large)</th>
-                                    <th>办理时间</th><th>返点</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td rowspan="6" style="font-weight: bold; color: #1a365d;">Local Company Service</td>
-                                    <td style="text-align: left; padding-left: 8px;">公司注册</td>
-                                    <td>$450</td><td>$1,300</td><td>$1,600</td>
-                                    <td>30天</td><td>—</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; padding-left: 8px;">工厂注册</td>
-                                    <td>—</td><td>$1,400</td><td>$1,700</td>
-                                    <td>30天</td><td>—</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; padding-left: 8px;">公司停业</td>
-                                    <td>$400</td><td>$600</td><td>$800</td>
-                                    <td>30天</td><td>—</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; padding-left: 8px;">公司注销</td>
-                                    <td>$900</td><td>$1,500</td><td>$2,000</td>
-                                    <td>8-10个月</td><td>—</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; padding-left: 8px;">记账+税务申报+QB（基础）</td>
-                                    <td>$100</td><td>$150</td><td>$200</td>
-                                    <td>每月</td><td style="color: #d48806;">20%</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; padding-left: 8px;">记账+税务申报+QB（有营业额）</td>
-                                    <td>$101~150</td><td>$200~300</td><td>$250~400</td>
-                                    <td>每月</td><td style="color: #d48806;">20%</td>
-                                </tr>
-                                <tr>
-                                    <td rowspan="4" style="font-weight: bold; color: #1a365d;">CDC Company Service</td>
-                                    <td style="text-align: left; padding-left: 8px;">CDC 公司注册</td>
-                                    <td colspan="3">$26,000 ~ $30,000</td>
-                                    <td>3-4个月</td><td>—</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; padding-left: 8px;">记账+税务申报+QB（基础）</td>
-                                    <td colspan="3">$300</td>
-                                    <td>每月</td><td style="color: #d48806;">20%</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; padding-left: 8px;">记账+税务申报+QB（有营业额）</td>
-                                    <td colspan="3">$300 ~ $600</td>
-                                    <td>每月</td><td style="color: #d48806;">20%</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; padding-left: 8px;">出工业部生产报表</td>
-                                    <td colspan="3">$200</td>
-                                    <td>每月</td><td style="color: #d48806;">20%</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p style="font-size: 11px; color: #aaa; margin-top: 8px;">💡 非记账类服务为代理价，MNA 可在此基础上加价销售给会员；记账类服务实收金额返点 20%</p>
-                </div>
-            </div>
-
-            <!-- ==================== 法律计费参数 ==================== -->
-            <div class="page-section" id="pageLegalPricing">
-                <div class="card">
-                    <h3>⚖️ 法律咨询合规计费参数</h3>
-                    <div class="controls">
-                        <label>按小时费率（USD/h）：</label>
-                        <input type="number" id="legalHourlyRate" value="150" min="0" step="10">
-                        <label>固定费用（USD）：</label>
-                        <input type="number" id="legalFixedFee" value="500" min="0" step="50">
-                        <label>按标的额比例（%）：</label>
-                        <input type="number" id="legalPercentRate" value="3" min="0" max="20" step="0.5">
-                        <button class="btn btn-success" onclick="applyLegalConfig()">保存</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 法律风险预警 ==================== -->
-            <div class="page-section" id="pageLegalRisk">
-                <div class="card">
-                    <h3>⚖️ 法律合规风险预警阈值</h3>
-                    <div class="controls">
-                        <label>审批递交通道预警阈值（天）：</label>
-                        <input type="number" id="legalUrgencyThreshold" value="3" min="1" max="30" step="1">
-                        <label>逾期红线（天）：</label>
-                        <input type="number" id="legalOverdueThreshold" value="7" min="1" max="30" step="1">
-                        <button class="btn btn-success" onclick="applyLegalConfig()">保存</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 参数设置 ==================== -->
-            <div class="page-section" id="pageConfig">
-                <div class="card">
-                    <h3>⚙️ 物流计费参数</h3>
-                    <div class="controls">
-                        <label>每货柜利润（USD）：</label>
-                        <input type="number" id="cfgProfit" value="180" min="0" step="10">
-                        <label>返点比例（%）：</label>
-                        <input type="number" id="cfgRebate" value="3" min="0" max="100" step="0.5">
-                        <button class="btn btn-success" onclick="applyConfig()">应用参数</button>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>📌 返点说明</h3>
-                    <ul style="font-size: 13px; color: #666; line-height: 2; padding-left: 20px;">
-                        <li>每笔订单利润 = 货柜数量 × 每货柜利润（默认 $180）</li>
-                        <li>返点金额 = 利润 × 返点比例（默认 3%）</li>
-                        <li>净收益 = 利润 - 返点</li>
-                        <li>修改参数后，历史数据会自动按新参数重新计算</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>⚙️ 出海服务收费模板</h3>
-                    <div class="controls">
-                        <label>公司注册（USD）：</label>
-                        <input type="number" id="cfgOverseasReg" value="2000" min="0" step="100">
-                        <label>财税代理/月（USD）：</label>
-                        <input type="number" id="cfgOverseasFiscal" value="300" min="0" step="50">
-                        <button class="btn btn-success" onclick="applyOverseasConfig()">保存</button>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>⚙️ 投融资佣金比例</h3>
-                    <div class="controls">
-                        <label>成功佣金（%）：</label>
-                        <input type="number" id="cfgInvCommission" value="3" min="0" max="20" step="0.5">
-                        <button class="btn btn-success" onclick="applyInvConfig()">保存</button>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>⚙️ 会员入会费</h3>
-                    <div class="controls">
-                        <label>普通会员入会费（USD）：</label>
-                        <input type="number" id="cfgMemFee" value="999" min="0" step="50">
-                        <label>理事会员入会费（USD）：</label>
-                        <input type="number" id="cfgMemDirector" value="2999" min="0" step="100">
-                        <label>战略会员入会费（USD）：</label>
-                        <input type="number" id="cfgMemStrategic" value="9999" min="0" step="100">
-                        <button class="btn btn-success" onclick="applyMemConfig()">保存</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 用户管理 ==================== -->
-            <div class="page-section" id="pageUsers">
-                <div class="card">
-                    <h3>👥 用户账户管理</h3>
-                    <div id="userList" style="margin-bottom: 16px;"></div>
-                    <button class="btn btn-success" onclick="showAddUserModal()">➕ 添加用户</button>
-                </div>
-            </div>
-
-            <!-- ==================== 修改密码 ==================== -->
-            <div class="page-section" id="pagePwd">
-                <div class="card" style="max-width: 400px; margin: 0 auto;">
-                    <h3>🔑 修改密码</h3>
-                    <div class="form-group">
-                        <label>当前密码</label>
-                        <input type="password" id="oldPwd" placeholder="请输入当前密码">
-                    </div>
-                    <div class="form-group">
-                        <label>新密码</label>
-                        <input type="password" id="newPwd" placeholder="请输入新密码（至少6位）">
-                    </div>
-                    <div class="form-group">
-                        <label>确认新密码</label>
-                        <input type="password" id="newPwd2" placeholder="请再次输入新密码">
-                    </div>
-                    <button class="btn btn-success" style="width: 100%; padding: 10px;" onclick="doChangePassword()">确认修改</button>
-                    <div id="changePwdError" style="margin-top: 10px; font-size: 13px; color: #e53e3e;"></div>
-                </div>
-            </div>
-
-        </div><!-- /content-area -->
-
-        <div style="text-align: center; padding: 20px; color: #bbb; font-size: 12px;">
-            © 2025 Mekong Nexus Association (MNA) · 湄公产业资本联盟业务管理平台 · 当前用户：<span id="footerUser"></span>
-        </div>
-    </div><!-- /appContainer -->
-
-    <!-- ==================== 弹窗：物流订单 ==================== -->
-    <div class="modal-overlay" id="orderModal">
-        <div class="modal">
-            <h3 id="orderModalTitle">➕ 新建物流订单</h3>
-            <div class="form-row">
-                <div class="form-group"><label>客户名称 *</label><input type="text" id="fCustomer" placeholder="请输入客户名称"></div>
-                <div class="form-group"><label>订单日期 *</label><input type="date" id="fOrderDate"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>货柜编号 *</label><input type="text" id="fContainerNo" placeholder="如：MSKU1234567"></div>
-                <div class="form-group"><label>货柜类型</label>
-                    <select id="fType">
-                        <option value="20GP">20GP</option>
-                        <option value="40GP">40GP</option>
-                        <option value="40HQ" selected>40HQ</option>
-                        <option value="45HQ">45HQ</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>货柜数量 *</label><input type="number" id="fQty" min="1" value="1"></div>
-                <div class="form-group"><label>每柜利润(USD)</label><input type="number" id="fProfitPer" min="0" step="10" placeholder="留空用默认"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>起运港</label><input type="text" id="fFromPort" placeholder="如：深圳蛇口"></div>
-                <div class="form-group"><label>目的港/目的地</label><input type="text" id="fToPort" placeholder="如：柬埔寨西哈努克港"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>工厂地址</label><input type="text" id="fFactoryAddr" placeholder="如：金边市XX工业区"></div>
-                <div class="form-group"><label>船名/航次</label><input type="text" id="fVessel" placeholder="如：COSCO SHIPPING XX"></div>
-            </div>
-            <div class="form-group"><label>备注</label><textarea id="fRemark" placeholder="其他备注信息" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <h4 style="font-size: 14px; color: #1a365d; margin: 16px 0 8px; border-top: 1px solid #eee; padding-top: 12px;">📍 物流节点时间</h4>
-            <div class="form-row">
-                <div class="form-group"><label>🚢 发柜日期</label><input type="date" id="fShipDate"></div>
-                <div class="form-group"><label>⚓ 到港日期</label><input type="date" id="fArrivePort"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>📋 清关开始</label><input type="date" id="fClearanceStart"></div>
-                <div class="form-group"><label>✅ 清关完成</label><input type="date" id="fClearanceDone"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>🏭 到工厂</label><input type="date" id="fArriveFactory"></div>
-                <div class="form-group"><label>🔚 结单日期</label><input type="date" id="fCloseDate"></div>
-            </div>
-            <h4 style="font-size: 14px; color: #1a365d; margin: 16px 0 8px; border-top: 1px solid #eee; padding-top: 12px;">💰 费用明细</h4>
-            <div class="form-row">
-                <div class="form-group"><label>运费(USD)</label><input type="number" id="fFreightFee" min="0" step="0.01" placeholder="0.00"></div>
-                <div class="form-group"><label>清关费(USD)</label><input type="number" id="fClearanceFee" min="0" step="0.01" placeholder="0.00"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>拖车费(USD)</label><input type="number" id="fTruckFee" min="0" step="0.01" placeholder="0.00"></div>
-                <div class="form-group"><label>其他费用(USD)</label><input type="number" id="fOtherFee" min="0" step="0.01" placeholder="0.00"></div>
-            </div>
-            <div class="form-group"><label>返点比例(%) — 留空用默认值</label><input type="number" id="fRebatePct" min="0" max="100" step="0.5" placeholder="默认3%"></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeOrderModal()">取消</button>
-                <button class="btn-submit" onclick="submitOrder()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：订单详情 ==================== -->
-    <div class="modal-overlay" id="detailModal">
-        <div class="modal" style="width: 720px;">
-            <h3 id="detailModalTitle">📦 订单详情</h3>
-            <div id="detailContent"></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeDetailModal()">关闭</button>
-                <button class="btn-submit" id="detailEditBtn" onclick="editFromDetail()">编辑此订单</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：出海项目 ==================== -->
-    <div class="modal-overlay" id="overseasModal">
-        <div class="modal">
-            <h3 id="overseasModalTitle">➕ 新建出海项目</h3>
-            <div class="form-row">
-                <div class="form-group"><label>客户名称 *</label><input type="text" id="foCustomer" placeholder="企业名称"></div>
-                <div class="form-group"><label>项目日期 *</label><input type="date" id="foDate"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>服务类型</label>
-                    <select id="foServiceType">
-                        <option value="公司注册">公司注册</option>
-                        <option value="财税代理">财税代理</option>
-                        <option value="人力招聘">人力招聘</option>
-                        <option value="全套落地">全套落地服务</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>目的地</label><input type="text" id="foDestination" placeholder="如：柬埔寨金边"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>合同金额(USD)</label><input type="number" id="foAmount" min="0" step="100" placeholder="0"></div>
-                <div class="form-group"><label>已收金额(USD)</label><input type="number" id="foReceived" min="0" step="100" placeholder="0"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>当前阶段</label>
-                    <select id="foStage">
-                        <option value="需求沟通">需求沟通</option>
-                        <option value="公司注册">公司注册</option>
-                        <option value="银行开户">银行开户</option>
-                        <option value="税号申请">税号申请</option>
-                        <option value="财税代理">财税代理</option>
-                        <option value="人力招聘">人力招聘</option>
-                        <option value="正式运营">正式运营</option>
-                        <option value="已完成">已完成</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>完成进度(%)</label><input type="number" id="foProgress" min="0" max="100" value="0" step="5"></div>
-            </div>
-            <div class="form-group"><label>备注</label><textarea id="foRemark" placeholder="项目备注" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeOverseasModal()">取消</button>
-                <button class="btn-submit" onclick="submitOverseas()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：投融资项目 ==================== -->
-    <div class="modal-overlay" id="investModal">
-        <div class="modal">
-            <h3 id="investModalTitle">➕ 新建投融资项目</h3>
-            <div class="form-row">
-                <div class="form-group"><label>项目名称 *</label><input type="text" id="fiName" placeholder="项目名称"></div>
-                <div class="form-group"><label>项目日期 *</label><input type="date" id="fiDate"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>项目方</label><input type="text" id="fiProjectCo" placeholder="融资方企业名称"></div>
-                <div class="form-group"><label>投资方</label><input type="text" id="fiInvestor" placeholder="投资方/机构名称"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>涉及金额(USD)</label><input type="number" id="fiAmount" min="0" step="1000" placeholder="0"></div>
-                <div class="form-group"><label>佣金比例(%)</label><input type="number" id="fiCommPct" min="0" max="20" step="0.5" placeholder="默认3%"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>项目状态</label>
-                    <select id="fiStatus">
-                        <option value="项目入库">项目入库</option>
-                        <option value="初步评估">初步评估</option>
-                        <option value="尽职调查">尽职调查</option>
-                        <option value="路演对接">路演对接</option>
-                        <option value="投融谈判">投融谈判</option>
-                        <option value="资金到位">资金到位</option>
-                        <option value="投后管理">投后管理</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>成功佣金(USD)</label><input type="number" id="fiCommission" min="0" step="100" placeholder="自动计算" readonly style="background: #f5f5f5;"></div>
-            </div>
-            <div class="form-group"><label>备注</label><textarea id="fiRemark" placeholder="项目备注" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeInvestModal()">取消</button>
-                <button class="btn-submit" onclick="submitInvest()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：商务合作 ==================== -->
-    <div class="modal-overlay" id="commerceModal">
-        <div class="modal">
-            <h3 id="commerceModalTitle">➕ 新建商务项目</h3>
-            <div class="form-row">
-                <div class="form-group"><label>会员/活动名称 *</label><input type="text" id="fcName" placeholder="企业名称或活动名称"></div>
-                <div class="form-group"><label>日期 *</label><input type="date" id="fcDate"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>类型</label>
-                    <select id="fcType">
-                        <option value="普通会员">普通会员</option>
-                        <option value="理事会员">理事会员</option>
-                        <option value="战略会员">战略会员</option>
-                        <option value="活动收费">活动收费</option>
-                        <option value="赞助">赞助</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>会员等级</label>
-                    <select id="fcLevel">
-                        <option value="普通">普通</option>
-                        <option value="VIP">VIP</option>
-                        <option value="理事">理事</option>
-                        <option value="战略">战略</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>收入金额(USD)</label><input type="number" id="fcAmount" min="0" step="50" placeholder="0"></div>
-                <div class="form-group"><label>已收金额(USD)</label><input type="number" id="fcReceived" min="0" step="50" placeholder="0"></div>
-            </div>
-            <div class="form-group"><label>备注</label><textarea id="fcRemark" placeholder="备注信息" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeCommerceModal()">取消</button>
-                <button class="btn-submit" onclick="submitCommerce()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：政策项目 ==================== -->
-    <div class="modal-overlay" id="policyModal">
-        <div class="modal">
-            <h3 id="policyModalTitle">➕ 新建政策项目</h3>
-            <div class="form-row">
-                <div class="form-group"><label>项目名称 *</label><input type="text" id="fpName" placeholder="项目名称"></div>
-                <div class="form-group"><label>日期 *</label><input type="date" id="fpDate"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>对接部门</label><input type="text" id="fpDept" placeholder="如：柬埔寨商业部"></div>
-                <div class="form-group"><label>项目类型</label>
-                    <select id="fpType">
-                        <option value="政策解读">政策解读</option>
-                        <option value="政府对接">政府对接</option>
-                        <option value="资质申请">资质申请</option>
-                        <option value="补贴申请">补贴申请</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>服务收入(USD)</label><input type="number" id="fpAmount" min="0" step="100" placeholder="0"></div>
-                <div class="form-group"><label>状态</label>
-                    <select id="fpStatus">
-                        <option value="需求登记">需求登记</option>
-                        <option value="政策研究">政策研究</option>
-                        <option value="报告交付">报告交付</option>
-                        <option value="政府沟通">政府沟通</option>
-                        <option value="结果反馈">结果反馈</option>
-                        <option value="已完成">已完成</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group"><label>备注</label><textarea id="fpRemark" placeholder="备注信息" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closePolicyModal()">取消</button>
-                <button class="btn-submit" onclick="submitPolicy()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：财税项目 ==================== -->
-    <div class="modal-overlay" id="taxModal">
-        <div class="modal">
-            <h3 id="taxModalTitle">➕ 新增财税项目</h3>
-            <div class="form-row">
-                <div class="form-group"><label>工厂名称 *</label><input type="text" id="ftName" placeholder="工厂/企业名称"></div>
-                <div class="form-group"><label>税号</label><input type="text" id="ftTaxNo" placeholder="税务登记号"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>服务日期 *</label><input type="date" id="ftDate"></div>
-                <div class="form-group"><label>服务类型</label>
-                    <select id="ftServiceType">
-                        <optgroup label="── Local Company Service ──">
-                            <option value="公司注册(小型)">公司注册（小型 $450）</option>
-                            <option value="公司注册(中型)">公司注册（中型 $1,300）</option>
-                            <option value="公司注册(大型)">公司注册（大型 $1,600）</option>
-                            <option value="工厂注册(中型)">工厂注册（中型 $1,400）</option>
-                            <option value="工厂注册(大型)">工厂注册（大型 $1,700）</option>
-                            <option value="公司停业(小型)">公司停业（小型 $400）</option>
-                            <option value="公司停业(中型)">公司停业（中型 $600）</option>
-                            <option value="公司停业(大型)">公司停业（大型 $800）</option>
-                            <option value="公司注销(小型)">公司注销（小型 $900）</option>
-                            <option value="公司注销(中型)">公司注销（中型 $1,500）</option>
-                            <option value="公司注销(大型)">公司注销（大型 $2,000）</option>
-                            <option value="记账+税务申报+QB(基础/小型)">记账+税务申报+QB（基础/小型 $100）</option>
-                            <option value="记账+税务申报+QB(基础/中型)">记账+税务申报+QB（基础/中型 $150）</option>
-                            <option value="记账+税务申报+QB(基础/大型)">记账+税务申报+QB（基础/大型 $200）</option>
-                            <option value="记账+税务申报+QB(有营业额/小型)">记账+税务申报+QB（有营业额/小型 $101~150）</option>
-                            <option value="记账+税务申报+QB(有营业额/中型)">记账+税务申报+QB（有营业额/中型 $200~300）</option>
-                            <option value="记账+税务申报+QB(有营业额/大型)">记账+税务申报+QB（有营业额/大型 $250~400）</option>
-                        </optgroup>
-                        <optgroup label="── CDC Company Service ──">
-                            <option value="CDC公司注册">CDC公司注册（$26K~30K）</option>
-                            <option value="CDC记账+税务申报+QB(基础)">CDC记账+税务申报+QB（基础 $300）</option>
-                            <option value="CDC记账+税务申报+QB(有营业额)">CDC记账+税务申报+QB（有营业额 $300~600）</option>
-                            <option value="CDC出工业部生产报表">CDC出工业部生产报表（$200）</option>
-                        </optgroup>
-                        <optgroup label="── 其他财税服务 ──">
-                            <option value="增值税申报">增值税申报</option>
-                            <option value="企业所得税">企业所得税</option>
-                            <option value="个税代扣代缴">个税代扣代缴</option>
-                            <option value="年度汇算清缴">年度汇算清缴</option>
-                            <option value="税务登记">税务登记</option>
-                            <option value="全套财税代理">全套财税代理</option>
-                            <option value="其他">其他</option>
-                        </optgroup>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>财税周期</label>
-                    <select id="ftPeriod">
-                        <option value="月度">月度</option>
-                        <option value="季度">季度</option>
-                        <option value="年度">年度</option>
-                        <option value="一次性">一次性（30天）</option>
-                        <option value="8-10个月">8-10个月（注销）</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>工厂月营业额(USD)</label><input type="number" id="ftTurnover" min="0" step="1000" placeholder="输入金额自动匹配服务费" oninput="autoFillTaxFee()"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>手动设置服务费(USD)</label><input type="number" id="ftAmount" min="0" step="50" placeholder="0"></div>
-                <div class="form-group"><label>已收金额(USD)</label><input type="number" id="ftReceived" min="0" step="50" placeholder="0"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>当前状态</label>
-                    <select id="ftStatus">
-                        <option value="待收资料">待收资料</option>
-                        <option value="资料审核中">资料审核中</option>
-                        <option value="财税申报中">财税申报中</option>
-                        <option value="财税核查">财税核查</option>
-                        <option value="已完成">已完成</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group"><label>备注</label><textarea id="ftRemark" placeholder="备注信息" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeTaxModal()">取消</button>
-                <button class="btn-submit" onclick="submitTax()">确认提交</button>
-                <button class="btn" style="background: #13c2c2; color: white;" onclick="genTaxShareLink()">🔗 生成客户共享链接</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：会员管理 ==================== -->
-    <div class="modal-overlay" id="memberModal">
-        <div class="modal">
-            <h3 id="memberModalTitle">➕ 新增会员</h3>
-            <div class="form-row">
-                <div class="form-group"><label>会员名称 *</label><input type="text" id="fmName" placeholder="企业或个人名称"></div>
-                <div class="form-group"><label>入会日期 *</label><input type="date" id="fmDate"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>会员类型</label>
-                    <select id="fmType">
-                        <option value="普通会员">普通会员（入会费 $999）</option>
-                        <option value="理事会员">理事会员</option>
-                        <option value="战略会员">战略会员</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>会员等级</label>
-                    <select id="fmLevel">
-                        <option value="普通">普通</option>
-                        <option value="VIP">VIP</option>
-                        <option value="理事">理事</option>
-                        <option value="战略">战略</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>入会费(USD)</label><input type="number" id="fmFee" min="0" step="50" placeholder="默认999"></div>
-                <div class="form-group"><label>已收金额(USD)</label><input type="number" id="fmReceived" min="0" step="50" placeholder="0"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>到期日期</label><input type="date" id="fmExpire"></div>
-                <div class="form-group"><label>状态</label>
-                    <select id="fmStatus">
-                        <option value="正常">正常</option>
-                        <option value="即将到期">即将到期</option>
-                        <option value="已过期">已过期</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group"><label>备注</label><textarea id="fmRemark" placeholder="会员备注信息" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeMemberModal()">取消</button>
-                <button class="btn-submit" onclick="submitMember()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：日常费用支出 ==================== -->
-    <div class="modal-overlay" id="expenseModal">
-        <div class="modal">
-            <h3 id="expenseModalTitle">➕ 新增支出</h3>
-            <div class="form-row">
-                <div class="form-group"><label>支出日期 *</label><input type="date" id="feDate"></div>
-                <div class="form-group"><label>费用类别</label>
-                    <select id="feCat">
-                        <option value="rent">房租/水电</option>
-                        <option value="salary">人员工资</option>
-                        <option value="utility">通讯/网络</option>
-                        <option value="travel">差旅费</option>
-                        <option value="marketing">市场推广</option>
-                        <option value="office">办公用品</option>
-                        <option value="other">其他</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>支出项目 *</label><input type="text" id="feDesc" placeholder="如：办公室月租"></div>
-                <div class="form-group"><label>金额(USD) *</label><input type="number" id="feAmount" min="0" step="0.01" placeholder="0.00"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>支付方式</label>
-                    <select id="feMethod">
-                        <option value="现金">现金</option>
-                        <option value="银行转账">银行转账</option>
-                        <option value="信用卡">信用卡</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>经办人</label><input type="text" id="fePerson" placeholder="经办人姓名"></div>
-            </div>
-            <div class="form-group"><label>备注</label><textarea id="feRemark" placeholder="备注信息" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeExpenseModal()">取消</button>
-                <button class="btn-submit" onclick="submitExpense()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：培训项目 ==================== -->
-    <div class="modal-overlay" id="trainingModal">
-        <div class="modal">
-            <h3 id="trainingModalTitle">➕ 新增培训项目</h3>
-            <div class="form-row">
-                <div class="form-group"><label>企业名称 *</label><input type="text" id="trEntName" placeholder="用工企业名称"></div>
-                <div class="form-group"><label>院校名称 *</label><input type="text" id="trSchoolName" placeholder="合作院校名称"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>项目名称 *</label><input type="text" id="trProjName" placeholder="如：高级电工定制培训班"></div>
-                <div class="form-group"><label>培训类别</label>
-                    <select id="trCategory">
-                        <option value="职业资格">职业资格</option>
-                        <option value="语言培训">语言培训</option>
-                        <option value="安全规范">安全规范</option>
-                        <option value="管理技能">管理技能</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>学员人数 *</label><input type="number" id="trStudents" min="1" value="1"></div>
-                <div class="form-group"><label>培训天数</label><input type="number" id="trDays" min="1" value="30"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>培训费用/人(USD) *</label><input type="number" id="trFee" min="0" step="50" placeholder="0"></div>
-                <div class="form-group"><label>已收金额(USD)</label><input type="number" id="trReceived" min="0" step="50" placeholder="0"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>合作模式</label>
-                    <select id="trMode">
-                        <option value="企业付费">企业付费</option>
-                        <option value="院校分成">院校分成</option>
-                        <option value="就业佣金">就业佣金</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>当前状态</label>
-                    <select id="trStatus">
-                        <option value="企业需求对接">企业需求对接</option>
-                        <option value="院校联合选拔">院校联合选拔</option>
-                        <option value="定制化教学">定制化教学</option>
-                        <option value="技能考核认证">技能考核认证</option>
-                        <option value="上岗就业">上岗就业</option>
-                        <option value="已完成">已完成</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>开班日期</label><input type="date" id="trStartDate"></div>
-                <div class="form-group"><label>预计结业日期</label><input type="date" id="trEndDate"></div>
-            </div>
-            <div class="form-group"><label>备注</label><textarea id="trRemark" placeholder="备注信息" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeTrainingModal()">取消</button>
-                <button class="btn-submit" onclick="submitTraining()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：合作院校 ==================== -->
-    <div class="modal-overlay" id="schoolModal">
-        <div class="modal" style="width: 560px;">
-            <h3 id="schoolModalTitle">➕ 新增合作院校</h3>
-            <div class="form-row">
-                <div class="form-group"><label>院校名称 *</label><input type="text" id="schName" placeholder="院校全称"></div>
-                <div class="form-group"><label>合作类型</label>
-                    <select id="schType">
-                        <option value="实习基地">实习基地</option>
-                        <option value="定向委培">定向委培</option>
-                        <option value="产学研合作">产学研合作</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>优势专业</label><input type="text" id="schMajor" placeholder="如：机械、焊接、中文"></div>
-                <div class="form-group"><label>联系人</label><input type="text" id="schContact" placeholder="院校负责人姓名"></div>
-            </div>
-            <div class="form-group"><label>联系电话</label><input type="text" id="schPhone" placeholder="联系电话"></div>
-            <div class="form-group"><label>备注</label><textarea id="schRemark" placeholder="院校备注信息" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeSchoolModal()">取消</button>
-                <button class="btn-submit" onclick="submitSchool()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：合作企业 ==================== -->
-    <div class="modal-overlay" id="enterpriseModal">
-        <div class="modal" style="width: 560px;">
-            <h3 id="enterpriseModalTitle">➕ 新增合作企业</h3>
-            <div class="form-row">
-                <div class="form-group"><label>企业名称 *</label><input type="text" id="entName" placeholder="企业全称"></div>
-                <div class="form-group"><label>用工岗位</label><input type="text" id="entPosition" placeholder="如：电工、焊工、普工"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>需求人数</label><input type="number" id="entHeadcount" min="1" value="1"></div>
-                <div class="form-group"><label>薪资范围(USD)</label><input type="text" id="entSalary" placeholder="如：300-500/月"></div>
-            </div>
-            <div class="form-group"><label>技能要求</label><input type="text" id="entSkill" placeholder="岗位技能要求"></div>
-            <div class="form-group"><label>联系人</label><input type="text" id="entContact" placeholder="企业联系人"></div>
-            <div class="form-group"><label>备注</label><textarea id="entRemark" placeholder="企业备注信息" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeEnterpriseModal()">取消</button>
-                <button class="btn-submit" onclick="submitEnterprise()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：法律项目 ==================== -->
-    <div class="modal-overlay" id="legalModal">
-        <div class="modal" style="width: 620px;">
-            <h3 id="legalModalTitle">➕ 新增法律项目</h3>
-            <div class="form-row">
-                <div class="form-group"><label>委托企业 *</label><input type="text" id="lgEntName" placeholder="企业全称"></div>
-                <div class="form-group"><label>服务类型 *</label>
-                    <select id="lgServiceType">
-                        <option value="企业设立与架构设计">企业设立与架构设计</option>
-                        <option value="投资项目法律服务">投资项目法律服务</option>
-                        <option value="商业合同管理">商业合同管理</option>
-                        <option value="政府审批与合规">政府审批与合规</option>
-                        <option value="劳动与人力资源法务">劳动与人力资源法务</option>
-                        <option value="争议解决与维权">争议解决与维权</option>
-                        <option value="特殊专项服务">特殊专项服务</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>负责律师</label>
-                    <select id="lgLawyer">
-                        <option value="">请选择律师</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>计费方式</label>
-                    <select id="lgBilling">
-                        <option value="按小时">按小时</option>
-                        <option value="固定费用">固定费用</option>
-                        <option value="按标的额比例">按标的额比例</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>服务费用(USD) *</label><input type="number" id="lgFee" min="0" step="0.01" placeholder="0.00"></div>
-                <div class="form-group"><label>已收金额(USD)</label><input type="number" id="lgReceived" min="0" step="0.01" placeholder="0.00" value="0"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>紧急程度</label>
-                    <select id="lgUrgency">
-                        <option value="普通">🟢 普通</option>
-                        <option value="重要">🟡 重要</option>
-                        <option value="紧急">🔴 紧急</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>当前状态</label>
-                    <select id="lgStatus">
-                        <option value="咨询接洽">咨询接洽</option>
-                        <option value="方案拟定">方案拟定</option>
-                        <option value="尽职调查">尽职调查</option>
-                        <option value="文书起草">文书起草</option>
-                        <option value="审批递交">审批递交</option>
-                        <option value="完成归档">完成归档</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group"><label>案件描述/备注</label><textarea id="lgDesc" placeholder="案件背景、争议焦点等" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeLegalModal()">取消</button>
-                <button class="btn-submit" onclick="submitLegal()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：法律项目详情 ==================== -->
-    <div class="modal-overlay" id="legalDetailModal">
-        <div class="modal" style="width: 640px;">
-            <h3>⚖️ 法律项目详情</h3>
-            <div id="legalDetailContent"></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeLegalDetailModal()">关闭</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：企业客户 ==================== -->
-    <div class="modal-overlay" id="legalClientModal">
-        <div class="modal" style="width: 560px;">
-            <h3 id="legalClientModalTitle">➕ 新增企业客户</h3>
-            <div class="form-row">
-                <div class="form-group"><label>企业名称 *</label><input type="text" id="lcName" placeholder="企业全称"></div>
-                <div class="form-group"><label>联系人</label><input type="text" id="lcContact" placeholder="联系人姓名"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>电话</label><input type="text" id="lcPhone" placeholder="联系电话"></div>
-                <div class="form-group"><label>服务类型</label>
-                    <select id="lcService">
-                        <option value="常年法律顾问">常年法律顾问</option>
-                        <option value="专项法律服务">专项法律服务</option>
-                        <option value="合同审核">合同审核</option>
-                        <option value="合规咨询">合规咨询</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group"><label>备注</label><textarea id="lcRemark" placeholder="客户备注信息" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeLegalClientModal()">取消</button>
-                <button class="btn-submit" onclick="submitLegalClient()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：律师信息 ==================== -->
-    <div class="modal-overlay" id="lawyerModal">
-        <div class="modal" style="width: 560px;">
-            <h3 id="lawyerModalTitle">➕ 新增律师</h3>
-            <div class="form-row">
-                <div class="form-group"><label>律师姓名 *</label><input type="text" id="lwName" placeholder="律师姓名"></div>
-                <div class="form-group"><label>语言</label>
-                    <select id="lwLang">
-                        <option value="中文">中文</option>
-                        <option value="柬文">柬文</option>
-                        <option value="英文">英文</option>
-                        <option value="中英柬">中英柬三语</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>专长领域</label><input type="text" id="lwExpertise" placeholder="如：公司法、劳动法、税法"></div>
-                <div class="form-group"><label>资质</label><input type="text" id="lwQual" placeholder="如：中国律师资格"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>费率(USD/小时)</label><input type="number" id="lwRate" min="0" step="0.01" placeholder="如：150"></div>
-                <div class="form-group"><label>状态</label>
-                    <select id="lwStatus">
-                        <option value="在职">在职</option>
-                        <option value="休假">休假</option>
-                        <option value="离职">离职</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeLawyerModal()">取消</button>
-                <button class="btn-submit" onclick="submitLawyer()">确认提交</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：客户共享链接 ==================== -->
-    <div class="modal-overlay" id="shareLinkModal">
-        <div class="modal" style="width: 560px;">
-            <h3>🔗 客户共享链接</h3>
-            <p style="font-size: 13px; color: #666; margin-bottom: 12px;">将此链接发送给工厂客户，客户可<b>只读查看</b>财税项目进度（无需登录）</p>
+        <!-- 登录表单 -->
+        <div id="login-form">
             <div class="form-group">
-                <label>共享链接（只读）</label>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <input type="text" id="shareLinkInput" readonly style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; background: #f5f5f5; font-family: monospace;">
-                    <button class="btn btn-success" onclick="copyShareLink()" style="padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer;">复制</button>
-                </div>
-            </div>
-            <div id="shareQrCode" style="text-align: center; margin: 12px 0;"></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeShareLinkModal()">关闭</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== 弹窗：添加用户 ==================== -->
-    <div class="modal-overlay" id="addUserModal">
-        <div class="modal">
-            <h3>➕ 添加用户</h3>
-            <div class="form-group">
-                <label>用户名</label>
-                <input type="text" id="newUserName" placeholder="请输入用户名">
+                <label for="username">👤 用户名</label>
+                <input type="text" id="username" placeholder="请输入用户名" />
             </div>
             <div class="form-group">
-                <label>密码</label>
-                <input type="password" id="newUserPass" placeholder="请输入密码">
+                <label for="password">🔑 密码</label>
+                <input type="password" id="password" placeholder="请输入密码" />
+            </div>
+            <button class="btn" onclick="doLogin()">→ 登录</button>
+            <div class="links">
+                <a href="#" onclick="showModal('register-modal')">注册新用户</a>
+                <a href="#">忘记密码？</a>
+            </div>
+        </div>
+
+        <!-- 注册表单 (默认隐藏) -->
+        <div id="register-form" style="display:none;">
+            <div class="form-group">
+                <label for="reg-username">👤 用户名</label>
+                <input type="text" id="reg-username" placeholder="请设置用户名" />
             </div>
             <div class="form-group">
-                <label>角色</label>
-                <select id="newUserRole" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <option value="user">普通用户</option>
-                    <option value="admin">管理员</option>
-                </select>
+                <label for="reg-password">🔑 密码</label>
+                <input type="password" id="reg-password" placeholder="请设置密码" />
             </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeAddUserModal()">取消</button>
-                <button class="btn-submit" onclick="doAddUser()">确认添加</button>
+            <button class="btn" onclick="doRegister()">✓ 注册</button>
+            <div class="links">
+                <a href="#" onclick="showLogin()">已有账号？去登录</a>
             </div>
+        </div>
+
+        <div class="footer">
+            © 2025 MNA · 仅授权用户可访问 · 数据加密存储
         </div>
     </div>
 
-    <!-- Toast -->
-    <div class="toast" id="toast"></div>
+    <!-- 弹窗 -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <p id="modal-message">登录成功！正在跳转...
+            <button class="modal-btn" onclick="closeModal()">确定</button>
+        </div>
+    </div>
 
-    <!-- ==================== JavaScript ==================== -->
     <script>
-// ============ 密码哈希 ============
-async function sha256(text) {
-    return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))).map(b => b.toString(16).padStart(2, '0')).join('');
-}
+        // ==========================================
+        // ⚠️ 重要：在这里填入你的 Supabase 信息
+        // ==========================================
+        const SUPABASE_URL = 'https://dicapkasnfjzbfmfyzyib.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_vSH9T39fUA4mfxC2E3QC1g_vH0bI...'; // 替换为你的公开密钥
+        
+        // 初始化 Supabase 客户端
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ============ 用户管理 ============
-const USERS_KEY = 'mna_users', SESSION_KEY = 'mna_session';
-function getUsers() { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); }
-function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
-async function initDefaultUsers() {
-    const u = getUsers();
-    if (!u.admin) {
-        u.admin = { password: await sha256('admin123'), role: 'admin', createdAt: new Date().toISOString() };
-        saveUsers(u);
-    }
-    if (!localStorage.getItem('mna_lawyers')) {
-        const defaultLawyers = [
-            { id: 'LW-1', name: '张律师', lang: '中英柬', expertise: '公司法、投资法', qual: '中国律师资格、柬埔寨律师资格', rate: 200, status: '在职' },
-            { id: 'LW-2', name: 'Mr. Sokha', lang: '柬文', expertise: '劳动法、土地法', qual: '柬埔寨律师资格', rate: 120, status: '在职' },
-            { id: 'LW-3', name: 'Mr. John Smith', lang: '英文', expertise: '国际贸易法、仲裁', qual: '英国律师资格', rate: 250, status: '在职' }
-        ];
-        localStorage.setItem('mna_lawyers', JSON.stringify(defaultLawyers));
-    }
-    if (!localStorage.getItem('mna_legalClients')) localStorage.setItem('mna_legalClients', '[]');
-    if (!localStorage.getItem('mna_legal')) localStorage.setItem('mna_legal', '[]');
-}
-initDefaultUsers();
+        // 显示弹窗
+        function showModal(message) {
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('success-modal').style.display = 'flex';
+        }
 
-function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY) || '{}'); } catch { return {}; } }
-function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
-function clearSession() { localStorage.removeItem(SESSION_KEY); }
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('success-modal').style.display = 'none';
+        }
 
-// ============ 登录/注册/重置 ============
-async function doLogin() {
-    const u = document.getElementById('loginUser').value.trim().toLowerCase();
-    const p = document.getElementById('loginPass').value;
-    if (!u || !p) { showToast('请输入用户名和密码', 'error'); return; }
-    const user = getUsers()[u];
-    if (!user) { showToast('用户不存在', 'error'); return; }
-    if (await sha256(p) !== user.password) { showToast('密码错误', 'error'); return; }
-    saveSession({ username: u, role: user.role, loggedInAt: new Date().toISOString() });
-    showApp(u, user.role);
-}
+        // 切换登录/注册表单
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+        }
 
-document.addEventListener('keydown', e => { if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') doLogin(); });
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+        }
 
-function doLogout() { clearSession(); location.reload(); }
+        // 登录功能
+        async function doLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
 
-function showReset() { showToast('重置密码功能暂未开放', 'error'); }
+            if (!username || !password) {
+                showModal('请输入用户名和密码');
+                return;
+            }
 
-// ============ 进入主应用 ============
-function showApp(username, role) {
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'flex';
-    document.getElementById('currentUserName').textContent = username;
-    document.getElementById('footerUser').textContent = username + '（' + (role === 'admin' ? '管理员' : '普通用户') + '）';
-    document.getElementById('welcomeTitle').textContent = '👋 欢迎回来，' + username;
-    document.getElementById('welcomeSub').textContent = '今天是 ' + new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+            try {
+                // 1. 在 Supabase 中查找用户
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', username)
+                    .single();
 
-    // 设置默认日期
-    const today = new Date().toISOString().slice(0, 10);
-    document.getElementById('fOrderDate').value = today;
-    document.getElementById('foDate').value = today;
-    document.getElementById('fiDate').value = today;
-    document.getElementById('fcDate').value = today;
-    document.getElementById('fpDate').value = today;
-    document.getElementById('ftDate').value = today;
+                if (error) throw error;
 
-    // 设置月度选择器
-    const now = new Date().toISOString().slice(0, 7);
-    ['overseasMonth', 'invMonth', 'comMonth', 'financeMonth', 'taxMonth', 'legalMonth', 'trMonth', 'memMonth', 'expMonth'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = now;
-    });
+                // 2. 验证密码 (⚠️ 注意：生产环境必须用加密比对，这里为了演示直接比对明文)
+                if (data && data.password === password) {
+                    // 登录成功
+                    localStorage.setItem('isLogin', 'true');
+                    localStorage.setItem('currentUser', username);
+                    showModal('登录成功！正在跳转...');
+                    
+                    // 模拟跳转（你可以改成你真正的后台页面）
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html'; // 如果没有这个页面，可以先注释掉
+                    }, 1500);
+                } else {
+                    showModal('用户名或密码错误');
+                }
+            } catch (err) {
+                console.error('登录失败:', err);
+                showModal('登录失败，请重试');
+            }
+        }
 
-    loadLegalConfig();
-    renderDashboard();
-}
+        // 注册功能
+        async function doRegister() {
+            const username = document.getElementById('reg-username').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
 
-// ============ 页面导航 ============
-function switchPage(page) {
-    const s = getSession();
-    const restrictedPages = ['finance', 'membership', 'expenses', 'taxPricing', 'taxAlliance', 'legalPricing', 'legalRisk'];
-    if (restrictedPages.includes(page)) {
-        if (s.role !== 'admin') { showToast('⚠️ 该板块仅管理员可访问', 'error'); return; }
-    }
-    document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.sidebar .nav-item').forEach(n => n.classList.remove('active'));
-    const pageEl = document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1));
-    if (pageEl) pageEl.classList.add('active');
-    if (event && event.currentTarget) event.currentTarget.classList.add('active');
+            if (!username || !password) {
+                showModal('请输入用户名和密码');
+                return;
+            }
 
-    if (page === 'logistics') renderOrders();
-    if (page === 'overseas') { renderOverseas(); renderOverseasLedger(); }
-    if (page === 'investment') { renderInvest(); renderInvLedger(); }
-    if (page === 'commerce') { renderCommerce(); renderComLedger(); }
-    if (page === 'policy') renderPolicy();
-    if (page === 'tax') { renderTax(); renderTaxLedger(); }
-    if (page === 'training') { renderTraining(); renderTrLedger(); renderSchools(); renderEnterprises(); }
-    if (page === 'legal') { renderLegal(); renderLegalLedger(); renderLegalClients(); renderLawyers(); }
-    if (page === 'finance') renderFinance();
-    if (page === 'users') renderUserList();
-    if (page === 'dashboard') renderDashboard();
-}
+            try {
+                // 1. 检查用户名是否已存在
+                const { data: existing, error: checkError } = await supabase
+                    .from('users')
+                    .select('username')
+                    .eq('username', username)
+                    .single();
 
-function switchSubTab(btn, id) {
-    const parent = btn.closest('.page-section');
-    parent.querySelectorAll('.sub-tabs button').forEach(b => b.classList.remove('active'));
-    parent.querySelectorAll('.sub-tabs ~ div[id]').forEach(d => d.style.display = 'none');
-    btn.classList.add('active');
-    const target = document.getElementById(id);
-    if (target) target.style.display = 'block';
-}
+                if (existing) {
+                    showModal('用户名已存在，请更换');
+                    return;
+                }
 
-// ============ 用户管理 ============
-function renderUserList() {
-    const users = getUsers();
-    const s = getSession();
-    let html = '';
-    Object.entries(users).forEach(([name, info]) => {
-        const isSelf = name === s.username;
-        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid #eee;border-radius:8px;margin-bottom:8px;background:#fafafa;">
-            <div><div style="font-weight:bold;">${esc(name)} ${isSelf ? '（当前）' : ''}</div><div style="font-size:12px;color:#999;">${info.role === 'admin' ? '管理员' : '普通用户'}</div></div>
-            <div>${!isSelf ? `<button style="padding:3px 10px;background:#e53e3e;color:white;border:none;border-radius:4px;cursor:pointer;" onclick="deleteUser('${name}')">删除</button>` : '<span style="font-size:12px;color:#ccc;">不可操作</span>'}</div>
-        </div>`;
-    });
-    document.getElementById('userList').innerHTML = html;
-}
+                // 2. 插入新用户 (⚠️ 注意：生产环境密码必须加密存储！)
+                const { data, error } = await supabase
+                    .from('users')
+                    .insert([
+                        { username: username, password: password }
+                    ])
+                    .select();
 
-async function doAddUser() {
-    const u = document.getElementById('newUserName').value.trim().toLowerCase();
-    const p = document.getElementById('newUserPass').value;
-    if (u.length < 3) { showToast('用户名至少3位', 'error'); return; }
-    if (p.length < 6) { showToast('密码至少6位', 'error'); return; }
-    const users = getUsers();
-    if (users[u]) { showToast('用户名已存在', 'error'); return; }
-    users[u] = { password: await sha256(p), role: document.getElementById('newUserRole').value, createdAt: new Date().toISOString() };
-    saveUsers(users);
-    closeAddUserModal();
-    renderUserList();
-    showToast('用户 ' + u + ' 已添加', 'success');
-}
+                if (error) throw error;
 
-function deleteUser(n) {
-    if (!confirm('确定删除用户 "' + n + '" 吗？')) return;
-    const users = getUsers();
-    delete users[n];
-    saveUsers(users);
-    renderUserList();
-    showToast('用户已删除', 'success');
-}
+                showModal('注册成功！请登录');
+                showLogin(); // 跳回登录页
+            } catch (err) {
+                console.error('注册失败:', err);
+                showModal('注册失败：' + err.message);
+            }
+        }
+    </script>
 
-function showAddUserModal() {
-    document.getElementById('addUserModal').classList.add('active');
-    document.getElementById('newUserName').value = '';
-    document.getElementById('newUserPass').value = '';
-}
-function closeAddUserModal() { document.getElementById('addUserModal').classList.remove('active'); }
-
-// ============ 通用数据层 ============
-function getData(key) { return JSON.parse(localStorage.getItem('mna_' + key) || '[]'); }
-function saveData(key, data) { localStorage.setItem('mna_' + key, JSON.stringify(data)); }
-function genId(prefix) { return prefix + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 100).toString().padStart(2, '0'); }
-function esc(s) { if (!s) return ''; return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-function showToast(msg, type) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show' + (type ? ' ' + type : '');
-    setTimeout(() => { t.className = 'toast'; }, 2500);
-}
-
-// ============ 物流订单 ============
-let editingOrderId = null;
-const statusLabels = ['待发柜', '已发柜（在途）', '已到港', '清关中', '已清关', '已到工厂', '已结单'];
-
-function getOrderStatus(o) {
-    if (o.closeDate) return 6;
-    if (o.arriveFactory) return 5;
-    if (o.clearanceDone) return 4;
-    if (o.clearanceStart) return 3;
-    if (o.arrivePort) return 2;
-    if (o.shipDate) return 1;
-    return 0;
-}
-
-function renderOrders() {
-    let orders = getData('orders');
-    const fs = parseInt(document.getElementById('filterStatus').value);
-    const kw = document.getElementById('filterKeyword').value.trim().toLowerCase();
-    if (fs >= 0) orders = orders.filter(o => getOrderStatus(o) === fs);
-    if (kw) orders = orders.filter(o => (o.customer || '').toLowerCase().includes(kw) || (o.orderNo || '').toLowerCase().includes(kw) || (o.containerNo || '').toLowerCase().includes(kw));
-    document.getElementById('orderCount').textContent = '共 ' + orders.length + ' 条订单';
-    if (orders.length === 0) {
-        document.getElementById('orderTableContainer').innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无订单数据</p></div>';
-        return;
-    }
-    orders.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-    let html = '<table><thead><tr><th>#</th><th>订单号</th><th>客户</th><th>货柜号</th><th>类型</th><th>数量</th><th>航线</th><th>状态</th><th>利润(USD)</th><th>返点(USD)</th><th>净收益(USD)</th><th>操作</th></tr></thead><tbody>';
-    orders.forEach((o, i) => {
-        const st = getOrderStatus(o);
-        const pp = o.profitPer || 180;
-        const rr = (o.rebatePct || 3) / 100;
-        const profit = (o.qty || 0) * pp;
-        const rebate = profit * rr;
-        const net = profit - rebate;
-        html += `<tr onclick="showOrderDetail('${o.id}')">
-            <td>${i + 1}</td><td style="font-weight:bold;font-family:monospace;">${o.orderNo || ''}</td>
-            <td>${esc(o.customer || '')}</td><td>${esc(o.containerNo || '')}</td>
-            <td>${esc(o.type || '')}</td><td><b>${o.qty || 0}</b></td>
-            <td style="font-size:11px;">${esc((o.fromPort || '') + '→' + (o.toPort || ''))}</td>
-            <td><span class="status-badge" style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:bold;background:#e6f7ff;color:#1a4a8a;">${statusLabels[st]}</span></td>
-            <td>$${(profit).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-            <td style="color:#d48806;">$${(rebate).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-            <td style="color:#38a169;">$${(net).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-            <td><button style="padding:2px 8px;background:#e6f7ff;color:#1a4a8a;border:none;border-radius:4px;cursor:pointer;font-size:11px;" onclick="event.stopPropagation();editOrder('${o.id}')">编辑</button>
-                <button style="padding:2px 8px;background:#fff1f0;color:#e53e3e;border:none;border-radius:4px;cursor:pointer;font-size:11px;" onclick="event.stopPropagation();deleteOrder('${o.id}')">删除</button></td>
-        </tr>`;
-    });
-    html += '</tbody></table>';
-    document.getElementById('orderTableContainer').innerHTML = html;
-}
-
-function openOrderModal() {
-    editingOrderId = null;
-    document.getElementById('orderModalTitle').textContent = '➕ 新建物流订单';
-    clearOrderForm();
-    document.getElementById('orderModal').classList.add('active');
-}
-function clearOrderForm() {
-    ['fCustomer', 'fContainerNo', 'fFromPort', 'fToPort', 'fFactoryAddr', 'fVessel', 'fRemark', 'fShipDate', 'fArrivePort', 'fClearanceStart', 'fClearanceDone', 'fArriveFactory', 'fCloseDate', 'fFreightFee', 'fClearanceFee', 'fTruckFee', 'fOtherFee', 'fRebatePct', 'fProfitPer'].forEach(id => {
-        document.getElementById(id).value = '';
-    });
-    document.getElementById('fOrderDate').value = new Date().toISOString().slice(0, 10);
-    document.getElementById('fQty').value = 1;
-    document.getElementById('fType').value = '40HQ';
-}
-function closeOrderModal() { document.getElementById('orderModal').classList.remove('active'); editingOrderId = null; }
-
-function submitOrder() {
-    const customer = document.getElementById('fCustomer').value.trim();
-    const qty = parseInt(document.getElementById('fQty').value) || 0;
-    if (!customer || qty <= 0) { showToast('请填写客户名称和有效货柜数量', 'error'); return; }
-    const order = {
-        customer, orderDate: document.getElementById('fOrderDate').value,
-        containerNo: document.getElementById('fContainerNo').value.trim(),
-        type: document.getElementById('fType').value, qty,
-        profitPer: parseFloat(document.getElementById('fProfitPer').value) || undefined,
-        fromPort: document.getElementById('fFromPort').value.trim(),
-        toPort: document.getElementById('fToPort').value.trim(),
-        factoryAddr: document.getElementById('fFactoryAddr').value.trim(),
-        vessel: document.getElementById('fVessel').value.trim(),
-        remark: document.getElementById('fRemark').value.trim(),
-        shipDate: document.getElementById('fShipDate').value || undefined,
-        arrivePort: document.getElementById('fArrivePort').value || undefined,
-        clearanceStart: document.getElementById('fClearanceStart').value || undefined,
-        clearanceDone: document.getElementById('fClearanceDone').value || undefined,
-        arriveFactory: document.getElementById('fArriveFactory').value || undefined,
-        closeDate: document.getElementById('fCloseDate').value || undefined,
-        freightFee: parseFloat(document.getElementById('fFreightFee').value) || 0,
-        clearanceFee: parseFloat(document.getElementById('fClearanceFee').value) || 0,
-        truckFee: parseFloat(document.getElementById('fTruckFee').value) || 0,
-        otherFee: parseFloat(document.getElementById('fOtherFee').value) || 0,
-        rebatePct: parseFloat(document.getElementById('fRebatePct').value) || undefined,
-        updatedAt: new Date().toISOString()
-    };
-    const orders = getData('orders');
-    if (editingOrderId) {
-        const idx = orders.findIndex(o => o.id === editingOrderId);
-        if (idx >= 0) orders[idx] = { ...orders[idx], ...order };
-    } else {
-        order.id = genId('MNA');
-        order.createdAt = new Date().toISOString();
-        orders.unshift(order);
-    }
-    saveData('orders', orders);
-    closeOrderModal();
-    renderOrders();
-    showToast(editingOrderId ? '订单已更新' : '订单已创建（' + order.id + '）', 'success');
-}
-
-function editOrder(id) {
-    const o = getData('orders').find(x => x.id === id);
-    if (!o) return;
-    editingOrderId = id;
-    document.getElementById('orderModalTitle').textContent = '✏️ 编辑订单 ' + o.id;
-    ['fCustomer', 'fContainerNo', 'fType', 'fQty', 'fProfitPer', 'fFromPort', 'fToPort', 'fFactoryAddr', 'fVessel', 'fRemark', 'fShipDate', 'fArrivePort', 'fClearanceStart', 'fClearanceDone', 'fArriveFactory', 'fCloseDate', 'fFreightFee', 'fClearanceFee', 'fTruckFee', 'fOtherFee', 'fRebatePct'].forEach(id => {
-        const f = id.replace('f', '').replace(/([
+</body>
+</html>
