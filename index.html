@@ -3570,5 +3570,95 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("langSwitch");
   if (btn) btn.innerText = currentLang === "zh" ? "EN" : "中";
 });
-</script></body>
+</script><!-- ========================================== -->
+<!-- 🛠️ 强制修复语言切换功能的独立脚本 (放在 </body> 前) -->
+<!-- ========================================== -->
+<script>
+// 1. 确保语言包存在 (如果之前没加载，这里兜底)
+if (typeof i18n === 'undefined') {
+    var i18n = {
+        zh: {
+            login_title: "MNA 业务管理平台",
+            login_sub: "湄公产业资本联盟 Mekong Nexus Association连接产业 · 资本 · 政府 · 国际资源",
+            username: "用户名",
+            password: "密码",
+            login_btn: "登 录",
+            logout_btn: "退出登录",
+            admin: "管理员"
+            // ... 这里可以补全你之前的中文，为了演示先写这几个
+        },
+        en: {
+            login_title: "MNA Integrated Business Management Platform",
+            login_sub: "Mekong Nexus AssociationConnecting Industry, Capital, and Public Sector Stakeholders",
+            username: "Username",
+            password: "Password",
+            login_btn: "Log In",
+            logout_btn: "Sign Out",
+            admin: "Administrator"
+        }
+    };
+}
+
+// 2. 核心切换逻辑 (强制注入)
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取元素
+    var langBtn = document.getElementById('langBtn');
+    var langText = document.getElementById('langText');
+    
+    // 检查元素是否存在
+    if (!langBtn) {
+        console.log('未找到 langBtn，跳过绑定');
+        return;
+    }
+
+    // 强制设置初始状态为中文 (防止刷新后变成英文)
+    if (!localStorage.getItem('lang')) {
+        localStorage.setItem('lang', 'zh');
+    }
+    
+    // 初始渲染
+    updateLanguage();
+
+    // 点击事件
+    langBtn.onclick = function() {
+        var currentLang = localStorage.getItem('lang');
+        var newLang = (currentLang === 'zh') ? 'en' : 'zh';
+        localStorage.setItem('lang', newLang);
+        updateLanguage();
+    };
+
+    // 更新页面内容的函数
+    function updateLanguage() {
+        var lang = localStorage.getItem('lang') || 'zh';
+        var dict = i18n[lang];
+        
+        // 1. 更新按钮文字
+        if(langText) langText.innerText = (lang === 'zh') ? 'EN' : '中';
+
+        // 2. 更新所有带有 data-i18n 属性的元素
+        var elements = document.querySelectorAll('[data-i18n]');
+        elements.forEach(function(el) {
+            var key = el.getAttribute('data-i18n');
+            if (dict[key]) {
+                el.innerText = dict[key];
+            }
+        });
+
+        // 3. 更新特定 ID 的元素 (比如侧边栏、标题)
+        var specificIds = ['sidebarTitle', 'userRoleText']; // 你可以根据需要添加 ID
+        specificIds.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) {
+                var key = el.getAttribute('data-i18n-key'); // 假设用 data-i18n-key 存键名
+                if (key && dict[key]) {
+                    el.innerText = dict[key];
+                }
+            }
+        });
+        
+        console.log('语言已切换至: ' + lang);
+    }
+});
+</script>
+</body>
 </html>
